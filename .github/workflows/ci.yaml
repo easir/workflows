@@ -6,9 +6,6 @@ on:
         required: true
         default: false
         type: boolean
-      enabled_linters:
-        type: string
-        required: true
 
 
     secrets:
