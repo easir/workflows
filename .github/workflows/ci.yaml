@@ -62,7 +62,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.token }}
           APPLY_FIXES: all
-          APPLY_FIXES_MODE: pull_request
+          APPLY_FIXES_MODE: push
           APPLY_FIXES_EVENT: all
         
       - name: Set up Docker Context for Buildx
