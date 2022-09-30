@@ -6,6 +6,10 @@ on:
         required: true
         default: false
         type: boolean
+      enabled_linters:
+        type: string
+        required: true
+
 
     secrets:
       token:
@@ -64,6 +68,7 @@ jobs:
           APPLY_FIXES: all
           APPLY_FIXES_MODE: push
           APPLY_FIXES_EVENT: all
+          MEGALINTER_CONFIG: .github/.megalinter.yml
         
       - name: Set up Docker Context for Buildx
         id: buildx-context
