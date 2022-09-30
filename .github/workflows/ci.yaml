@@ -6,7 +6,7 @@ on:
         required: true
         default: false
         type: boolean
-      
+
     secrets:
       token:
         required: true
@@ -40,7 +40,7 @@ jobs:
             tag=pr-"$pull_number-$GITHUB_SHA"
           fi
           echo "fulltag=${{secrets.docker-reg}}/$app:$tag">>"$GITHUB_ENV"
-
+          echo ${{ github.event.inputs.run-composer-install }}
       - name: Checkout
         uses: actions/checkout@v2.4.2
 
@@ -52,7 +52,7 @@ jobs:
       #     # VALIDATE_ALL_CODEBASE: false
       #     VALIDATE_PHP_PSALM: false
       - name: Install
-        if: ${{ github.event.inputs.run-composer-install }}
+        # if: ${{ github.event.inputs.run-composer-install }}
         uses: docker://composer
         with:
           args: install
