@@ -5,7 +5,7 @@ on:
       composer:
         required: true
         default: false
-        type: string
+        type: boolean
 
     secrets:
       token:
