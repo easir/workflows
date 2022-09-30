@@ -2,10 +2,10 @@
 on:
   workflow_call:
     inputs:
-      run-composer-install:
+      composer:
         required: true
         default: false
-        type: boolean
+        type: string
 
     secrets:
       token:
