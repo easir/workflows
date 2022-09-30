@@ -6,8 +6,10 @@ on:
         required: true
         default: false
         type: boolean
-
-
+      linter-config:
+        type: string
+        required: true
+        default: easir/.github/.mega-linter.yml@master
     secrets:
       token:
         required: true
