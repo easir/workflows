@@ -65,7 +65,7 @@ jobs:
           APPLY_FIXES: all
           APPLY_FIXES_MODE: push
           APPLY_FIXES_EVENT: all
-          MEGALINTER_CONFIG: .github/.megalinter.yml
+          MEGALINTER_CONFIG: ${{ GITHUB_WORKSPACE }}/.github/.megalinter.yml
         
       - name: Set up Docker Context for Buildx
         id: buildx-context
