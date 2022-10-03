@@ -62,12 +62,6 @@ jobs:
           args: install
 
       - name: MegaLinter-php
-        if: inputs.language == 'php'
-        id: ml
-        uses: oxsecurity/megalinter/flavors/php@v6.11.0
-
-      - name: MegaLinter-php
-        if: inputs.language == 'all'
         id: ml
         uses: oxsecurity/megalinter@v6.11.0
 
