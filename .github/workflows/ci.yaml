@@ -61,10 +61,16 @@ jobs:
         with:
           args: install
 
-      - name: MegaLinter
+      - name: MegaLinter-php
+        if: inputs.language == 'php'
         id: ml
         uses: oxsecurity/megalinter/flavors/php@v6.11.0
-          
+
+      - name: MegaLinter-php
+        if: inputs.language == 'all'
+        id: ml
+        uses: oxsecurity/megalinter@v6.11.0
+
       - name: Archive production artifacts
         if: ${{ success() }} || ${{ failure() }}
         uses: actions/upload-artifact@v2
