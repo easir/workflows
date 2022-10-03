@@ -6,10 +6,10 @@ on:
         required: true
         default: false
         type: boolean
-      linter-config:
-        type: string
-        required: false
-        default: easir/.github/.mega-linter.yml@master
+      # linter-config:
+      #   type: string
+      #   required: false
+      #   default: easir/.github/.mega-linter.yml@master
     secrets:
       token:
         required: true
@@ -67,7 +67,7 @@ jobs:
           APPLY_FIXES: all
           APPLY_FIXES_MODE: push
           APPLY_FIXES_EVENT: all
-          MEGALINTER_CONFIG: ${{ inputs.linter-config }}
+          # MEGALINTER_CONFIG: ${{ inputs.linter-config }}
         
       - name: Set up Docker Context for Buildx
         id: buildx-context
