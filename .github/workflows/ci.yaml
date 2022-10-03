@@ -20,6 +20,12 @@ on:
 
 jobs:
   build-test-and-push:
+    env:
+      GITHUB_TOKEN: ${{ secrets.token }}
+      APPLY_FIXES: all
+      APPLY_FIXES_MODE: pull_request
+      APPLY_FIXES_EVENT: all
+
     runs-on: ["self-hosted"]
     steps:
       - name: GenerateTAG
@@ -52,11 +58,6 @@ jobs:
       - name: MegaLinter
         id: ml
         uses: oxsecurity/megalinter/flavors/php@v6.10.0
-        env:
-          GITHUB_TOKEN: ${{ secrets.token }}
-          APPLY_FIXES: all
-          APPLY_FIXES_MODE: pull_request
-          APPLY_FIXES_EVENT: all
           
       - name: Archive production artifacts
         if: ${{ success() }} || ${{ failure() }}
