@@ -49,6 +49,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3.0.2
 
+      - name: Run & fix PHP Code Sniffer
+        if: ${{ inputs.language == "php" }}
+        uses: shalior/wordpress-phpcs-action@v1.0.3
+
       - name: run composer install 
         if: ${{ inputs.composer }}
         uses: docker://composer
