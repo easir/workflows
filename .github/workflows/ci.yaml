@@ -56,7 +56,7 @@ jobs:
       #     github_token: ${{ secrets.token }}
 
       - name: run composer install 
-        if: ${{ inputs.language == 'php' }}
+        if: inputs.language == 'php'
         uses: docker://composer
         with:
           args: install
