@@ -47,7 +47,7 @@ jobs:
           echo "fulltag=${{secrets.docker-reg}}/$app:$tag">>"$GITHUB_ENV"
           echo ${{ github.event.inputs.run-composer-install }}
       - name: Checkout
-        uses: actions/checkout@v2.4.2
+        uses: actions/checkout@v3.0.2
 
       - name: run composer install 
         if: ${{ inputs.composer }}
