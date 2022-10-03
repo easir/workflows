@@ -2,10 +2,10 @@
 on:
   workflow_call:
     inputs:
-      composer:
+      language:
         required: true
-        default: false
-        type: boolean
+        default: "all"
+        type: string
 
     secrets:
       token:
@@ -49,12 +49,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3.0.2
 
-      - name: Run & fix PHP Code Sniffer
-        if: ${{ inputs.language == "php" }}
-        uses: shalior/wordpress-phpcs-action@v1.0.3
+      # - name: Run & fix PHP Code Sniffer
+      #   if: ${{ inputs.language == "php" }}
+      #   uses: shalior/wordpress-phpcs-action@v1.0.3
+      #   with:
+      #     github_token: ${{ secrets.token }}
 
       - name: run composer install 
-        if: ${{ inputs.composer }}
+        if: ${{ inputs.language =="php" }}
         uses: docker://composer
         with:
           args: install
