@@ -61,9 +61,9 @@ jobs:
         with:
           args: install
 
-      - name: MegaLinter-php
+      - name: MegaLinter
         id: ml
-        uses: oxsecurity/megalinter@v6.11.0
+        uses: oxsecurity/megalinter@v6.11.1
 
       - name: Archive production artifacts
         if: ${{ success() }} || ${{ failure() }}
