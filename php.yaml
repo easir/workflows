@@ -1,0 +1,93 @@
+on:
+    workflow_call:
+        inputs:
+            make:
+                required: true
+                description: GNU Make targets list
+                default: ""
+                type: string
+
+        secrets:
+            token:
+                required: true
+            docker-reg:
+                required: true
+            docker-pass:
+                required: true
+            docker-login:
+                required: true
+jobs:
+    analysis-and-tests:
+        name: PHP analysis and tests
+        runs-on: [ self-hosted ]
+        env:
+            GITHUB_TOKEN: ${{ secrets.token }}
+        steps:
+            -   uses: actions/checkout@v3 # moving below actions to easir/workflow allow embedding checkout inside
+            -   uses: ./actions/file_exists
+                id: gitmodules_exists
+                with:
+                    paths: .gitmodules
+            -   name: Checkout GIT Submodules
+                shell: sh
+                if: steps.gitmodules_exists.outputs.file_exists
+                run: git submodule update --init --recursive
+
+            -   name: Setup PHP
+                uses: shivammathur/setup-php@v2
+                with:
+                    php-version: "8.1"
+                    extensions: pdo_sqlite
+                    coverage: pcov
+                env: { runner: self-hosted }
+
+            -   name: Composer Install
+                uses: ramsey/composer-install@v2
+                with: { composer-options: "--no-progress --no-scripts" }
+
+            -   name: Check if any PHP_CodeSniffer configuration file exists
+                uses: ./actions/file_exists
+                id: phpcs_exists
+                with:
+                    paths: phpcs.xml phpcs.xml.dist
+            -   name: PHP_CodeSniffer
+                shell: sh
+                if: steps.phpcs_exists.outputs.file_exists
+                run: composer exec -- phpcs
+
+            -   name: Check if any Psalm configuration file exists
+                uses: ./actions/file_exists
+                id: psalm_exists
+                with:
+                    paths: psalm.xml psalm.xml.dist
+            -   name: Psalm
+                shell: sh
+                if: steps.psalm_exists.outputs.file_exists
+                run: ([ -e psalm.xml.dist ] || [ -e psalm.xml ]) && composer exec -- psalm --long-progress
+
+            -   name: Check if Makefile file exists
+                uses: ./actions/file_exists
+                id: make_exists
+                with:
+                    paths: Makefile
+            -   name: Tests
+                shell: sh
+                if: steps.make_exists.outputs.file_exists
+                run: make ${{ inputs.make }} -O -k
+                env: { APP_ENV: test }
+
+    build-and-push:
+        name: Build and push
+        needs: analysis-and-tests
+        runs-on: [ self-hosted ]
+        env:
+            GITHUB_TOKEN: ${{ secrets.token }}
+        steps:
+            -   uses: actions/checkout@v3 # moving below actions to easir/workflow allow embedding checkout inside
+            -   name: Build and push Docker image
+                uses: easir/workflows/actions/build-and-push@brzuchal
+                with:
+                    head: master # default can be removed
+                    registry: ${{ secrets.docker-reg }}
+                    username: ${{ secrets.docker-login }}
+                    password: ${{ secrets.docker-pass }}
