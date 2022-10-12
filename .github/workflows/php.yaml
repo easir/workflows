@@ -27,11 +27,10 @@ jobs:
 
             -   name: Check if project uses submodules
                 shell: sh
-                id: gitmodules_exists
-                run: ([ -e .gitmodules ]) && echo '::set-output name=file_exists::true' || echo '::set-output name=file_exists::false'
+                run: ([ -e .gitmodules ]) && echo "gitmodules_exists=true" >> $GITHUB_ENV || echo "gitmodules_exists=false" >> $GITHUB_ENV
             -   name: Checkout GIT Submodules
                 shell: sh
-                if: steps.gitmodules_exists.outputs.file_exists == 'true'
+                if: env.gitmodules_exists == 'true'
                 run: git submodule update --init --recursive
 
             -   name: Setup PHP
@@ -48,29 +47,26 @@ jobs:
 
             -   name: Check if any PHP_CodeSniffer configuration file exists
                 shell: sh
-                id: phpcs_exists
-                run: ([ -e phpcs.xml.dist ] || [ -e phpcs.xml ]) && echo '::set-output name=file_exists::true' || echo '::set-output name=file_exists::false'
+                run: ([ -e phpcs.xml.dist ] || [ -e phpcs.xml ]) && echo 'phpcs_exists=true' >> $GITHUB_ENV || echo 'phpcs_exists=false' >> $GITHUB_ENV
             -   name: PHP_CodeSniffer
                 shell: sh
-                if: steps.phpcs_exists.outputs.file_exists == 'true'
+                if: env.phpcs_exists == 'true'
                 run: composer exec -- phpcs
 
             -   name: Check if any Psalm configuration file exists
                 shell: sh
-                id: psalm_exists
-                run: ([ -e psalm.xml.dist ] || [ -e psalm.xml ]) && echo '::set-output name=file_exists::true' || echo '::set-output name=file_exists::false'
+                run: ([ -e psalm.xml.dist ] || [ -e psalm.xml ]) && echo 'psalm_exists=true' >> $GITHUB_ENV || echo 'psalm_exists=false' >> $GITHUB_ENV
             -   name: Psalm
                 shell: sh
-                if: steps.psalm_exists.outputs.file_exists == 'true'
+                if: env.psalm_exists == 'true'
                 run: composer exec -- psalm --long-progress
 
             -   name: Check if Makefile file exists
                 shell: sh
-                id: make_exists
-                run: ([ -e Makefile ]) && echo '::set-output name=file_exists::true' || echo '::set-output name=file_exists::false'
+                run: ([ -e Makefile ]) && echo 'make_exists=true' >> $GITHUB_ENV || echo 'make_exists=false' >> $GITHUB_ENV
             -   name: Tests
                 shell: sh
-                if: steps.make_exists.outputs.file_exists == 'true'
+                if: env.make_exists == 'true'
                 run: make ${{ inputs.make }} -O -k
                 env: { APP_ENV: test }
 
