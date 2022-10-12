@@ -23,11 +23,11 @@ jobs:
         env:
             GITHUB_TOKEN: ${{ secrets.token }}
         steps:
-            -   uses: actions/checkout@v3 # moving below actions to easir/workflow allow embedding checkout inside
-            -   uses: easir/workflow/actions/file_exists
+            -   uses: actions/checkout@v3
+
+            -   shell: sh
                 id: gitmodules_exists
-                with:
-                    paths: .gitmodules
+                run: ([ -e .gitmodules ]) && echo '::set-output name=file_exists::true' || echo '::set-output name=file_exists::false'
             -   name: Checkout GIT Submodules
                 shell: sh
                 if: steps.gitmodules_exists.outputs.file_exists
@@ -46,30 +46,27 @@ jobs:
                 with: { composer-options: "--no-progress --no-scripts" }
 
             -   name: Check if any PHP_CodeSniffer configuration file exists
-                uses: easir/workflow/actions/file_exists
+                shell: sh
                 id: phpcs_exists
-                with:
-                    paths: phpcs.xml phpcs.xml.dist
+                run: ([ -e phpcs.xml.dist ] || [ -e phpcs.xml ]) && echo '::set-output name=file_exists::true' || echo '::set-output name=file_exists::false'
             -   name: PHP_CodeSniffer
                 shell: sh
                 if: steps.phpcs_exists.outputs.file_exists
                 run: composer exec -- phpcs
 
             -   name: Check if any Psalm configuration file exists
-                uses: easir/workflow/actions/file_exists
+                shell: sh
                 id: psalm_exists
-                with:
-                    paths: psalm.xml psalm.xml.dist
+                run: ([ -e psalm.xml.dist ] || [ -e psalm.xml ]) && echo '::set-output name=file_exists::true' || echo '::set-output name=file_exists::false'
             -   name: Psalm
                 shell: sh
                 if: steps.psalm_exists.outputs.file_exists
-                run: ([ -e psalm.xml.dist ] || [ -e psalm.xml ]) && composer exec -- psalm --long-progress
+                run: omposer exec -- psalm --long-progress
 
             -   name: Check if Makefile file exists
-                uses: easir/workflow/actions/file_exists
+                shell: sh
                 id: make_exists
-                with:
-                    paths: Makefile
+                run: ([ -e Makefile ]) && echo '::set-output name=file_exists::true' || echo '::set-output name=file_exists::false'
             -   name: Tests
                 shell: sh
                 if: steps.make_exists.outputs.file_exists
