@@ -31,7 +31,7 @@ jobs:
                 run: ([ -e .gitmodules ]) && echo '::set-output name=file_exists::true' || echo '::set-output name=file_exists::false'
             -   name: Checkout GIT Submodules
                 shell: sh
-                if: steps.gitmodules_exists.outputs.file_exists
+                if: fromJson(steps.gitmodules_exists.outputs.file_exists)
                 run: git submodule update --init --recursive
 
             -   name: Setup PHP
@@ -52,7 +52,7 @@ jobs:
                 run: ([ -e phpcs.xml.dist ] || [ -e phpcs.xml ]) && echo '::set-output name=file_exists::true' || echo '::set-output name=file_exists::false'
             -   name: PHP_CodeSniffer
                 shell: sh
-                if: steps.phpcs_exists.outputs.file_exists
+                if: fromJson(steps.phpcs_exists.outputs.file_exists)
                 run: composer exec -- phpcs
 
             -   name: Check if any Psalm configuration file exists
@@ -61,7 +61,7 @@ jobs:
                 run: ([ -e psalm.xml.dist ] || [ -e psalm.xml ]) && echo '::set-output name=file_exists::true' || echo '::set-output name=file_exists::false'
             -   name: Psalm
                 shell: sh
-                if: steps.psalm_exists.outputs.file_exists
+                if: fromJson(steps.psalm_exists.outputs.file_exists)
                 run: composer exec -- psalm --long-progress
 
             -   name: Check if Makefile file exists
@@ -70,7 +70,7 @@ jobs:
                 run: ([ -e Makefile ]) && echo '::set-output name=file_exists::true' || echo '::set-output name=file_exists::false'
             -   name: Tests
                 shell: sh
-                if: steps.make_exists.outputs.file_exists
+                if: fromJson(steps.make_exists.outputs.file_exists)
                 run: make ${{ inputs.make }} -O -k
                 env: { APP_ENV: test }
 
