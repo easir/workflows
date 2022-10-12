@@ -25,7 +25,8 @@ jobs:
         steps:
             -   uses: actions/checkout@v3
 
-            -   shell: sh
+            -   name: Check if project uses submodules
+                shell: sh
                 id: gitmodules_exists
                 run: ([ -e .gitmodules ]) && echo '::set-output name=file_exists::true' || echo '::set-output name=file_exists::false'
             -   name: Checkout GIT Submodules
@@ -64,10 +65,9 @@ jobs:
                 run: composer exec -- psalm --long-progress
 
             -   name: Check if Makefile file exists
-                uses: brzuchal/file-exists@main
+                shell: sh
                 id: make_exists
-                with:
-                    paths: Makefile
+                run: ([ -e Makefile ]) && echo '::set-output name=file_exists::true' || echo '::set-output name=file_exists::false'
             -   name: Tests
                 shell: sh
                 if: steps.make_exists.outputs.file_exists
