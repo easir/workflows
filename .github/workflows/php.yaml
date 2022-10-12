@@ -61,12 +61,13 @@ jobs:
             -   name: Psalm
                 shell: sh
                 if: steps.psalm_exists.outputs.file_exists
-                run: omposer exec -- psalm --long-progress
+                run: composer exec -- psalm --long-progress
 
             -   name: Check if Makefile file exists
-                shell: sh
+                uses: brzuchal/file_exists@main
                 id: make_exists
-                run: ([ -e Makefile ]) && echo '::set-output name=file_exists::true' || echo '::set-output name=file_exists::false'
+                with:
+                    paths: Makefile
             -   name: Tests
                 shell: sh
                 if: steps.make_exists.outputs.file_exists
