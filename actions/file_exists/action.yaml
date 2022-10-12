@@ -1,0 +1,15 @@
+name: File existence check
+description: Checks file existence
+inputs:
+    paths:
+        description: Path names to check
+        required: true
+outputs:
+    file_exists:
+        description: Returns true if any path exists
+runs:
+    using: docker
+    image: Dockerfile
+    args:
+        - php
+        - /action.php
