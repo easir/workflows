@@ -1,0 +1,34 @@
+name: "PHP CodeStyle and Tests"
+description: "Run analysis and tests for PHP project"
+inputs:
+    make:
+        description: "Runs GNU Make targets"
+        required: false
+        default: ""
+runs:
+    using: composite
+    steps:
+        -   name: Checkout GIT Submodules
+            shell: sh
+            run: ([ -e .gitmodules ]) && git submodule update --init --recursive
+        -   name: Setup PHP
+            uses: shivammathur/setup-php@v2
+            with:
+                php-version: "8.1"
+                extensions: pdo_sqlite
+                coverage: pcov
+            env: { runner: self-hosted }
+        -   name: Composer Install
+            uses: ramsey/composer-install@v2
+            with: { composer-options: "--no-progress --no-scripts" }
+        -   name: PHP_CodeSniffer
+            shell: sh
+            run: ([ -e phpcs.xml.dist ] || [ -e phpcs.xml ]) && composer exec -- phpcs
+        -   name: Psalm
+            shell: sh
+            run: ([ -e psalm.xml.dist ] || [ -e psalm.xml ]) && composer exec -- psalm --long-progress
+        -   name: Tests
+            shell: sh
+            if: inputs.make != ''
+            run: make ${{ inputs.make }} -O -k
+            env: { APP_ENV: test }
