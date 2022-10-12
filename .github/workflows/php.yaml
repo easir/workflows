@@ -18,7 +18,7 @@ on:
                 required: true
 jobs:
     analysis-and-tests:
-        name: PHP analysis and tests
+        name: Analysis and tests
         runs-on: [ self-hosted ]
         env:
             GITHUB_TOKEN: ${{ secrets.token }}
