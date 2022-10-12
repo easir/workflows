@@ -64,7 +64,7 @@ jobs:
                 run: composer exec -- psalm --long-progress
 
             -   name: Check if Makefile file exists
-                uses: brzuchal/file_exists@main
+                uses: brzuchal/file-exists@main
                 id: make_exists
                 with:
                     paths: Makefile
