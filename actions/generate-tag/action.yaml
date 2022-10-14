@@ -24,7 +24,7 @@ runs:
                 app=$(echo "$GITHUB_REPOSITORY" | cut -f 2 -d "/")
                 echo "app=$app" >> "$GITHUB_OUTPUT"
                 if [ "$GITHUB_REF" = "refs/heads/${{ inputs.head }}" ]; then
-                  echo "tag=production-$GITHUB_SHA" >> "$GITHUB_ENV"
+                  echo "tag=production-$GITHUB_SHA" >> "$GITHUB_OUTPUT"
                 else
                   echo "tag=pr-$(jq -r .pull_request.number "$GITHUB_EVENT_PATH")-$GITHUB_SHA" >> "$GITHUB_OUTPUT"
                 fi
