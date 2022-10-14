@@ -39,6 +39,8 @@ jobs:
                 uses: easir/workflows/actions/build-and-push@a8a1f573f108cfa0a1a0ad9747d12d625f858e87
                 with:
                     tags: ${{ steps.meta.outputs.tags }}
+                    dockerfile: ${{ inputs.dockerfile }}
+                    target: ${{ inputs.target }}
                     registry: ${{ secrets.DOCKER_REGISTRY_URL }}
                     username: ${{ secrets.DOCKER_LOGIN }}
                     password: ${{ secrets.DOCKER_REGISTRY_PASSWORD }}
