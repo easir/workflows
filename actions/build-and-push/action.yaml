@@ -8,6 +8,9 @@ inputs:
         description: Dockerfile path name
         required: true
         default: Dockerfile
+    build-args:
+        description: Docker build args
+        required: false
     target:
         description: Dockerfile target name
         required: false
@@ -50,3 +53,4 @@ runs:
                 file: ${{ inputs.dockerfile }}
                 push: true
                 tags: ${{ inputs.tags }}
+                build-args: ${{ inputs.build-args }}
