@@ -9,6 +9,10 @@ inputs:
     tag:
         description: Docker Image tag to push
         required: true
+    dockerfile:
+        description: Dockerfile path name
+        required: true
+        default: Dockerfile
     registry:
         description: Docker registry URL
         required: true
@@ -89,5 +93,6 @@ runs:
                 context: .
                 allow: network.host
                 network: host
+                file: ${{ inputs.dockerfile }}
                 push: true
                 tags: ${{ steps.meta.outputs.tags }}
