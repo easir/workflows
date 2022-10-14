@@ -64,8 +64,17 @@ jobs:
         needs: analysis-and-tests
         runs-on: [ self-hosted ]
         steps:
+            -   uses: actions/checkout@v3
+            -   name: Check if project uses submodules
+                shell: sh
+                run: ([ -e .gitmodules ]) && echo "gitmodules_exists=true" >> $GITHUB_ENV || echo "gitmodules_exists=false" >> $GITHUB_ENV
+            -   name: Checkout GIT Submodules
+                shell: sh
+                if: env.gitmodules_exists == 'true'
+                run: git submodule update --init --recursive
+
             -   name: Generate Docker image tag
-                uses: easir/workflows/actions/generate-tag@a8a1f573f108cfa0a1a0ad9747d12d625f858e87
+                uses: easir/workflows/actions/generate-tag@ec8a3020f8697f5ab0aad60dd3f5f2f2fce8a55b
                 id: tags
             -   name: Docker meta
                 id: meta
@@ -78,7 +87,7 @@ jobs:
                         type=raw,value=${{ steps.tags.outputs.tag }}
                         type=sha,enable=true,priority=100,prefix=,suffix=,format=long
             -   name: Build and push Docker image
-                uses: easir/workflows/actions/build-and-push@a8a1f573f108cfa0a1a0ad9747d12d625f858e87
+                uses: easir/workflows/actions/build-and-push@ec8a3020f8697f5ab0aad60dd3f5f2f2fce8a55b
                 with:
                     tags: ${{ steps.meta.outputs.tags }}
                     registry: ${{ secrets.DOCKER_REGISTRY_URL }}
