@@ -79,7 +79,7 @@ jobs:
         steps:
             -   uses: actions/checkout@v3
             -   name: Generate Docker image tag
-                uses: easir/workflows/actions/generate-tag@c75dc560f505532e4d5dedb6f5289f4c9358b741
+                uses: easir/workflows/actions/generate-tag@06705ab241ba96626569db78d61602d677545845
                 id: tags
                 with:
                     head: master
