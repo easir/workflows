@@ -23,15 +23,6 @@ inputs:
 runs:
     using: composite
     steps:
-        -   uses: actions/checkout@v3
-        -   name: Check if project uses submodules
-            shell: sh
-            run: ([ -e .gitmodules ]) && echo "gitmodules_exists=true" >> $GITHUB_ENV || echo "gitmodules_exists=false" >> $GITHUB_ENV
-        -   name: Checkout GIT Submodules
-            shell: sh
-            if: env.gitmodules_exists == 'true'
-            run: git submodule update --init --recursive
-
         -   name: Set up Docker Context for Buildx
             id: buildx-context
             shell: sh
