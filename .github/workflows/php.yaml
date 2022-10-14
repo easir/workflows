@@ -79,12 +79,12 @@ jobs:
         steps:
             -   uses: actions/checkout@v3
             -   name: Generate Docker image tag
-                uses: easir/workflows/actions/generate-tag@824fd977d72885e1f55697c40cb58a22ca69f433
+                uses: easir/workflows/actions/generate-tag@9ebdb8078f6420cfc3b0d6653a231f823da6a1d3
                 id: tags
                 with:
                     head: master
             -   name: Build and push Docker image
-                uses: easir/workflows/actions/build-and-push@brzuchal
+                uses: easir/workflows/actions/build-and-push@9ebdb8078f6420cfc3b0d6653a231f823da6a1d3
                 with:
                     app: ${{ steps.tags.outputs.app }}
                     tag: ${{ steps.tags.outputs.tag }}
