@@ -78,7 +78,8 @@ jobs:
             GITHUB_TOKEN: ${{ secrets.token }}
         steps:
             -   uses: actions/checkout@v3
-            -   uses: easir/workflows/actions/generate-tag@21e5e5687ed186c577166f8dfb4507e2d530298b
+            -   name: Generate Docker image tag
+                uses: easir/workflows/actions/generate-tag@c75dc560f505532e4d5dedb6f5289f4c9358b741
                 id: tags
                 with:
                     head: master
