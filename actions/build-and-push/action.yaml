@@ -11,15 +11,21 @@ inputs:
         description: Dockerfile path name
         required: true
         default: Dockerfile
+    target:
+        description: Dockerfile target name
+        required: false
     registry:
         description: Docker registry URL
         required: true
+        default: ${{ secrets.DOCKER_REGISTRY_URL }}
     username:
         description: Docker login Username
         required: true
+        default: ${{ secrets.DOCKER_LOGIN }}
     password:
         description: Docker login Password
         required: true
+        default: ${{ secrets.DOCKER_REGISTRY_PASSWORD }}
 runs:
     using: composite
     steps:
@@ -68,6 +74,7 @@ runs:
             with:
                 context: .
                 allow: network.host
+                target: ${{ inputs.target }}
                 network: host
                 file: ${{ inputs.dockerfile }}
                 push: true
