@@ -1,4 +1,4 @@
-name: Build and push
+name: Build base
 on:
     workflow_call:
         inputs:
@@ -25,58 +25,20 @@ jobs:
         runs-on: [ self-hosted ]
         steps:
             -   name: Generate Docker image tag
-                uses: easir/workflows/actions/generate-tag@103d43cb2557cf9bc517c9087c3e630cce54d21a
+                uses: easir/workflows/actions/generate-tag@a8a1f573f108cfa0a1a0ad9747d12d625f858e87
                 id: tags
                 with:
-                    head: ${{ inputs.default_branch }}
-
-            -   name: Check if project uses submodules
-                shell: sh
-                run: ([ -e .gitmodules ]) && echo "gitmodules_exists=true" >> $GITHUB_ENV || echo "gitmodules_exists=false" >> $GITHUB_ENV
-            -   name: Checkout GIT Submodules
-                shell: sh
-                if: env.gitmodules_exists == 'true'
-                run: git submodule update --init --recursive
-
-            -   name: Set up Docker Context for Buildx
-                id: buildx-context
-                shell: sh
-                run: |
-                    docker context create builders
-            -   name: Docker Setup Buildx
-                uses: docker/setup-buildx-action@v2.0.0
-                with:
-                    version: latest
-                    endpoint: builders
+                    default_branch: ${{ inputs.default_branch }}
             -   name: Docker meta with calculated tag
                 id: meta
                 uses: docker/metadata-action@v4
                 with:
                     images: ${{ secrets.DOCKER_REGISTRY_URL }}/${{ steps.tags.output.app }}
-                    tags: |
-                        type=schedule
-                        type=ref,event=branch
-                        type=ref,event=pr
-                        type=semver,pattern={{ version }}
-                        type=semver,pattern={{ major }}.{{ minor }}
-                        type=semver,pattern={{ major }}
-                        type=raw,value=${{ inputs.tag != '' && inputs.tag || steps.tags.outputs.tag }}
-                        type=ref,event=tag
-                        type=sha,enable=true,priority=100,prefix=,suffix=,format=long
-            -   name: Docker Login
-                uses: docker/login-action@v2.0.0
+                    tags: type=raw,value=${{ inputs.tag }}
+            -   name: Build and push Docker image
+                uses: easir/workflows/actions/build-and-push@a8a1f573f108cfa0a1a0ad9747d12d625f858e87
                 with:
+                    tags: ${{ steps.meta.outputs.tags }}
                     registry: ${{ secrets.DOCKER_REGISTRY_URL }}
                     username: ${{ secrets.DOCKER_LOGIN }}
                     password: ${{ secrets.DOCKER_REGISTRY_PASSWORD }}
-                    ecr: false
-            -   name: Build and push Docker images
-                uses: docker/build-push-action@v3.1.1
-                with:
-                    context: .
-                    allow: network.host
-                    target: ${{ inputs.target }}
-                    network: host
-                    file: ${{ inputs.dockerfile }}
-                    push: true
-                    tags: ${{ steps.meta.outputs.tags }}

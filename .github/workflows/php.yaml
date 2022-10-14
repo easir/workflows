@@ -64,17 +64,23 @@ jobs:
         needs: analysis-and-tests
         runs-on: [ self-hosted ]
         steps:
-            -   uses: actions/checkout@v3
             -   name: Generate Docker image tag
-                uses: easir/workflows/actions/generate-tag@103d43cb2557cf9bc517c9087c3e630cce54d21a
+                uses: easir/workflows/actions/generate-tag@a8a1f573f108cfa0a1a0ad9747d12d625f858e87
                 id: tags
+            -   name: Docker meta
+                id: meta
+                uses: docker/metadata-action@v4
                 with:
-                    head: $default_branch
+                    images: ${{ secrets.DOCKER_REGISTRY_URL }}/${{ steps.tags.outputs.app }}
+                    tags: |
+                        type=ref,event=branch
+                        type=ref,event=pr
+                        type=raw,value=${{ steps.tags.outputs.tag }}
+                        type=sha,enable=true,priority=100,prefix=,suffix=,format=long
             -   name: Build and push Docker image
-                uses: easir/workflows/actions/build-and-push@103d43cb2557cf9bc517c9087c3e630cce54d21a
+                uses: easir/workflows/actions/build-and-push@a8a1f573f108cfa0a1a0ad9747d12d625f858e87
                 with:
-                    app: ${{ steps.tags.outputs.app }}
-                    tag: ${{ steps.tags.outputs.tag }}
+                    tags: ${{ steps.meta.outputs.tags }}
                     registry: ${{ secrets.DOCKER_REGISTRY_URL }}
                     username: ${{ secrets.DOCKER_LOGIN }}
                     password: ${{ secrets.DOCKER_REGISTRY_PASSWORD }}
