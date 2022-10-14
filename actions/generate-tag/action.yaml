@@ -32,6 +32,6 @@ runs:
         - shell: sh
           run: |
               echo "### Generated :rocket:" >> $GITHUB_STEP_SUMMARY
-              echo "* app: `${{ steps.generate.outputs.app }}`" >> $GITHUB_STEP_SUMMARY
-              echo "* tag: `${{ steps.generate.outputs.tag }}`" >> $GITHUB_STEP_SUMMARY
-              echo "* full_tag: `${{ steps.generate.outputs.full_tag }}`" >> $GITHUB_STEP_SUMMARY
+              echo '* app: `${{ steps.generate.outputs.app }}`' >> $GITHUB_STEP_SUMMARY
+              echo '* tag: `${{ steps.generate.outputs.tag }}`' >> $GITHUB_STEP_SUMMARY
+              echo '* full_tag: `${{ steps.generate.outputs.full_tag }}`' >> $GITHUB_STEP_SUMMARY
