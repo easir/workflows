@@ -1,11 +1,8 @@
 name: Docker build and push
 description: Build and push docker image
 inputs:
-    app:
-        description: Project repository app name
-        required: true
-    tag:
-        description: Docker Image tag to push
+    tags:
+        description: Docker Image tags to push
         required: true
     dockerfile:
         description: Dockerfile path name
@@ -44,21 +41,6 @@ runs:
             with:
                 version: latest
                 endpoint: builders
-        -   name: Docker meta
-            id: meta
-            uses: docker/metadata-action@v4
-            with:
-                images: ${{ inputs.registry }}/${{ inputs.app }}
-                tags: |
-                    type=schedule
-                    type=ref,event=branch
-                    type=ref,event=pr
-                    type=semver,pattern={{ version }}
-                    type=semver,pattern={{ major }}.{{ minor }}
-                    type=semver,pattern={{ major }}
-                    type=raw,value=${{ inputs.tag }}
-                    type=ref,event=tag
-                    type=sha,enable=true,priority=100,prefix=,suffix=,format=long
         -   name: Docker Login
             uses: docker/login-action@v2.0.0
             with:
@@ -75,4 +57,4 @@ runs:
                 network: host
                 file: ${{ inputs.dockerfile }}
                 push: true
-                tags: ${{ steps.meta.outputs.tags }}
+                tags: ${{ inputs.tags }}
