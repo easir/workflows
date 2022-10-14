@@ -1,44 +1,52 @@
-name: "Docker build and push"
-description: "Build and push docker image"
+name: Docker build and push
+description: Build and push docker image
 inputs:
     head:
-        description: "Project repository main branch name"
+        deprecationMessage: Use `generate-tag` action instead
+        description: Project repository main branch name
         required: true
         default: master
+    tag:
+        description: Docker Image tag to push
+        required: true
     registry:
-        description: "Docker registry URL"
+        description: Docker registry URL
         required: true
     username:
-        description: "Docker login Username"
+        description: Docker login Username
         required: true
     password:
-        description: "Docker login Password"
+        description: Docker login Password
         required: true
-outputs:
-    fulltag:
-        description: "Docker image full tag"
-        value: ${{ steps.generatetag.outputs.fulltag }}
+#outputs:
+#    fulltag:
+#        description: Docker image full tag
+#        value: ${{ steps.generatetag.outputs.fulltag }}
 runs:
     using: composite
     steps:
-        -   name: GenerateTAG
-            id: generatetag
-            shell: sh
-            run: |
-                echo "GITHUB_REF - $GITHUB_REF"
-                echo "GITHUB_SHA - $GITHUB_SHA"
-                echo "GITHUB_REPOSITORY - $GITHUB_REPOSITORY"
-                app=$(echo "$GITHUB_REPOSITORY" | cut -f 2 -d "/")
-                pull_number=$(jq -r .pull_request.number "$GITHUB_EVENT_PATH")
-                echo "app=$app" >> "$GITHUB_ENV"
-                if [ "$GITHUB_REF" = "refs/heads/${{ inputs.head }}" ]; then
-                  echo "tag=production-$GITHUB_SHA" >> "$GITHUB_ENV"
-                  tag=production-"$GITHUB_SHA"
-                else
-                  echo "tag=pr-$pull_number-$GITHUB_SHA" >> "$GITHUB_ENV"
-                  tag=pr-"$pull_number-$GITHUB_SHA"
-                fi
-                echo "fulltag=${{ inputs.registry }}/$app:$tag">>"$GITHUB_ENV"
+        - uses: easir/workflows/actions/generate-tag@brzuchal
+          id: tags
+          with:
+              head: master
+#        -   name: GenerateTAG
+#            id: generatetag
+#            shell: sh
+#            run: |
+#                echo "GITHUB_REF - $GITHUB_REF"
+#                echo "GITHUB_SHA - $GITHUB_SHA"
+#                echo "GITHUB_REPOSITORY - $GITHUB_REPOSITORY"
+#                app=$(echo "$GITHUB_REPOSITORY" | cut -f 2 -d "/")
+#                pull_number=$(jq -r .pull_request.number "$GITHUB_EVENT_PATH")
+#                echo "app=$app" >> "$GITHUB_ENV"
+#                if [ "$GITHUB_REF" = "refs/heads/${{ inputs.head }}" ]; then
+#                  echo "tag=production-$GITHUB_SHA" >> "$GITHUB_ENV"
+#                  tag=production-"$GITHUB_SHA"
+#                else
+#                  echo "tag=pr-$pull_number-$GITHUB_SHA" >> "$GITHUB_ENV"
+#                  tag=pr-"$pull_number-$GITHUB_SHA"
+#                fi
+#                echo "fulltag=${{ inputs.registry }}/$app:$tag">>"$GITHUB_ENV"
         -   name: Checkout GIT Submodules
             shell: sh
             run: ([ -e .gitmodules ]) && git submodule update --init --recursive
@@ -56,7 +64,8 @@ runs:
             id: meta
             uses: docker/metadata-action@v4
             with:
-                images: ${{ inputs.registry }}/${{ env.app }}
+#                images: ${{ inputs.registry }}/${{ env.app }}
+                images: ${{ inputs.registry }}/${{ steps.tags.outputs.app }}
                 tags: |
                     type=schedule
                     type=ref,event=branch
@@ -64,7 +73,7 @@ runs:
                     type=semver,pattern={{ version }}
                     type=semver,pattern={{ major }}.{{ minor }}
                     type=semver,pattern={{ major }}
-                    type=raw,value=${{ env.tag }}
+                    type=raw,value=${{ steps.tags.outputs.tag }}
                     type=ref,event=tag
                     type=sha,enable=true,priority=100,prefix=,suffix=,format=long
         -   name: Docker Login

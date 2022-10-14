@@ -1,0 +1,37 @@
+name: Generate Docker image tag
+description: Generate Docker image tags using current project and branch name and sha
+inputs:
+    head:
+        description: Project repository main branch name
+        required: true
+        default: master
+outputs:
+    app:
+        description: Docker image app mane
+        value: ${{ steps.generate.outputs.app }}
+    tag:
+        description: Docker image tag
+        value: ${{ steps.generate.outputs.tag }}
+    full_tag:
+        description: Docker image tag including registry and name
+        value: ${{ steps.generate.outputs.full_tag }}
+runs:
+    using: composite
+    steps:
+        -   id: generate
+            shell: sh
+            run: |
+                app=$(echo "$GITHUB_REPOSITORY" | cut -f 2 -d "/")
+                echo "app=$app" >> "$GITHUB_OUTPUT"
+                if [ "$GITHUB_REF" = "refs/heads/${{ inputs.head }}" ]; then
+                  echo "tag=production-$GITHUB_SHA" >> "$GITHUB_ENV"
+                else
+                  echo "tag=pr-$(jq -r .pull_request.number "$GITHUB_EVENT_PATH")-$GITHUB_SHA" >> "$GITHUB_OUTPUT"
+                fi
+                echo "full_tag=${{ inputs.registry }}/$app:$tag">>"$GITHUB_OUTPUT"
+        - shell: sh
+          run: |
+              echo "### Generated :rocket:" >> $GITHUB_STEP_SUMMARY
+              echo "* app: ${{ steps.generate.outputs.app }}" >> $GITHUB_STEP_SUMMARY
+              echo "* tag: ${{ steps.generate.outputs.tag }}" >> $GITHUB_STEP_SUMMARY
+              echo "* full_tag: ${{ steps.generate.outputs.full_tag }}" >> $GITHUB_STEP_SUMMARY
