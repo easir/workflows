@@ -5,15 +5,15 @@ on:
             app:
                 description: Project repository app name
                 type: string
-                required: true
+                required: false
             tag:
                 description: Docker Image tag to push
                 type: string
-                required: true
+                required: false
             dockerfile:
                 description: Dockerfile path name
                 type: string
-                required: true
+                required: false
                 default: Dockerfile
             target:
                 description: Dockerfile target name
