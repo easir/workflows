@@ -33,7 +33,7 @@ jobs:
                 id: meta
                 uses: docker/metadata-action@v4
                 with:
-                    images: ${{ secrets.DOCKER_REGISTRY_URL }}/${{ steps.tags.output.app }}
+                    images: ${{ secrets.DOCKER_REGISTRY_URL }}/${{ steps.tags.outputs.app }}
                     tags: type=raw,value=${{ inputs.tag }}
             -   name: Build and push Docker image
                 uses: easir/workflows/actions/build-and-push@a8a1f573f108cfa0a1a0ad9747d12d625f858e87
