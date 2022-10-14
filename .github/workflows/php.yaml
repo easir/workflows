@@ -77,11 +77,16 @@ jobs:
         env:
             GITHUB_TOKEN: ${{ secrets.token }}
         steps:
-            -   uses: actions/checkout@v3 # moving below actions to easir/workflow allow embedding checkout inside
+            -   uses: actions/checkout@v3
+            -   uses: easir/workflows/actions/generate-tag@21e5e5687ed186c577166f8dfb4507e2d530298b
+                id: tags
+                with:
+                    head: master
             -   name: Build and push Docker image
                 uses: easir/workflows/actions/build-and-push@brzuchal
                 with:
-                    head: master # default can be removed
+                    app: ${{ steps.tags.outputs.app }}
+                    tag: ${{ steps.tags.outputs.tag }}
                     registry: ${{ secrets.docker-reg }}
                     username: ${{ secrets.docker-login }}
                     password: ${{ secrets.docker-pass }}
