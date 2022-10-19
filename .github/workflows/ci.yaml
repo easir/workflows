@@ -14,7 +14,7 @@ on:
         required: false
         default: false
         type: boolean
-        
+
     secrets:
       token:
         required: true
@@ -58,7 +58,7 @@ jobs:
 
       - name: run composer install 
         if: inputs.language == 'php'
-        uses: docker://composer:${{ inputs.ComposerVersion }}
+        uses: docker://composer:2.2
         with:
           args: install
 
