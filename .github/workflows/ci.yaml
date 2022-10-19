@@ -63,7 +63,7 @@ jobs:
         uses: oxsecurity/megalinter@v6.11.1
 
       - name: Archive production artifacts
-        if: ${{ ( success() }} || ${{ failure() ) && MLEnabled }}
+        if: ${{ success() }} || ${{ failure() && inputs.MLEnabled }}
         uses: actions/upload-artifact@v2
         with:
           name: MegaLinter reports
@@ -74,7 +74,7 @@ jobs:
       # Create pull request if applicable (for now works only on PR from same repository, not from forks)
       - name: Create Pull Request with applied fixes
         id: cpr
-        if: steps.ml.outputs.has_updated_sources == 1 && (env.APPLY_FIXES_EVENT == 'all' || env.APPLY_FIXES_EVENT == github.event_name) && env.APPLY_FIXES_MODE == 'pull_request' && (github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository) && MLEnabled
+        if: steps.ml.outputs.has_updated_sources == 1 && (env.APPLY_FIXES_EVENT == 'all' || env.APPLY_FIXES_EVENT == github.event_name) && env.APPLY_FIXES_MODE == 'pull_request' && (github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository) && inputs.MLEnabled
         uses: peter-evans/create-pull-request@v4.1.3
         with:
           token: ${{ secrets.token || secrets.GITHUB_TOKEN }}
@@ -84,7 +84,7 @@ jobs:
           base: ${{ github.head_ref }}
   
       - name: Create PR output
-        if: steps.ml.outputs.has_updated_sources == 1 && (env.APPLY_FIXES_EVENT == 'all' || env.APPLY_FIXES_EVENT == github.event_name) && env.APPLY_FIXES_MODE == 'pull_request' && (github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository) && MLEnabled
+        if: steps.ml.outputs.has_updated_sources == 1 && (env.APPLY_FIXES_EVENT == 'all' || env.APPLY_FIXES_EVENT == github.event_name) && env.APPLY_FIXES_MODE == 'pull_request' && (github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository) && inputs.MLEnabled
         run: |
           echo "Pull Request Number - ${{ steps.cpr.outputs.pull-request-number }}"
           echo "Pull Request URL - ${{ steps.cpr.outputs.pull-request-url }}"
