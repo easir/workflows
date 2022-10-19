@@ -63,11 +63,12 @@ jobs:
           args: install
 
       - name: MegaLinter
+        if: inputs.MLEnabled
         id: ml
         uses: oxsecurity/megalinter@v6.11.1
 
       - name: Archive production artifacts
-        if: ${{ success() }} || ${{ failure() && inputs.MLEnabled }}
+        if: ( ${{ success() }} || ${{ failure() }} ) && inputs.MLEnabled 
         uses: actions/upload-artifact@v2
         with:
           name: MegaLinter reports
