@@ -7,8 +7,8 @@ on:
         default: "all"
         type: string
       ComposerVersion:
-        required: false
-        default: "latest"
+        required: true
+        default: "2.2"
         type: string
       MLEnabled:
         required: false
@@ -26,7 +26,7 @@ on:
         required: true
 
 jobs:
-  build-test-and-push:
+  test:
     env:
       GITHUB_TOKEN: ${{ secrets.token }}
       APPLY_FIXES: all
@@ -36,64 +36,50 @@ jobs:
     runs-on: ["self-hosted"]
     timeout-minutes: 15
     steps:
-      - name: GenerateTAG
-        id: generatetag
-        run: |
-          echo "GITHUB_REF - $GITHUB_REF"
-          echo "GITHUB_SHA - $GITHUB_SHA"
-          echo "GITHUB_REPOSITORY - $GITHUB_REPOSITORY"
-          app=$(echo "$GITHUB_REPOSITORY" | cut -f 2 -d "/")
-          pull_number=$(jq -r .pull_request.number "$GITHUB_EVENT_PATH")
-          echo "app=$app" >> "$GITHUB_ENV"
-          if [ "$GITHUB_REF" = "refs/heads/master" ]; then
-            echo "tag=production-$GITHUB_SHA" >> "$GITHUB_ENV"
-            tag=production-"$GITHUB_SHA"
-          else
-            echo "tag=pr-$pull_number-$GITHUB_SHA" >> "$GITHUB_ENV"
-            tag=pr-"$pull_number-$GITHUB_SHA"
-          fi
-          echo "fulltag=${{secrets.docker-reg}}/$app:$tag">>"$GITHUB_ENV"
       - name: Checkout
         uses: actions/checkout@v3.0.2
 
       - name: run composer install 
         if: inputs.language == 'php'
-        uses: docker://composer:2.2
+        uses: docker://composer:${{ inputs.ComposerVersion }}
         with:
           args: install
 
-      - name: MegaLinter
-        if: inputs.MLEnabled
-        id: ml
-        uses: oxsecurity/megalinter@v6.11.1
+      # - name: MegaLinter
+      #   if: inputs.MLEnabled
+      #   id: ml
+      #   uses: oxsecurity/megalinter@v6.11.1
 
-      - name: Archive production artifacts
-        if: ( ${{ success() }} || ${{ failure() }} ) && inputs.MLEnabled 
-        uses: actions/upload-artifact@v2
-        with:
-          name: MegaLinter reports
-          path: |
-            megalinter-reports
-            mega-linter.log
+      # - name: Archive production artifacts
+      #   if: ( ${{ success() }} || ${{ failure() }} ) && inputs.MLEnabled 
+      #   uses: actions/upload-artifact@v2
+      #   with:
+      #     name: MegaLinter reports
+      #     path: |
+      #       megalinter-reports
+      #       mega-linter.log
 
       # Create pull request if applicable (for now works only on PR from same repository, not from forks)
-      - name: Create Pull Request with applied fixes
-        id: cpr
-        if: steps.ml.outputs.has_updated_sources == 1 && (env.APPLY_FIXES_EVENT == 'all' || env.APPLY_FIXES_EVENT == github.event_name) && env.APPLY_FIXES_MODE == 'pull_request' && (github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository) && inputs.MLEnabled
-        uses: peter-evans/create-pull-request@v4.1.3
-        with:
-          token: ${{ secrets.token || secrets.GITHUB_TOKEN }}
-          commit-message: "[MegaLinter] Apply linters automatic fixes"
-          title: "[MegaLinter] Apply linters automatic fixes"
-          labels: bot
-          base: ${{ github.head_ref }}
+      # - name: Create Pull Request with applied fixes
+      #   id: cpr
+      #   if: steps.ml.outputs.has_updated_sources == 1 && (env.APPLY_FIXES_EVENT == 'all' || env.APPLY_FIXES_EVENT == github.event_name) && env.APPLY_FIXES_MODE == 'pull_request' && (github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository) && inputs.MLEnabled
+      #   uses: peter-evans/create-pull-request@v4.1.3
+      #   with:
+      #     token: ${{ secrets.token || secrets.GITHUB_TOKEN }}
+      #     commit-message: "[MegaLinter] Apply linters automatic fixes"
+      #     title: "[MegaLinter] Apply linters automatic fixes"
+      #     labels: bot
+      #     base: ${{ github.head_ref }}
   
-      - name: Create PR output
-        if: steps.ml.outputs.has_updated_sources == 1 && (env.APPLY_FIXES_EVENT == 'all' || env.APPLY_FIXES_EVENT == github.event_name) && env.APPLY_FIXES_MODE == 'pull_request' && (github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository) && inputs.MLEnabled
-        run: |
-          echo "Pull Request Number - ${{ steps.cpr.outputs.pull-request-number }}"
-          echo "Pull Request URL - ${{ steps.cpr.outputs.pull-request-url }}"
+      # - name: Create PR output
+      #   if: steps.ml.outputs.has_updated_sources == 1 && (env.APPLY_FIXES_EVENT == 'all' || env.APPLY_FIXES_EVENT == github.event_name) && env.APPLY_FIXES_MODE == 'pull_request' && (github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository) && inputs.MLEnabled
+      #   run: |
+      #     echo "Pull Request Number - ${{ steps.cpr.outputs.pull-request-number }}"
+      #     echo "Pull Request URL - ${{ steps.cpr.outputs.pull-request-url }}"
 
+  build:
+    needs: 
+    steps:
       - name: Set up Docker Context for Buildx
         id: buildx-context
         run: |
