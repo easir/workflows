@@ -3,7 +3,7 @@ on:
   workflow_call:
     inputs:
       language:
-        required: true
+        required: false
         default: "all"
         type: string
       ComposerVersion:
@@ -34,7 +34,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3.0.2
-
+      - name: Check repo for tests configurations
+        run: |
+          ([ -e phpcs.xml.dist ] || [ -e phpcs.xml ]) && echo 'phpcs_exists=true' >> $GITHUB_ENV || echo 'phpcs_exists=false' >> $GITHUB_ENV
       - name: run composer 
         if: ${{ inputs.language == 'php' && inputs.ComposerVersion == '2.2' }}
         uses: docker://composer:2.2
@@ -46,6 +48,7 @@ jobs:
         uses: docker://composer
         with:
           args: ${{ inputs.ComposerArgs }}
+
 
   build:
     runs-on: ["self-hosted"]
