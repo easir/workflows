@@ -46,12 +46,12 @@ jobs:
       DO_E2E_TESTS: ${{ contains(github.event.head_commit.message, '/e2e') }}
     steps:
       - name: forced selfhosted runners
-        if: ${{ inputs.ForceSelfHosted }}
+        if: inputs.ForceSelfHosted
         run: echo "runners=self-hosted" >> $GITHUB_OUTPUT
 
       - name: how meny already paid minutes we have on github action runners?
         id: runners
-        if: ! ${{ inputs.ForceSelfHosted }}
+        if: inputs.ForceSelfHosted == false
         run: | 
           minutes=`gh api -H "Accept: application/vnd.github+json" /orgs/easir/settings/billing/actions | jq ".total_minutes_used"`
           if (( $minutes < 2900 ))
