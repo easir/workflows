@@ -31,7 +31,7 @@ jobs:
       output1: ${{ steps.runners.outputs.runners }}
       output2: ${{ steps.environment.outputs.environment }}
       output3: ${{ steps.imagetag.outputs.fulltag }}
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
     env:
       GH_TOKEN: ${{ secrets.token }}
       FORCE_PUSH: ${{ contains(github.event.head_commit.message, '/forcepush') }}
@@ -82,8 +82,6 @@ jobs:
       # - name: get envs 1Password
       #   uses: mcmarkj/1password-actions@v2.0.3
 
-      # - name: 1password connect
-      #   uses: 
   use-variables:
     runs-on: ${{needs.setup_variables.outputs.output1}}
     needs: setup_variables
