@@ -32,15 +32,13 @@ jobs:
       output3: ${{ steps.imagetag.outputs.imagetag }}
     runs-on: ubuntu-latest
     env:
-      GH_TOKEN: ${{ secrets.token }}
+      GH_TOKEN: ${{ secrets.GH_TOKEN }}
       FORCE_PUSH: ${{ contains(github.event.head_commit.message, '/forcepush') }}
       DO_E2E_TESTS: ${{ contains(github.event.head_commit.message, '/e2e') }}
     steps:
       # # THIS DOES NOT FULLY WORK WITHOUT SOME PERMISSIONS !
       - name: how meny already paid minutes we have on github action runners?
         id: runners
-        env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: | 
           minutes=`gh api -H "Accept: application/vnd.github+json" /orgs/easir/settings/billing/actions | jq ".total_minutes_used"`
           if (( $minutes < 3000 ))
