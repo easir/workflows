@@ -22,7 +22,6 @@ on:
         required: true
   workflow_dispatch:
     
-permissions: read-all
 
   
 jobs:
@@ -30,7 +29,7 @@ jobs:
     outputs:
       output1: ${{ steps.runners.outputs.runners }}
       output2: ${{ steps.environment.outputs.environment }}
-      output3: ${{ steps.imagetag.outputs.fulltag }}
+      output3: ${{ steps.imagetag.outputs.imagetag }}
     runs-on: ubuntu-latest
     env:
       GH_TOKEN: ${{ secrets.token }}
@@ -41,7 +40,7 @@ jobs:
       - name: how meny already paid minutes we have on github action runners?
         id: runners
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: | 
           minutes=`gh api -H "Accept: application/vnd.github+json" /orgs/easir/settings/billing/actions | jq ".total_minutes_used"`
           if (( $minutes < 3000 ))
@@ -77,7 +76,8 @@ jobs:
             echo "tag=pr-$pull_number-$GITHUB_SHA" >> "$GITHUB_ENV"
             tag=pr-"$pull_number-$GITHUB_SHA"
           fi
-          echo "fulltag=${{secrets.docker-reg}}/$app:$tag" >> $GITHUB_OUTPUT
+          echo "imagetag=$app:$tag" >> $GITHUB_OUTPUT
+
           cat $GITHUB_OUTPUT
       # - name: get envs 1Password
       #   uses: mcmarkj/1password-actions@v2.0.3
