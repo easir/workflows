@@ -126,6 +126,20 @@ jobs:
         run: |
           php ./vendor/bin/phpunit
 
+  build:
+    needs: setup_variables
+    env: 
+      GITHUB_TOKEN: ${{ secrets.token }}
+    runs-on: ${{needs.setup_variables.outputs.runners}}
+    steps:    
+      - name: Import secrets
+        if: ${{ steps.environment.outputs.environment }} = "dev"
+        uses: mcmarkj/1password-actions@v2
+        id: screts
+        with:
+          connect-server-url: ${{ secrets.TEST_OP_CONNECT_HOST }}
+          connect-server-token: ${{ secrets.TEST_OP_CONNECT_TOKEN }}
+
 
   # build:
   #   runs-on: ["self-hosted"]
