@@ -34,7 +34,8 @@ jobs:
       output3: ${{ steps.imagetag.outputs.imagetag }}
     runs-on: ubuntu-latest
     env:
-      GH_TOKEN: ${{ secrets.GH_TOKEN }}
+      GITHUB_TOKEN: ${{ secrets.token }}
+      GH_TOKEN: ${{ secrets.numa-numa-token }}
       FORCE_PUSH: ${{ contains(github.event.head_commit.message, '/forcepush') }}
       DO_E2E_TESTS: ${{ contains(github.event.head_commit.message, '/e2e') }}
     steps:
