@@ -44,7 +44,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: | 
           minutes=`gh api -H "Accept: application/vnd.github+json" /orgs/easir/settings/billing/actions | jq ".total_minutes_used"`
-          if (( $minutes > 3000 ))
+          if (( $minutes < 3000 ))
           then 
           export runners="ubuntu-latest"
           else
