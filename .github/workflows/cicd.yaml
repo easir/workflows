@@ -35,7 +35,7 @@ jobs:
     steps:
       - name: how meny already paid minutes we have on github action runners?
         env:
-          GH_TOKEN: ${{ secrets.token }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: | 
           gh api -H "Accept: application/vnd.github+json" /orgs/easir/settings/billing/actions        
       - name: prod or not?
