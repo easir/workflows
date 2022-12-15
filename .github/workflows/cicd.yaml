@@ -20,7 +20,8 @@ on:
         required: true
       docker-login:
         required: true
-
+  workflow_dispatch:
+    
 permissions: read-all
 
   
