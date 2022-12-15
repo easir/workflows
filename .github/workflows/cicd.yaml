@@ -38,7 +38,7 @@ jobs:
       runners: ${{ steps.runners.outputs.runners }}
       output2: ${{ steps.environment.outputs.environment }}
       output3: ${{ steps.imagetag.outputs.imagetag }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
     env:
       GITHUB_TOKEN: ${{ secrets.token }}
       GH_TOKEN: ${{ secrets.numa-numa-token }}
@@ -51,16 +51,17 @@ jobs:
 
       - name: how meny already paid minutes we have on github action runners?
         id: runners
-        if: !Not ${{ inputs.ForceSelfHosted }}
+        if: ! ${{ inputs.ForceSelfHosted }}
         run: | 
           minutes=`gh api -H "Accept: application/vnd.github+json" /orgs/easir/settings/billing/actions | jq ".total_minutes_used"`
           if (( $minutes < 2900 ))
           then 
-          export runners="ubuntu-latest"
+          export runners="ubuntu-18.04"
           else
           export runners="self-hosted"
           fi
           echo "runners=$runners" >> $GITHUB_OUTPUT
+
       - name: prod or not?
         id: environment
         run: | 
@@ -81,7 +82,7 @@ jobs:
           app=$(echo "$GITHUB_REPOSITORY" | cut -f 2 -d "/")
           pull_number=$(jq -r .pull_request.number "$GITHUB_EVENT_PATH")
           echo "app=$app" >> "$GITHUB_ENV"
-          if [ ${{ steps.environment.outputs.environment }} = "prod"]; then
+          if [ ${{ steps.environment.outputs.environment }} = "prod" ]; then
             echo "tag=production-$GITHUB_SHA" >> "$GITHUB_ENV"
             tag=production-"$GITHUB_SHA"
           else
@@ -102,7 +103,7 @@ jobs:
   #       run: |
   #         echo ${{needs.setup_variables.outputs.runners}} ${{needs.setup_variables.outputs.output2}}  ${{needs.setup_variables.outputs.output3}}  
       
-  test:
+  tests:
     needs: setup_variables
     env: 
       GITHUB_TOKEN: ${{ secrets.token }}
@@ -127,7 +128,7 @@ jobs:
           php ./vendor/bin/phpunit
 
   build:
-    needs: setup_variables
+    needs: [ "setup_variables", "tests" ]
     env: 
       GITHUB_TOKEN: ${{ secrets.token }}
     runs-on: ${{needs.setup_variables.outputs.runners}}
