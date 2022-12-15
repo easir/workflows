@@ -20,6 +20,8 @@ on:
         required: true
       docker-login:
         required: true
+      numa-numa-token:
+        required: true
   workflow_dispatch:
     
 
@@ -40,6 +42,7 @@ jobs:
       - name: how meny already paid minutes we have on github action runners?
         id: runners
         run: | 
+          env
           minutes=`gh api -H "Accept: application/vnd.github+json" /orgs/easir/settings/billing/actions | jq ".total_minutes_used"`
           if (( $minutes < 3000 ))
           then 
