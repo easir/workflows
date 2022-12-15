@@ -27,35 +27,46 @@ permissions: read-all
   
 jobs:
   setup_variables:
+    outputs:
+      output1: ${{ steps.runners.outputs.runners }}
+      output2: ${{ steps.environment.outputs.environment }}
+      output3: ${{ steps.imagetag.outputs.fulltag }}
     runs-on: ubuntu-18.04
     env:
       GH_TOKEN: ${{ secrets.token }}
       FORCE_PUSH: ${{ contains(github.event.head_commit.message, '/forcepush') }}
       DO_E2E_TESTS: ${{ contains(github.event.head_commit.message, '/e2e') }}
     steps:
+      # # THIS DOES NOT FULLY WORK WITHOUT SOME PERMISSIONS !
       - name: how meny already paid minutes we have on github action runners?
+        id: runners
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: | 
-          gh api -H "Accept: application/vnd.github+json" /orgs/easir/settings/billing/actions        
+          minutes=`gh api -H "Accept: application/vnd.github+json" /orgs/easir/settings/billing/actions | jq ".total_minutes_used"`
+          if (( $minutes < 3000 ))
+          then 
+          export runners="ubuntu-latest"
+          else
+          export runners="self-hosted"
+          fi
+          echo "runners=$runners" >> $GITHUB_OUTPUT
       - name: prod or not?
+        id: environment
         run: | 
           if [[ $GITHUB_REF_NAME = "master" ]]
             then
-              echo prod
+              export environment=prod
           elif [[ $GITHUB_REF_NAME = "main" ]]
             then
-              echo prod
+              export environment=prod
           else
-            echo dev
+            export environment=dev
           fi
-          echo $GITHUB_REF_NAME
+          echo "environment=$environment" >> $GITHUB_OUTPUT
       - name: GenerateTAG
-        id: generatetag
+        id: imagetag
         run: |
-          echo "GITHUB_REF - $GITHUB_REF"
-          echo "GITHUB_SHA - $GITHUB_SHA"
-          echo "GITHUB_REPOSITORY - $GITHUB_REPOSITORY"
           app=$(echo "$GITHUB_REPOSITORY" | cut -f 2 -d "/")
           pull_number=$(jq -r .pull_request.number "$GITHUB_EVENT_PATH")
           echo "app=$app" >> "$GITHUB_ENV"
@@ -66,12 +77,20 @@ jobs:
             echo "tag=pr-$pull_number-$GITHUB_SHA" >> "$GITHUB_ENV"
             tag=pr-"$pull_number-$GITHUB_SHA"
           fi
-          echo "fulltag=${{secrets.docker-reg}}/$app:$tag">>"$GITHUB_ENV"
-      - name: get envs 1Password
-        uses: mcmarkj/1password-actions@v2.0.3
+          echo "fulltag=${{secrets.docker-reg}}/$app:$tag" >> $GITHUB_OUTPUT
+          cat $GITHUB_OUTPUT
+      # - name: get envs 1Password
+      #   uses: mcmarkj/1password-actions@v2.0.3
 
       # - name: 1password connect
       #   uses: 
+  use-variables:
+    runs-on: ${{needs.setup_variables.outputs.output1}}
+    needs: setup_variables
+    steps:
+      - name: test
+        run: |
+          echo ${{needs.setup_variables.outputs.output1}} ${{needs.setup_variables.outputs.output2}}  ${{needs.setup_variables.outputs.output3}}  
   # test:
   #   env:
   #     GITHUB_TOKEN: ${{ secrets.token }}
