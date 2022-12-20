@@ -14,10 +14,14 @@ on:
         required: false
         type: boolean
         default: false
-      phpcsWorkdir:
+      PhpcsWorkdir:
         required: false
         type: string
         default: "./src/"
+      UnitTestsExecutable:
+        required: false
+        type: string
+        default: "./vendor/bin/phpunit"
 
 
 
@@ -41,8 +45,9 @@ jobs:
     timeout-minutes: 5
     outputs:
       runners: ${{ steps.runners.outputs.runners }}
-      output2: ${{ steps.environment.outputs.environment }}
-      output3: ${{ steps.imagetag.outputs.imagetag }}
+      environment: ${{ steps.environment.outputs.environment }}
+      imagetag: ${{ steps.imagetag.outputs.imagetag }}
+      rebuildManifest: ${{ steps.did-manifest-change.outputs.any_changed }}
     runs-on: ubuntu-18.04
     env:
       GITHUB_TOKEN: ${{ secrets.token }}
@@ -59,7 +64,7 @@ jobs:
         if: inputs.ForceSelfHosted == false
         run: | 
           minutes=`gh api -H "Accept: application/vnd.github+json" /orgs/easir/settings/billing/actions | jq ".total_minutes_used"`
-          if (( $minutes < 500 ))
+          if (( $minutes < 2500 ))
           then 
           export runners="ubuntu-18.04"
           else
@@ -96,7 +101,12 @@ jobs:
           fi
           echo "imagetag=$app:$tag" >> $GITHUB_OUTPUT
 
-          cat $GITHUB_OUTPUT
+      - name: did manifest change?
+        id: did-manifest-change
+        uses: tj-actions/changed-files@v35.1.0
+        with:
+          files: |
+            ./manifest.yaml
 
 
   # use-variables:
@@ -124,13 +134,28 @@ jobs:
           composer install  --prefer-dist --ignore-platform-reqs --no-ansi --no-progress --no-interaction
       - name: phpcs
         run: |
-          php ./vendor/bin/phpcs ${{ inputs.phpcs-workdir }}
+          php ./vendor/bin/phpcs ${{ inputs.PhpcsWorkdir }}
       - name: phplint
         run: |
           find . -name '*.php' -not -path './vendor/*' -print0 | xargs -0 php -l
       - name: phpunit
         run: |
-          php ./vendor/bin/phpunit
+          php ${{ inputs.UnitTestsExecutable }}
+
+  manifest-generate:
+    needs: setup_variables
+    runs-on: ${{needs.setup_variables.outputs.runners}}
+    container: 
+      image: docker-registry.easir.com/manifest:master-edc5d03a8b7a4530442e23d2bd87c0833b4bd0bd
+      credentials:
+          username: ${{secrets.DOCKER_LOGIN}}
+          password: ${{secrets.DOCKER_REGISTRY_PASSWORD}}
+    steps:
+      - name: pull code
+        uses: actions/checkout@v3
+      - name: generate manifest
+        run: |
+          manifest chart generate && helmpush chart "${{secrets.CHART_REPOSITORY_URL}}" --version "0.0.0-${{github.sha}}"
 
   build:
     needs: [ "setup_variables", "tests" ]
