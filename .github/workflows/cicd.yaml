@@ -55,6 +55,9 @@ jobs:
       FORCE_PUSH: ${{ contains(github.event.head_commit.message, '/forcepush') }}
       DO_E2E_TESTS: ${{ contains(github.event.head_commit.message, '/e2e') }}
     steps:
+      - name: pull code
+        uses: actions/checkout@v3
+
       - name: forced selfhosted runners
         if: inputs.ForceSelfHosted
         run: echo "runners=self-hosted" >> $GITHUB_OUTPUT
