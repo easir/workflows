@@ -152,8 +152,8 @@ jobs:
     container: 
       image: docker-registry.easir.com/manifest:master-edc5d03a8b7a4530442e23d2bd87c0833b4bd0bd
       credentials:
-          username: ${{secrets.DOCKER_LOGIN}}
-          password: ${{secrets.DOCKER_REGISTRY_PASSWORD}}
+          username: ${{secrets.docker-login}}
+          password: ${{secrets.docker-pass}}
     steps:
       - name: pull code
         uses: actions/checkout@v3
