@@ -48,7 +48,7 @@ jobs:
       environment: ${{ steps.environment.outputs.environment }}
       imagetag: ${{ steps.imagetag.outputs.imagetag }}
       rebuildManifest: ${{ steps.did-manifest-change.outputs.any_changed }}
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
     env:
       GITHUB_TOKEN: ${{ secrets.token }}
       GH_TOKEN: ${{ secrets.numa-numa-token }}
@@ -69,7 +69,7 @@ jobs:
           minutes=`gh api -H "Accept: application/vnd.github+json" /orgs/easir/settings/billing/actions | jq ".total_minutes_used"`
           if (( $minutes < 2500 ))
           then 
-          export runners="ubuntu-18.04"
+          export runners="ubuntu-latest"
           else
           export runners="self-hosted"
           fi
@@ -219,7 +219,7 @@ jobs:
             type=ref,event=tag
             type=sha,enable=true,priority=100,prefix=,suffix=,format=long
             type=raw,value=${{needs.setup_variables.outputs.runners}}
-            
+
       - name: Docker Login
         uses: docker/login-action@v2.0.0
         with:
