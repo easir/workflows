@@ -150,7 +150,7 @@ jobs:
   manifest-generate:
     timeout-minutes: 5
     needs: setup_variables
-    runs-on: self-hosted #${{needs.setup_variables.outputs.runners}}
+    runs-on: ${{needs.setup_variables.outputs.runners}}
     container: 
       image: docker-registry.easir.com/manifest:master-edc5d03a8b7a4530442e23d2bd87c0833b4bd0bd
       credentials:
@@ -158,7 +158,7 @@ jobs:
           password: ${{secrets.docker-pass}}
     steps:
       - name: install helm
-        run: apt install helm
+        run: sudo apt install helm
       - name: pull code
         uses: actions/checkout@v3
       - name: generate manifest
