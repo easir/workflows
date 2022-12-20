@@ -157,6 +157,8 @@ jobs:
           username: ${{secrets.docker-login}}
           password: ${{secrets.docker-pass}}
     steps:
+      - name: install helm
+        run: apt install helm
       - name: pull code
         uses: actions/checkout@v3
       - name: generate manifest
