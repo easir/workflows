@@ -125,7 +125,7 @@ jobs:
     runs-on: ${{needs.setup_variables.outputs.runners}}
     timeout-minutes: 15
     container: 
-      image: composer
+      image: composer:${{inputs.ComposerVersion}}
     steps:
       - name: pull code
         uses: actions/checkout@v3
@@ -143,6 +143,7 @@ jobs:
           php ${{ inputs.UnitTestsExecutable }}
 
   manifest-generate:
+    timeout-minutes: 5
     needs: setup_variables
     runs-on: ${{needs.setup_variables.outputs.runners}}
     container: 
@@ -157,16 +158,25 @@ jobs:
         run: |
           manifest chart generate && helmpush chart "${{secrets.CHART_REPOSITORY_URL}}" --version "0.0.0-${{github.sha}}"
 
-  build:
+  build-image:
+    timeout-minutes: 15
     needs: [ "setup_variables", "tests" ]
     env: 
       GITHUB_TOKEN: ${{ secrets.token }}
     runs-on: ${{needs.setup_variables.outputs.runners}}
     steps:    
-      - name: Import secrets
+      - name: Import secrets for DEV
         if: ${{ steps.environment.outputs.environment }} = "dev"
         uses: mcmarkj/1password-actions@v2
-        id: screts
+        id: screts-dev
+        with:
+          connect-server-url: ${{ secrets.TEST_OP_CONNECT_HOST }}
+          connect-server-token: ${{ secrets.TEST_OP_CONNECT_TOKEN }}
+
+      - name: Import secrets for Prod
+        if: ${{ steps.environment.outputs.environment }} = "prod"
+        uses: mcmarkj/1password-actions@v2
+        id: screts-prod
         with:
           connect-server-url: ${{ secrets.TEST_OP_CONNECT_HOST }}
           connect-server-token: ${{ secrets.TEST_OP_CONNECT_TOKEN }}
@@ -178,23 +188,7 @@ jobs:
   #   env:
   #     GITHUB_TOKEN: ${{ secrets.token }}
   #   steps:
-  #     - name: GenerateTAG
-  #       id: generatetag
-  #       run: |
-  #         echo "GITHUB_REF - $GITHUB_REF"
-  #         echo "GITHUB_SHA - $GITHUB_SHA"
-  #         echo "GITHUB_REPOSITORY - $GITHUB_REPOSITORY"
-  #         app=$(echo "$GITHUB_REPOSITORY" | cut -f 2 -d "/")
-  #         pull_number=$(jq -r .pull_request.number "$GITHUB_EVENT_PATH")
-  #         echo "app=$app" >> "$GITHUB_ENV"
-  #         if [ "$GITHUB_REF" = "refs/heads/master" ]; then
-  #           echo "tag=production-$GITHUB_SHA" >> "$GITHUB_ENV"
-  #           tag=production-"$GITHUB_SHA"
-  #         else
-  #           echo "tag=pr-$pull_number-$GITHUB_SHA" >> "$GITHUB_ENV"
-  #           tag=pr-"$pull_number-$GITHUB_SHA"
-  #         fi
-  #         echo "fulltag=${{secrets.docker-reg}}/$app:$tag">>"$GITHUB_ENV"
+
   #     - name: Set up Docker Context for Buildx
   #       id: buildx-context
   #       run: |
