@@ -117,16 +117,6 @@ jobs:
       - name: print all outputs
         run: |
           echo       runners: ${{ steps.runners.outputs.runners }}       environment: ${{ steps.environment.outputs.environment }}      imagetag: ${{ steps.imagetag.outputs.imagetag }}      app: ${{ steps.imagetag.outputs.app }}      rebuildManifest: ${{ steps.did-manifest-change.outputs.any_changed }}
-
-
-  # use-variables:
-  #   runs-on: ${{needs.setup_variables.outputs.runners}}
-  #   needs: setup_variables
-  #   timeout-minutes: 20
-  #   steps:
-  #     - name: test
-  #       run: |
-  #         echo ${{needs.setup_variables.outputs.runners}} ${{needs.setup_variables.outputs.output2}}  ${{needs.setup_variables.outputs.output3}}  
       
   tests:
     needs: setup_variables
@@ -139,15 +129,23 @@ jobs:
     steps:
       - name: pull code
         uses: actions/checkout@v3
+      
+      - name: prevent host key verification error
+        run: |
+          ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts
+
       - name: run tests
         run: |
           composer install  --prefer-dist --ignore-platform-reqs --no-ansi --no-progress --no-interaction
+
       - name: phpcs
         run: |
           php ./vendor/bin/phpcs ${{ inputs.PhpcsWorkdir }}
+
       - name: phplint
         run: |
           find . -name '*.php' -not -path './vendor/*' -print0 | xargs -0 php -l
+          
       - name: phpunit
         run: |
           php ${{ inputs.UnitTestsExecutable }}
@@ -192,14 +190,6 @@ jobs:
       #   with:
       #     connect-server-url: ${{ secrets.TEST_OP_CONNECT_HOST }}
       #     connect-server-token: ${{ secrets.TEST_OP_CONNECT_TOKEN }}
-
-
-  # build:
-  #   runs-on: ["self-hosted"]
-  #   needs: test
-  #   env:
-  #     GITHUB_TOKEN: ${{ secrets.token }}
-  #   steps:
 
       - name: Set up Docker Context for Buildx
         id: buildx-context
