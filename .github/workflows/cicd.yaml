@@ -136,7 +136,7 @@ jobs:
         run: |
           mkdir ~/.ssh/
           echo '${{secrets.gh-ssh-key}}' > ~/.ssh/id_rsa
-          echo -e 'Host github.com \n	            StrictHostKeyChecking no \n' > ./.ssh/config
+          echo -e 'Host github.com \n	            StrictHostKeyChecking no \n' > ~/.ssh/config
           composer install  --prefer-dist --ignore-platform-reqs --no-ansi --no-progress --no-interaction
 
       - name: phpcs
