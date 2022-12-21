@@ -136,7 +136,7 @@ jobs:
       - name: run tests
         run: |
           mkdir ~/.ssh/
-          echo $gh-ssh-key >>~/.ssh/id_rsa
+          echo ${{secrets.gh-ssh-key}} >>~/.ssh/id_rsa
           composer install  --prefer-dist --ignore-platform-reqs --no-ansi --no-progress --no-interaction
 
       - name: phpcs
