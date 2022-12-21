@@ -161,10 +161,10 @@ jobs:
     steps:
       - name: pull code
         uses: actions/checkout@v3
-        
+
       - name: generate manifest
         run: |
-          manifest chart generate && helmpush chart "${{secrets.docker-reg}}" --version "0.0.0-${{github.sha}}"
+          manifest chart generate && helmpush chart "${{secrets.chartmuseum-url}}" --version "0.0.0-${{github.sha}}"
 
   build-image:
     timeout-minutes: 15
