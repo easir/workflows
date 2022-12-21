@@ -105,7 +105,7 @@ jobs:
             echo "tag=pr-$pull_number-$GITHUB_SHA" >> "$GITHUB_ENV"
             tag=pr-"$pull_number-$GITHUB_SHA"
           fi
-          echo "imagetag=$app:$tag" >> $GITHUB_OUTPUT
+          echo "imagetag=$tag" >> $GITHUB_OUTPUT
           echo "app=$app" >> $GITHUB_OUTPUT
 
       - name: did manifest change?
