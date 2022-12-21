@@ -122,6 +122,7 @@ jobs:
     needs: setup_variables
     env: 
       GITHUB_TOKEN: ${{ secrets.token }}
+      COMPOSER_AUTH: '{"github-oauth": {"github.com": "${{ secrets.token }}"}}'
     runs-on: ${{needs.setup_variables.outputs.runners}}
     timeout-minutes: 15
     container: 
@@ -129,11 +130,6 @@ jobs:
     steps:
       - name: pull code
         uses: actions/checkout@v3
-      
-      - name: prevent host key verification error
-        run: |
-          mkdir ~/.ssh/
-          ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts
 
       - name: run tests
         run: |
