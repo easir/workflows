@@ -133,7 +133,7 @@ jobs:
 
       - name: run tests
         run: |
-          env
+          composer global config github-oauth.github.com "$GITHUB_TOKEN"
           composer install  --prefer-dist --ignore-platform-reqs --no-ansi --no-progress --no-interaction
 
       - name: phpcs
