@@ -124,7 +124,6 @@ jobs:
     needs: setup_variables
     env: 
       GITHUB_TOKEN: ${{ secrets.token }}
-      COMPOSER_AUTH: '{"github-oauth": {"github.com": "${{ secrets.token }}"}}'
     runs-on: ${{needs.setup_variables.outputs.runners}}
     timeout-minutes: 15
     container: 
@@ -136,7 +135,7 @@ jobs:
       - name: run tests
         run: |
           mkdir ~/.ssh/
-          echo ${{secrets.gh-ssh-key}} >>~/.ssh/id_rsa
+          echo '${{secrets.gh-ssh-key}}' > ~/.ssh/id_rsa
           composer install  --prefer-dist --ignore-platform-reqs --no-ansi --no-progress --no-interaction
 
       - name: phpcs
