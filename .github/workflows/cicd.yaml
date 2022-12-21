@@ -136,10 +136,8 @@ jobs:
         run: |
           mkdir ~/.ssh/
           echo '${{secrets.gh-ssh-key}}' > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts
-          #wtf is this shit?!
-          ddev auth ssh
-          ddev ssh
           composer install  --prefer-dist --ignore-platform-reqs --no-ansi --no-progress --no-interaction
 
       - name: phpcs
