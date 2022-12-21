@@ -114,6 +114,9 @@ jobs:
         with:
           files: |
             ./manifest.yaml
+      - name: print all outputs
+        run: |
+          echo       runners: ${{ steps.runners.outputs.runners }}       environment: ${{ steps.environment.outputs.environment }}      imagetag: ${{ steps.imagetag.outputs.imagetag }}      app: ${{ steps.imagetag.outputs.app }}      rebuildManifest: ${{ steps.did-manifest-change.outputs.any_changed }}
 
 
   # use-variables:
