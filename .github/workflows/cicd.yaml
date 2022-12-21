@@ -38,6 +38,8 @@ on:
         required: true
       chartmuseum-url:
         required: true
+      gh-ssh-key:
+        required: true
   workflow_dispatch:
     
 
@@ -133,7 +135,8 @@ jobs:
 
       - name: run tests
         run: |
-          composer global config github-oauth.github.com "$GITHUB_TOKEN"
+          mkdir ~/.ssh/
+          echo $gh-ssh-key >>~/.ssh/id_rsa
           composer install  --prefer-dist --ignore-platform-reqs --no-ansi --no-progress --no-interaction
 
       - name: phpcs
