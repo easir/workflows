@@ -64,11 +64,12 @@ jobs:
         uses: actions/checkout@v3
 
       - name: forced selfhosted runners
+        id: forced
         if: inputs.ForceSelfHosted
         run: echo "runners=self-hosted" >> $GITHUB_OUTPUT
 
       - name: how meny already paid minutes we have on github action runners?
-        id: runners
+        id: hosted
         if: inputs.ForceSelfHosted == false
         run: | 
           minutes=`gh api -H "Accept: application/vnd.github+json" /orgs/easir/settings/billing/actions | jq ".total_minutes_used"`
@@ -79,6 +80,12 @@ jobs:
           export runners="self-hosted"
           fi
           echo "runners=$runners" >> $GITHUB_OUTPUT
+      - name: variable runners output
+        id: runners
+        run: |
+          # if [ "${{ steps.hosted.outputs.runners }}" == "${{ steps.forced.outputs.runners }}" ] then echo "runners=${{ steps.hosted.outputs.runners }}" >> $GITHUB_OUTPUT;
+          if [ "${{ inputs.ForceSelfHosted }}" == "true" ] then echo "runners=${{ steps.forced.outputs.runners }}" >> $GITHUB_OUTPUT
+
 
       - name: prod or not?
         id: environment
@@ -141,6 +148,7 @@ jobs:
           ls -al ~/.ssh/
           whoami
           pwd
+          git submodule update --init --recursive
           composer install  --prefer-dist --ignore-platform-reqs --no-ansi --no-progress --no-interaction
 
       - name: phpcs
