@@ -1,0 +1,55 @@
+name: Build base
+on:
+    workflow_call:
+        inputs:
+            default_branch:
+                description: Projects default branch name
+                type: string
+                required: false
+                default: master
+            tag:
+                description: Docker Image tag to push
+                type: string
+                required: false
+            dockerfile:
+                description: Dockerfile path name
+                type: string
+                required: false
+                default: Dockerfile
+            target:
+                description: Dockerfile target name
+                type: string
+                required: false
+jobs:
+    build-and-push:
+        runs-on: [ self-hosted ]
+        steps:
+            -   uses: actions/checkout@v3
+            -   name: Check if project uses submodules
+                shell: sh
+                run: ([ -e .gitmodules ]) && echo "gitmodules_exists=true" >> $GITHUB_ENV || echo "gitmodules_exists=false" >> $GITHUB_ENV
+            -   name: Checkout GIT Submodules
+                shell: sh
+                if: env.gitmodules_exists == 'true'
+                run: git submodule update --init --recursive
+
+            -   name: Generate Docker image tag
+                uses: easir/workflows/actions/generate-tag@ec8a3020f8697f5ab0aad60dd3f5f2f2fce8a55b
+                id: tags
+                with:
+                    default_branch: ${{ inputs.default_branch }}
+            -   name: Docker meta with calculated tag
+                id: meta
+                uses: docker/metadata-action@v4
+                with:
+                    images: ${{ secrets.DOCKER_REGISTRY_URL }}/${{ steps.tags.outputs.app }}
+                    tags: type=raw,value=${{ inputs.tag }}
+            -   name: Build and push Docker image
+                uses: easir/workflows/actions/build-and-push@ec8a3020f8697f5ab0aad60dd3f5f2f2fce8a55b
+                with:
+                    tags: ${{ steps.meta.outputs.tags }}
+                    dockerfile: ${{ inputs.dockerfile }}
+                    target: ${{ inputs.target }}
+                    registry: ${{ secrets.DOCKER_REGISTRY_URL }}
+                    username: ${{ secrets.DOCKER_LOGIN }}
+                    password: ${{ secrets.DOCKER_REGISTRY_PASSWORD }}
