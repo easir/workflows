@@ -69,7 +69,7 @@ jobs:
         run: echo "runners=self-hosted" >> $GITHUB_OUTPUT
 
       - name: how meny already paid minutes we have on github action runners?
-        id: hosted
+        id: runners
         if: inputs.ForceSelfHosted == false
         run: | 
           minutes=`gh api -H "Accept: application/vnd.github+json" /orgs/easir/settings/billing/actions | jq ".total_minutes_used"`
