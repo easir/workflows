@@ -80,11 +80,11 @@ jobs:
           export runners="self-hosted"
           fi
           echo "runners=$runners" >> $GITHUB_OUTPUT
-      - name: variable runners output
-        id: runners
-        run: |
-          # if [ "${{ steps.hosted.outputs.runners }}" == "${{ steps.forced.outputs.runners }}" ] then echo "runners=${{ steps.hosted.outputs.runners }}" >> $GITHUB_OUTPUT;
-          if [ "${{ inputs.ForceSelfHosted }}" == "true" ] then echo "runners=${{ steps.forced.outputs.runners }}" >> $GITHUB_OUTPUT
+      # - name: variable runners output
+      #   id: runners
+      #   run: |
+      #     # if [ "${{ steps.hosted.outputs.runners }}" == "${{ steps.forced.outputs.runners }}" ] then echo "runners=${{ steps.hosted.outputs.runners }}" >> $GITHUB_OUTPUT;
+      #     if [ "${{ inputs.ForceSelfHosted }}" == "true" ] then echo "runners=${{ steps.forced.outputs.runners }}" >> $GITHUB_OUTPUT
 
 
       - name: prod or not?
