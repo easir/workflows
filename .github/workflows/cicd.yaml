@@ -145,9 +145,10 @@ jobs:
 
       - name: pull code
         uses: actions/checkout@v3
-        
+
       - name: pull submodules if any exists
         run: |
+          git config --global --add safe.directory '*'
           git submodule update --init --recursive
         
       - name: run tests
