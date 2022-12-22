@@ -136,6 +136,13 @@ jobs:
     container: 
       image: composer:${{inputs.ComposerVersion}}
     steps:
+      - name: add ssh key
+        run: |
+          mkdir ~/.ssh/
+          echo '${{secrets.gh-ssh-key}}' > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts
+
       - name: pull code
         uses: actions/checkout@v3
         with:
