@@ -195,7 +195,7 @@ jobs:
 
   build-image:
     timeout-minutes: 15
-    needs: [ "setup_variables" ]
+    needs: [ "setup_variables", tests]
     if: ${{ always() && ( needs.tests.result =='success' || needs.tests.result =='skipped' ) }}
     env: 
       GITHUB_TOKEN: ${{ secrets.token }}
