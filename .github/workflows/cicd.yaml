@@ -221,7 +221,14 @@ jobs:
         with:
           token: ${{ secrets.numa-numa-token }}
           submodules: recursive
-        
+          
+      - name: add ssh key
+        run: |
+          mkdir ~/.ssh/
+          echo '${{secrets.gh-ssh-key}}' > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts
+
       - name: Set up Docker Context for Buildx
         id: buildx-context
         run: |
