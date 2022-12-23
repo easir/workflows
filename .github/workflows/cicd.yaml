@@ -136,20 +136,22 @@ jobs:
     container: 
       image: composer:${{inputs.ComposerVersion}}
     steps:
-      - name: add ssh key
-        run: |
-          mkdir ~/.ssh/
-          echo '${{secrets.gh-ssh-key}}' > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts
+      # - name: add ssh key
+      #   run: |
+      #     mkdir ~/.ssh/
+      #     echo '${{secrets.gh-ssh-key}}' > ~/.ssh/id_rsa
+      #     chmod 600 ~/.ssh/id_rsa
+      #     ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts
 
       - name: pull code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v2
+        with:
+          submodules: recursive
 
-      - name: pull submodules if any exists
-        run: |
-          git config --global --add safe.directory '*'
-          git submodule update --init --recursive
+      # - name: pull submodules if any exists
+      #   run: |
+      #     git config --global --add safe.directory '*'
+      #     git submodule update --init --recursive
         
       - name: run tests
         run: |
