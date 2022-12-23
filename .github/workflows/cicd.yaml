@@ -216,7 +216,12 @@ jobs:
       #   with:
       #     connect-server-url: ${{ secrets.TEST_OP_CONNECT_HOST }}
       #     connect-server-token: ${{ secrets.TEST_OP_CONNECT_TOKEN }}
-
+      - name: pull code
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.numa-numa-token }}
+          submodules: recursive
+        
       - name: Set up Docker Context for Buildx
         id: buildx-context
         run: |
