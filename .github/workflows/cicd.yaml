@@ -256,6 +256,7 @@ jobs:
       - name: Build and push Docker images
         uses: docker/build-push-action@v3.2.0
         with:
+          context: .
           allow: network.host
           network: host
           push: true
