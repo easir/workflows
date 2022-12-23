@@ -185,13 +185,13 @@ jobs:
         run: |
           manifest chart generate && helmpush chart "${{secrets.chartmuseum-url}}" --version "0.0.0-${{github.sha}}"
 
-  testofskip:
-    needs: setup_variables
-    runs-on: ${{needs.setup_variables.outputs.runners}}
-    steps:
-      - name: test
-        if: ${{ always() && ( needs.tests.result =='success' || needs.tests.result =='skipped' ) }}
-        run: echo "dupa"
+  # testofskip:
+  #   needs: setup_variables
+  #   runs-on: ${{needs.setup_variables.outputs.runners}}
+  #   steps:
+  #     - name: test
+  #       if: ${{ always() && ( needs.tests.result =='success' || needs.tests.result =='skipped' ) }}
+  #       run: echo "dupa"
 
   build-image:
     timeout-minutes: 15
@@ -266,3 +266,6 @@ jobs:
           network: host
           push: true
           tags: ${{ steps.meta.outputs.tags }}
+          secrets: |
+            GIT_AUTH_TOKEN=${{ secrets.numa-numa-token }}
+          github-token: ${{ secrets.numa-numa-token }}
