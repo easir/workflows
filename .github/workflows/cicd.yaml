@@ -144,8 +144,9 @@ jobs:
           ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts
 
       - name: pull code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
+          token: ${{ secrets.numa-numa-token }}
           submodules: recursive
 
       # - name: pull submodules if any exists
