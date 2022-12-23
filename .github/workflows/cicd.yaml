@@ -134,10 +134,7 @@ jobs:
       - name: print all outputs
         run: |
           echo       runners: ${{ steps.runners.outputs.runners }}       environment: ${{ steps.environment.outputs.environment }}      imagetag: ${{ steps.imagetag.outputs.imagetag }}      app: ${{ steps.imagetag.outputs.app }}      rebuildManifest: ${{ steps.did-manifest-change.outputs.any_changed }}
-      - name: evaluate if tests need to run
-        if: ${{ always() && ( (inputs.SkipTests != true) &&  contains(join(needs.tests.result, ','), 'success') )}}
-        run: |
-          echo ${{ always() && ( (inputs.SkipTests != true) &&  contains(join(needs.tests.result, ','), 'success') )}}
+
   tests:
     if: ${{ inputs.SkipTests != true }}
     needs: setup_variables
@@ -191,7 +188,7 @@ jobs:
   build-image:
     timeout-minutes: 15
     needs: [ "setup_variables" ]
-    if: ${{ always() && ( (inputs.SkipTests != true) &&  contains(join(needs.tests.result, ','), 'success') )}}
+    if: always && ( (inputs.SkipTests != true) &&  contains(join(needs.tests.result, ','), 'success') )
     env: 
       GITHUB_TOKEN: ${{ secrets.token }}
     runs-on: ${{needs.setup_variables.outputs.runners}}
