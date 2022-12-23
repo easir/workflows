@@ -184,6 +184,14 @@ jobs:
       - name: generate manifest
         run: |
           manifest chart generate && helmpush chart "${{secrets.chartmuseum-url}}" --version "0.0.0-${{github.sha}}"
+          
+  testofskip:
+    needs: setup_variables
+    runs-on: ${{needs.setup_variables.outputs.runners}}
+    steps:
+      - name: test
+        if: ${{ always() && ( (inputs.SkipTests != true) &&  contains(join(needs.tests.result, ','), 'success') )}}
+        run: echo "dupa"
 
   build-image:
     timeout-minutes: 15
