@@ -26,6 +26,10 @@ on:
         required: false
         type: string
         default: "./src/"
+      SkipUnitTests:
+        type: boolean
+        required: false
+        default: false      
       UnitTestsExecutable:
         required: false
         type: string
@@ -164,6 +168,7 @@ jobs:
           find . -name '*.php' -not -path './vendor/*' -print0 | xargs -0 php -l
           
       - name: phpunit
+        if: ${{ inputs.SkipUnitTests != true }}
         run: |
           php ${{ inputs.UnitTestsExecutable }}
 
