@@ -157,7 +157,7 @@ jobs:
 
       - name: phpcs
         run: |
-          php ./vendor/bin/phpcs ${{ inputs.PhpcsWorkdir }}
+          (php ./vendor/bin/phpcs ${{ inputs.PhpcsWorkdir }} || phpcs ${{ inputs.PhpcsWorkdir }})
 
       - name: phplint
         run: |
@@ -221,7 +221,7 @@ jobs:
         with:
           token: ${{ secrets.numa-numa-token }}
           submodules: recursive
-          
+
       - name: add ssh key
         run: |
           mkdir ~/.ssh/
