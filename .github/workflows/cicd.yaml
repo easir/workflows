@@ -65,7 +65,6 @@ jobs:
       imagetag: ${{ steps.imagetag.outputs.imagetag }}
       app: ${{ steps.imagetag.outputs.app }}
       rebuildManifest: ${{ steps.did-manifest-change.outputs.any_changed }}
-      pushImage: 
     runs-on: ubuntu-latest
     env:
       GITHUB_TOKEN: ${{ secrets.token }}
@@ -177,7 +176,7 @@ jobs:
     timeout-minutes: 5
     needs: setup_variables
     runs-on: ${{needs.setup_variables.outputs.runners}}
-    if: needs.setup_variables.outputs.any_changed == 'true'
+    if: needs.setup_variables.outputs.rebuildManifest == 'true'
     container: 
       image: docker-registry.easir.com/manifest:master-edc5d03a8b7a4530442e23d2bd87c0833b4bd0bd
       credentials:
@@ -272,7 +271,7 @@ jobs:
           ecr: false
 
       - name: Build and push Docker images
-        if: ${{ always() && ( needs.tests.result =='success' || needs.tests.result =='skipped' ) }}
+        if: always
         uses: docker/build-push-action@v3.2.0
         with:
           context: .
