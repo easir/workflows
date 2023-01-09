@@ -271,7 +271,7 @@ jobs:
           ecr: false
 
       - name: Build and push Docker images
-        if: always
+        # if: always
         uses: docker/build-push-action@v3.2.0
         with:
           context: .
