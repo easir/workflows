@@ -190,7 +190,7 @@ jobs:
           image: composer:${{inputs.ComposerVersion}}
           options: -v ${{ github.workspace }}:/app
           run: |
-            ls -al
+            ls -alr
             pwd
             composer install  --prefer-dist --ignore-platform-reqs --no-ansi --no-progress --no-interaction ${{ inputs.ComposerAdditionalArguments }}
       - uses: php-actions/behat@v1
