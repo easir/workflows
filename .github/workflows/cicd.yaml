@@ -188,6 +188,7 @@ jobs:
         uses: addnab/docker-run-action@v3
         with:
           image: composer:${{inputs.ComposerVersion}}
+          options: -v ${{ github.workspace }}:/work
           run: |
             composer install  --prefer-dist --ignore-platform-reqs --no-ansi --no-progress --no-interaction ${{ inputs.ComposerAdditionalArguments }}
       - uses: php-actions/behat@v1
