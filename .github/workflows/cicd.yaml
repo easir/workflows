@@ -185,8 +185,9 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: run composer
-        uses: docker://composer:${{inputs.ComposerVersion}}
+        uses: addnab/docker-run-action@v3
         with:
+          image: composer:${{inputs.ComposerVersion}}
           run: |
             composer install  --prefer-dist --ignore-platform-reqs --no-ansi --no-progress --no-interaction ${{ inputs.ComposerAdditionalArguments }}
       - uses: php-actions/behat@v1
