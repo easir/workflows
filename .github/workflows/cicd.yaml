@@ -185,7 +185,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: run composer
-        uses: composer:${{inputs.ComposerVersion}}
+        uses: docker://composer:${{inputs.ComposerVersion}}
         with:
           run: |
             composer install  --prefer-dist --ignore-platform-reqs --no-ansi --no-progress --no-interaction ${{ inputs.ComposerAdditionalArguments }}
