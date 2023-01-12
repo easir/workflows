@@ -29,7 +29,10 @@ on:
       SkipUnitTests:
         type: boolean
         required: false
-        default: false      
+      RunBehatTests:
+        type: boolean
+        required: false        
+        default: false     
       UnitTestsExecutable:
         required: false
         type: string
@@ -172,6 +175,18 @@ jobs:
         run: |
           php ${{ inputs.UnitTestsExecutable }}
 
+  behat:
+    if: inputs.RunBehatTests
+    needs: setup_variables
+    env: 
+      GITHUB_TOKEN: ${{ secrets.token }}
+    runs-on: ${{needs.setup_variables.outputs.runners}}
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v3
+      - uses: php-actions/composer@v3
+      - uses: php-actions/behat@v1
+      
   manifest-generate:
     timeout-minutes: 5
     needs: setup_variables
