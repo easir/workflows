@@ -250,12 +250,12 @@ jobs:
           token: ${{ secrets.numa-numa-token }}
           submodules: recursive
 
-      - name: add ssh key
-        run: |
-          mkdir ~/.ssh/
-          echo '${{secrets.gh-ssh-key}}' > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts
+      # - name: add ssh key
+      #   run: |
+      #     mkdir ~/.ssh/
+      #     echo '${{secrets.gh-ssh-key}}' > ~/.ssh/id_rsa
+      #     chmod 600 ~/.ssh/id_rsa
+      #     ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts
 
       - name: Set up Docker Context for Buildx
         id: buildx-context
@@ -265,7 +265,7 @@ jobs:
       - name: Docker Setup Buildx
         uses: docker/setup-buildx-action@v2.2.1
         with:
-          version: latest
+          version: v0.9.1
           endpoint: builders
       
       - name: Docker meta
