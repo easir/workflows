@@ -45,7 +45,7 @@ jobs:
                     images: ${{ secrets.DOCKER_REGISTRY_URL }}/${{ steps.tags.outputs.app }}
                     tags: type=raw,value=${{ inputs.tag }}
             -   name: Build and push Docker image
-                uses: easir/workflows/actions/build-and-push@ec8a3020f8697f5ab0aad60dd3f5f2f2fce8a55b
+                uses: easir/workflows/actions/build-and-push@af72d6d83ab44a29cf87873c8038772b37f83d26
                 with:
                     tags: ${{ steps.meta.outputs.tags }}
                     dockerfile: ${{ inputs.dockerfile }}
