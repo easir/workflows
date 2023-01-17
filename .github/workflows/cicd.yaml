@@ -37,6 +37,7 @@ on:
         required: false
         type: string
         default: "./vendor/bin/phpunit"
+      RunGitUpdateSubmodules:
 
 
 
@@ -157,7 +158,8 @@ jobs:
         with:
           token: ${{ secrets.numa-numa-token }}
           submodules: recursive
-        
+          fetch-depth: 0
+
       - name: run composer
         run: |
           composer install  --prefer-dist --ignore-platform-reqs --no-ansi --no-progress --no-interaction ${{ inputs.ComposerAdditionalArguments }}
@@ -249,13 +251,6 @@ jobs:
         with:
           token: ${{ secrets.numa-numa-token }}
           submodules: recursive
-
-      # - name: add ssh key
-      #   run: |
-      #     mkdir ~/.ssh/
-      #     echo '${{secrets.gh-ssh-key}}' > ~/.ssh/id_rsa
-      #     chmod 600 ~/.ssh/id_rsa
-      #     ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts
 
       - name: Set up Docker Context for Buildx
         id: buildx-context
