@@ -193,6 +193,8 @@ jobs:
             ls -alr
             pwd
             composer install  --prefer-dist --ignore-platform-reqs --no-ansi --no-progress --no-interaction ${{ inputs.ComposerAdditionalArguments }}
+      - name: Local development server
+        run: mkdir www && php -S 0.0.0.0:8000 -t www public/index.php &            
       - uses: php-actions/behat@v1
 
   manifest-generate:
