@@ -195,7 +195,7 @@ jobs:
             composer install  --prefer-dist --ignore-platform-reqs --no-ansi --no-progress --no-interaction ${{ inputs.ComposerAdditionalArguments }}
 
       - name: lets fire up the app
-        run: mkdir www && php -d 'error_reporting=E_ALL & ~E_DEPRECATED & ~E_STRICT' -S 0.0.0.0:8000 -t www public/index.php &           
+        run: mkdir www && php -d 'error_reporting=24575' -S 0.0.0.0:8000 -t www public/index.php &           
        
       - name: and test it
         uses: php-actions/behat@v1
