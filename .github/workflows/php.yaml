@@ -74,7 +74,7 @@ jobs:
                 run: git submodule update --init --recursive
 
             -   name: Generate Docker image tag
-                uses: easir/workflows/actions/generate-tag@ec8a3020f8697f5ab0aad60dd3f5f2f2fce8a55b
+                uses: easir/workflows/actions/generate-tag@brzuchal
                 id: tags
             -   name: Docker meta
                 id: meta
@@ -87,7 +87,7 @@ jobs:
                         type=raw,value=${{ steps.tags.outputs.tag }}
                         type=sha,enable=true,priority=100,prefix=,suffix=,format=long
             -   name: Build and push Docker image
-                uses: easir/workflows/actions/build-and-push@ec8a3020f8697f5ab0aad60dd3f5f2f2fce8a55b
+                uses: easir/workflows/actions/build-and-push@brzuchal
                 with:
                     tags: ${{ steps.meta.outputs.tags }}
                     registry: ${{ secrets.DOCKER_REGISTRY_URL }}
