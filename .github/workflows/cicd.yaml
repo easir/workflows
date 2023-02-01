@@ -179,7 +179,7 @@ jobs:
 
       - name: phpcs
         run: |
-          (php ./vendor/bin/phpcs ${{ inputs.PhpcsWorkdir }} || ./vendor/bin/phpcs ${{ inputs.PhpcsWorkdir }})
+          (php ./vendor/bin/phpcs ${{ inputs.PhpcsWorkdir }} || ./vendor/bin/phpcs ${{ inputs.PhpcsWorkdir }} || php ./bin/phpcs ${{ inputs.PhpcsWorkdir }} || ./bin/phpcs ${{ inputs.PhpcsWorkdir }})
 
       - name: phplint
         run: |
