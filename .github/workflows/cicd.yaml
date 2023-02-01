@@ -195,7 +195,7 @@ jobs:
       
       - name: Tests
         shell: sh
-        if: ${{ inputs.UseMakeTargets != "" }}
+        if: ${{ inputs.UseMakeTargets != '' }}
         run: |
           make ${{ inputs.UseMakeTargets }} -O -k
 
