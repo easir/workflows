@@ -168,7 +168,7 @@ jobs:
           extensions: pdo_sqlite
           coverage: pcov
         env:
-          runner: ${{ steps.runners.outputs.runners }}
+          runner: self-hosted
 #      - name: run composer
 #        run: |
 #          composer install  --prefer-dist --ignore-platform-reqs --no-ansi --no-progress --no-interaction ${{ inputs.ComposerAdditionalArguments }}
