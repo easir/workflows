@@ -178,14 +178,17 @@ jobs:
           composer-options: "--prefer-dist --ignore-platform-reqs --no-ansi --no-progress --no-interaction ${{ inputs.ComposerAdditionalArguments }}"
 
       - name: phpcs
+        if: always()
         run: |
           (php ./vendor/bin/phpcs ${{ inputs.PhpcsWorkdir }} || ./vendor/bin/phpcs ${{ inputs.PhpcsWorkdir }} || php ./bin/phpcs ${{ inputs.PhpcsWorkdir }} || ./bin/phpcs ${{ inputs.PhpcsWorkdir }})
 
       - name: phplint
+        if: always()      
         run: |
           find . -name '*.php' -not -path './vendor/*' -print0 | xargs -0 php -l
           
       - name: phpunit
+        if: always()      
         if: ${{ inputs.SkipUnitTests != true }}
         run: |
           php ${{ inputs.UnitTestsExecutable }}
