@@ -158,9 +158,12 @@ jobs:
           token: ${{ secrets.numa-numa-token }}
           submodules: recursive
         
-      - name: run composer
-        run: |
-          composer install  --prefer-dist --ignore-platform-reqs --no-ansi --no-progress --no-interaction ${{ inputs.ComposerAdditionalArguments }}
+#      - name: run composer
+#        run: |
+#          composer install  --prefer-dist --ignore-platform-reqs --no-ansi --no-progress --no-interaction ${{ inputs.ComposerAdditionalArguments }}
+      - uses: ramsey/composer-install@v2
+        with: 
+          composer-options: "--prefer-dist --ignore-platform-reqs --no-ansi --no-progress --no-interaction ${{ inputs.ComposerAdditionalArguments }}"
 
       - name: phpcs
         run: |
