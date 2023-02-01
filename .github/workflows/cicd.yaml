@@ -45,7 +45,10 @@ on:
         required: false
         type: boolean
         default: true
-
+      UseMakeTargets:
+        required: false
+        type: string
+        default: ""
 
 
     secrets:
@@ -108,7 +111,6 @@ jobs:
       #   run: |
       #     # if [ "${{ steps.hosted.outputs.runners }}" == "${{ steps.forced.outputs.runners }}" ] then echo "runners=${{ steps.hosted.outputs.runners }}" >> $GITHUB_OUTPUT;
       #     if [ "${{ inputs.ForceSelfHosted }}" == "true" ] then echo "runners=${{ steps.forced.outputs.runners }}" >> $GITHUB_OUTPUT
-
 
       - name: prod or not?
         id: environment
@@ -174,7 +176,7 @@ jobs:
 
       - uses: ramsey/composer-install@v2
         with:
-          composer-options: "--prefer-dist --ignore-platform-reqs --no-ansi --no-progress --no-interaction ${{ inputs.ComposerAdditionalArguments }}"
+          composer-options: "--prefer-dist --no-ansi --no-progress --no-interaction ${{ inputs.ComposerAdditionalArguments }}"
 
       - name: phpcs
         if: always()
@@ -187,9 +189,15 @@ jobs:
           find . -name '*.php' -not -path './vendor/*' -print0 | xargs -0 php -l
           
       - name: phpunit
-        if: always() && ${{ inputs.SkipUnitTests != true }}
+        if: ${{ inputs.SkipUnitTests != true }}
         run: |
           php ${{ inputs.UnitTestsExecutable }}
+      
+      - name: Tests
+        shell: sh
+        if: ${{ inputs.UseMakeTargets != "" }}
+        run: |
+          make ${{ inputs.UseMakeTargets }} -O -k
 
   behat:
     if: inputs.RunBehatTests
@@ -208,7 +216,7 @@ jobs:
           run: |
             ls -alr
             pwd
-            composer install  --prefer-dist --ignore-platform-reqs --no-ansi --no-progress --no-interaction ${{ inputs.ComposerAdditionalArguments }}
+            composer install  --prefer-dist --no-ansi --no-progress --no-interaction ${{ inputs.ComposerAdditionalArguments }}
 
       - name: lets fire up the app
         env:
@@ -317,7 +325,7 @@ jobs:
           ecr: false
 
       - name: Build and push Docker images
-        if: always()
+        if: always() && inputs.PoChujMiBuildImage != true
         uses: docker/build-push-action@v3.3.0
         with:
           context: .
