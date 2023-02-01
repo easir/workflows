@@ -164,7 +164,8 @@ jobs:
       - uses: ramsey/composer-install@v2
         with:
           composer-options: "--prefer-dist --ignore-platform-reqs --no-ansi --no-progress --no-interaction ${{ inputs.ComposerAdditionalArguments }}"
-          token: ${{ secrets.numa-numa-token }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.numa-numa-token }}
 
       - name: phpcs
         run: |
