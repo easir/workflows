@@ -157,8 +157,6 @@ jobs:
      GITHUB_TOKEN: ${{ secrets.numa-numa-token }}
     runs-on: ${{needs.setup_variables.outputs.runners}}
     timeout-minutes: 15
-    # container: 
-    #   image: composer:${{inputs.ComposerVersion}}
     steps:
       - name: pull code
         uses: actions/checkout@v3
@@ -189,7 +187,7 @@ jobs:
           find . -name '*.php' -not -path './vendor/*' -print0 | xargs -0 php -l
           
       - name: phpunit
-        if: ((success() || failure()) && ${{ inputs.SkipUnitTests != true }})
+        if: always() && ${{ inputs.SkipUnitTests != true }}
         run: |
           php ${{ inputs.UnitTestsExecutable }}
 
