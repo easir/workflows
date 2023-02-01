@@ -146,7 +146,7 @@ jobs:
     if: ${{ inputs.SkipTests != true }}
     needs: setup_variables
     env: 
-      GITHUB_TOKEN: ${{ secrets.token }}
+      GITHUB_TOKEN: ${{ secrets.numa-numa-token }}
     runs-on: ${{needs.setup_variables.outputs.runners}}
     timeout-minutes: 15
     container: 
