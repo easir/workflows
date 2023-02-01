@@ -188,7 +188,6 @@ jobs:
           find . -name '*.php' -not -path './vendor/*' -print0 | xargs -0 php -l
           
       - name: phpunit
-        if: always()      
         if: ${{ inputs.SkipUnitTests != true }}
         run: |
           php ${{ inputs.UnitTestsExecutable }}
