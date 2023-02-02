@@ -256,7 +256,7 @@ jobs:
   build-image:
     timeout-minutes: 15
     needs: [ "setup_variables", tests]
-    if: always() && (( needs.tests.result =='success' || needs.tests.result =='skipped' )|| github.event_name == 'pull_request')
+    if: always() && (( needs.tests.result =='success' || needs.tests.result =='skipped' )|| github.event_name == 'pull_request') && inputs.PoChujMiBuildImage != true
     env: 
       GITHUB_TOKEN: ${{ secrets.token }}
     runs-on: ${{needs.setup_variables.outputs.runners}}
@@ -326,7 +326,6 @@ jobs:
           ecr: false
 
       - name: Build and push Docker images
-        if: always() && inputs.PoChujMiBuildImage != true
         uses: docker/build-push-action@v3.3.0
         with:
           context: .
