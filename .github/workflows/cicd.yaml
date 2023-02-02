@@ -177,6 +177,12 @@ jobs:
       - uses: ramsey/composer-install@v2
         with:
           composer-options: "--prefer-dist --no-ansi --no-progress --no-interaction ${{ inputs.ComposerAdditionalArguments }}"
+      
+      - name: make files
+        shell: sh
+        if: ${{ inputs.UseMakeTargets != '' }}
+        run: |
+          make ${{ inputs.UseMakeTargets }} -O -k
 
       - name: phpcs
         if: always()
@@ -187,17 +193,12 @@ jobs:
         if: always()      
         run: |
           find . -name '*.php' -not -path './vendor/*' -print0 | xargs -0 php -l
-          
+
       - name: phpunit
-        if: ${{ inputs.SkipUnitTests != true }}
+        if: success() || failure() && inputs.SkipUnitTests != true
         run: |
           php ${{ inputs.UnitTestsExecutable }}
       
-      - name: Tests
-        shell: sh
-        if: ${{ inputs.UseMakeTargets != '' }}
-        run: |
-          make ${{ inputs.UseMakeTargets }} -O -k
 
   behat:
     if: inputs.RunBehatTests
