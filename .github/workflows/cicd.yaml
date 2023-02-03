@@ -186,8 +186,9 @@ jobs:
 
       - name: phpcs
         if: always()
+        # (php ./vendor/bin/phpcs ${{ inputs.PhpcsWorkdir }} || ./vendor/bin/phpcs ${{ inputs.PhpcsWorkdir }} || php ./bin/phpcs ${{ inputs.PhpcsWorkdir }} || ./bin/phpcs ${{ inputs.PhpcsWorkdir }})
         run: |
-          (php ./vendor/bin/phpcs ${{ inputs.PhpcsWorkdir }} || ./vendor/bin/phpcs ${{ inputs.PhpcsWorkdir }} || php ./bin/phpcs ${{ inputs.PhpcsWorkdir }} || ./bin/phpcs ${{ inputs.PhpcsWorkdir }})
+          composer exec -- phpcs ${{ inputs.PhpcsWorkdir }}
 
       - name: phplint
         if: always()      
@@ -197,7 +198,7 @@ jobs:
       - name: phpunit
         if: success() || failure() && inputs.SkipUnitTests != true
         run: |
-          php ${{ inputs.UnitTestsExecutable }}
+          composer exec -- phpunit
       
 
   behat:
