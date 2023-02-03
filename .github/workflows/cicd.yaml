@@ -169,7 +169,7 @@ jobs:
           token: ${{ secrets.numa-numa-token }}
           submodules: recursive
 
-      - uses: shivammathur/setup-php@v2
+      - uses: shivammathur/setup-php@2.24.0
         with:
           php-version: ${{inputs.PhpVersion}}
           extensions: ${{inputs.PhpExtensions}}
