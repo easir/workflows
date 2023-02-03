@@ -174,12 +174,13 @@ jobs:
           php-version: ${{inputs.PhpVersion}}
           extensions: ${{inputs.PhpExtensions}}
           coverage: pcov
+          tools: behat, phpunit, composer, phpcs, php-cs-fixer, phpcbf, phpstan, psalm, phplint, 
         env:
-          runner: self-hosted
+          runner: ${{needs.setup_variables.outputs.runners}}
 
-      - uses: ramsey/composer-install@v2
-        with:
-          composer-options: "--prefer-dist --no-ansi --no-progress --no-interaction ${{ inputs.ComposerAdditionalArguments }}"
+      - name: run Composer
+        run: |
+          composer install --prefer-dist --no-ansi --no-progress --no-interaction ${{ inputs.ComposerAdditionalArguments }}
       
       - name: make files
         shell: sh
@@ -188,13 +189,13 @@ jobs:
           make ${{ inputs.UseMakeTargets }} -O -k
 
       - name: phpcs
-        if: always()
+        if: success() || failure()
         # (php ./vendor/bin/phpcs ${{ inputs.PhpcsWorkdir }} || ./vendor/bin/phpcs ${{ inputs.PhpcsWorkdir }} || php ./bin/phpcs ${{ inputs.PhpcsWorkdir }} || ./bin/phpcs ${{ inputs.PhpcsWorkdir }})
         run: |
           composer exec -- phpcs ${{ inputs.PhpcsWorkdir }}
 
       - name: phplint
-        if: always()      
+        if: success() || failure()      
         run: |
           find . -name '*.php' -not -path './vendor/*' -print0 | xargs -0 php -l
 
