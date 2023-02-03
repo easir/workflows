@@ -172,7 +172,7 @@ jobs:
       - uses: shivammathur/setup-php@2.24.0
         with:
           php-version: ${{inputs.PhpVersion}}
-          extensions: pdo_sqlite, rdkafka-5.0.2
+          extensions: ${{inputs.PhpExtensions}}
           coverage: pcov
           tools: behat, phpunit, composer, phpcs, php-cs-fixer, phpcbf, phpstan, psalm, phplint, 
         env:
