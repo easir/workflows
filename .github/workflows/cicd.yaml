@@ -49,8 +49,11 @@ on:
         required: false
         type: string
         default: ""
-
-
+      PhpExtentions:
+        type: string
+        required: false
+        default: "pdo_sqlite"
+        
     secrets:
       token:
         required: true
@@ -169,7 +172,7 @@ jobs:
       - uses: shivammathur/setup-php@v2
         with:
           php-version: ${{inputs.PhpVersion}}
-          extensions: pdo_sqlite ${{inputs.PhpExtensions}}
+          extensions: ${{inputs.PhpExtensions}}
           coverage: pcov
         env:
           runner: self-hosted
