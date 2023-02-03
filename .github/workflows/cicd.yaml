@@ -169,7 +169,7 @@ jobs:
       - uses: shivammathur/setup-php@v2
         with:
           php-version: ${{inputs.PhpVersion}}
-          extensions: pdo_sqlite
+          extensions: pdo_sqlite ext-rdkafka
           coverage: pcov
         env:
           runner: self-hosted
