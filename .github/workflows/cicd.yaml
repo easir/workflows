@@ -49,7 +49,7 @@ on:
         required: false
         type: string
         default: ""
-      PhpExtentions:
+      PhpExtensions:
         type: string
         required: false
         default: "pdo_sqlite"
