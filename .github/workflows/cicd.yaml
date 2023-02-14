@@ -53,7 +53,33 @@ on:
         type: string
         required: false
         default: "pdo_sqlite"
-        
+      SentryOrganisation:
+        type: string
+        required: false
+        default: "loyalty-factory-aps"
+      SentryProjectName:
+        type: string
+        required: false
+        default: ""
+        description: ""
+      EnableSentryRelease: 
+        type: boolean
+        required: false
+        default: false
+      SentryUploadSourceMaps:
+        type: boolean
+        required: false
+        default: false
+      SentryTargetEnvironment:
+        type: string
+        required: false
+        default: "production"
+        description: ""
+      ApplicationLanguage:
+        type: string
+        required: false
+        default: "php"
+
     secrets:
       token:
         required: true
@@ -69,6 +95,9 @@ on:
         required: true
       gh-ssh-key:
         required: true
+      sentry-auth-token:
+        required: false
+  
   workflow_dispatch:
     
 
@@ -232,6 +261,15 @@ jobs:
       - name: and test it
         uses: php-actions/behat@v1
 
+  SentryRelease:
+    if: EnableSentryRelease && needs.setup_variables.outputs.environment == "prod"
+    needs: setup_variables
+    runs-on: ${{needs.setup_variables.outputs.runners}}
+    steps:
+      - name: Sentry release
+        run: |
+          echo "test"
+    
   manifest-generate:
     timeout-minutes: 5
     needs: setup_variables
