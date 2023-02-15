@@ -244,7 +244,6 @@ jobs:
 
       - name: phpcs
         if: success() || failure()
-        # (php ./vendor/bin/phpcs ${{ inputs.PhpcsWorkdir }} || ./vendor/bin/phpcs ${{ inputs.PhpcsWorkdir }} || php ./bin/phpcs ${{ inputs.PhpcsWorkdir }} || ./bin/phpcs ${{ inputs.PhpcsWorkdir }})
         run: |
           composer exec -- phpcs ${{ inputs.PhpcsWorkdir }}
 
@@ -358,13 +357,6 @@ jobs:
           ls -al ./
           cat .npmrc
           echo ${{github.event_name}}
-
-      # - name: add ssh key
-      #   run: |
-      #     mkdir ~/.ssh/
-      #     echo '${{secrets.gh-ssh-key}}' > ~/.ssh/id_rsa
-      #     chmod 600 ~/.ssh/id_rsa
-      #     ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts
 
       - name: Set up Docker Context for Buildx
         id: buildx-context
