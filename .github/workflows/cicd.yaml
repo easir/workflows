@@ -344,6 +344,14 @@ jobs:
           token: ${{ secrets.numa-numa-token }}
           submodules: recursive
 
+      - name: authenticate to NPM
+        if: inputs.UseNPM
+        run: |
+          echo ${{ secrets.nmprc }} >> .npmrc
+          ls -al ./
+          cat .npmrc
+          echo ${{github.event_name}}
+
       # - name: add ssh key
       #   run: |
       #     mkdir ~/.ssh/
@@ -387,13 +395,6 @@ jobs:
           password: ${{ secrets.docker-pass }} 
           ecr: false
 
-      - name: authenticate to NPM
-        if: inputs.UseNPM
-        run: |
-          echo ${{ secrets.nmprc }} >> .npmrc
-          ls -al ./
-          cat .npmrc
-          echo ${{github.event_name}}
 
       - name: Build and push Docker images
         uses: docker/build-push-action@v3.3.0
