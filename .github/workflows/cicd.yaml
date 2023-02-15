@@ -83,6 +83,10 @@ on:
         type: boolean
         default: true
         required: false
+      UseNPM:
+        type: boolean
+        default: false
+        required: false
 
     secrets:
       token:
@@ -101,6 +105,9 @@ on:
         required: true
       sentry-auth-token:
         required: false
+      npmrc:
+        required: false
+
   
   workflow_dispatch:
     
@@ -373,7 +380,11 @@ jobs:
           username: ${{ secrets.docker-login }}
           password: ${{ secrets.docker-pass }} 
           ecr: false
-
+      - name: authenticate to NPM
+        if: inputs.UseNPM
+        run: |
+          echo ${{ secrets.nmprc }} >> .npmrc
+          
       - name: Build and push Docker images
         uses: docker/build-push-action@v3.3.0
         with:
