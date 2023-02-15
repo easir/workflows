@@ -79,6 +79,10 @@ on:
         type: string
         required: false
         default: "php"
+      UseManifest:
+        type: boolean
+        default: true
+        required: false
 
     secrets:
       token:
@@ -175,11 +179,13 @@ jobs:
           echo "app=$app" >> $GITHUB_OUTPUT
 
       - name: did manifest change?
+        if: inputs.UseManifest
         id: did-manifest-change
         uses: tj-actions/changed-files@v35.1.0
         with:
           files: |
             ./manifest.yaml
+
       - name: print all outputs
         run: |
           echo       runners: ${{ steps.runners.outputs.runners }}       environment: ${{ steps.environment.outputs.environment }}      imagetag: ${{ steps.imagetag.outputs.imagetag }}      app: ${{ steps.imagetag.outputs.app }}      rebuildManifest: ${{ steps.did-manifest-change.outputs.any_changed }}
