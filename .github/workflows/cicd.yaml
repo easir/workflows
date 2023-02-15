@@ -185,8 +185,14 @@ jobs:
           echo "imagetag=$tag" >> $GITHUB_OUTPUT
           echo "app=$app" >> $GITHUB_OUTPUT
 
+      - name: Check file existence
+        id: check_files
+        uses: andstor/file-existence-action@v2.0.0
+        with:
+          files: "./manifest.yaml"
+
       - name: did manifest change?
-        if: inputs.UseManifest
+        if: steps.check_files.outputs.files_exists == 'true'
         id: did-manifest-change
         uses: tj-actions/changed-files@v35.1.0
         with:
@@ -384,7 +390,7 @@ jobs:
         if: inputs.UseNPM
         run: |
           echo ${{ secrets.nmprc }} >> .npmrc
-          
+
       - name: Build and push Docker images
         uses: docker/build-push-action@v3.3.0
         with:
