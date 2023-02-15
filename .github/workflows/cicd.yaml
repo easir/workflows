@@ -202,9 +202,6 @@ jobs:
       - name: print all outputs
         run: |
           echo       runners: ${{ steps.runners.outputs.runners }}       environment: ${{ steps.environment.outputs.environment }}      imagetag: ${{ steps.imagetag.outputs.imagetag }}      app: ${{ steps.imagetag.outputs.app }}      rebuildManifest: ${{ steps.did-manifest-change.outputs.any_changed }}
-      - name: print logic
-        run: |
-          echo (( ${{needs.tests.result}} =='success' || ${{needs.tests.result}} =='skipped' )|| ${{github.event_name}} == 'pull_request') && ${{inputs.PoChujMiBuildImage}}
 
   tests:
     if: ${{ inputs.SkipTests != true }}
@@ -321,7 +318,7 @@ jobs:
   build-image:
     timeout-minutes: 15
     needs: [ "setup_variables", tests]
-    if: success() || failure() && (( needs.tests.result =='success' || needs.tests.result =='skipped' )|| github.event_name == 'pull_request') && inputs.PoChujMiBuildImage
+    if: always || (success() || failure() && (( needs.tests.result =='success' || needs.tests.result =='skipped' )|| github.event_name == 'pull_request') && inputs.PoChujMiBuildImage)
     env: 
       GITHUB_TOKEN: ${{ secrets.token }}
     runs-on: ${{needs.setup_variables.outputs.runners}}
