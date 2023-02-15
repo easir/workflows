@@ -400,6 +400,8 @@ jobs:
       - name: Build and push Docker images
         uses: docker/build-push-action@v3.3.0
         with:
+          build-args: |
+            "IMAGE_VERSION=${{GITHUB_SHA}}"
           context: .
           allow: network.host
           network: host
