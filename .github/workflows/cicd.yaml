@@ -406,7 +406,7 @@ jobs:
         uses: docker/build-push-action@v3.3.0
         with:
           build-args: |
-            "IMAGE_VERSION=${{GITHUB_SHA}}"
+            "IMAGE_VERSION=$GITHUB_SHA"
           context: .
           allow: network.host
           network: host
