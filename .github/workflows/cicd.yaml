@@ -262,7 +262,7 @@ jobs:
         uses: php-actions/behat@v1
 
   SentryRelease:
-    if: {{ inputs.EnableSentryRelease == true && needs.setup_variables.outputs.environment == "prod" }}
+    if: inputs.EnableSentryRelease == true && needs.setup_variables.outputs.environment == "prod"
     needs: setup_variables
     runs-on: ${{needs.setup_variables.outputs.runners}}
     steps:
