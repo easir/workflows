@@ -204,7 +204,7 @@ jobs:
           echo       runners: ${{ steps.runners.outputs.runners }}       environment: ${{ steps.environment.outputs.environment }}      imagetag: ${{ steps.imagetag.outputs.imagetag }}      app: ${{ steps.imagetag.outputs.app }}      rebuildManifest: ${{ steps.did-manifest-change.outputs.any_changed }}
       - name: print logic
         run: |
-          echo ${{ success() }} || ${{ failure()}} && (( ${{needs.tests.result}} =='success' || ${{needs.tests.result}} =='skipped' )|| ${{github.event_name}} == 'pull_request') && ${{inputs.PoChujMiBuildImage}}
+          echo (( ${{needs.tests.result}} =='success' || ${{needs.tests.result}} =='skipped' )|| ${{github.event_name}} == 'pull_request') && ${{inputs.PoChujMiBuildImage}}
 
   tests:
     if: ${{ inputs.SkipTests != true }}
