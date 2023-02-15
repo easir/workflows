@@ -347,7 +347,8 @@ jobs:
       - name: authenticate to NPM
         if: inputs.UseNPM
         run: |
-          echo ${{ secrets.nmprc }} >> .npmrc
+          rm -f .npmrc
+          echo ${{secrets.npmrc}} > .npmrc
           ls -al ./
           cat .npmrc
           echo ${{github.event_name}}
