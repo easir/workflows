@@ -458,12 +458,18 @@ jobs:
         uses: docker/build-push-action@v3.3.0
         with:
           build-args: |
-            "IMAGE_VERSION=$GITHUB_SHA"
+            IMAGE_VERSION=$GITHUB_SHA
+            ENVIRONMENT=${{ needs.setup_variables.outputs.environment }}
           context: .
           allow: network.host
+          cache-to: |
+            type=local,dest=./build-cache
           network: host
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           secrets: |
             GIT_AUTH_TOKEN=${{ secrets.numa-numa-token }}
           github-token: ${{ secrets.numa-numa-token }}
+      - name: test the cache of build
+        run: |
+          ls -al ./build-cache
