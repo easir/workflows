@@ -239,7 +239,6 @@ jobs:
           composer install --prefer-dist --no-ansi --no-progress --no-interaction ${{ inputs.ComposerAdditionalArguments }}
       
       - name: make files
-        if: inputs.ApplicationLanguage == "php"
         shell: sh
         if: ${{ inputs.UseMakeTargets != '' }}
         run: |
