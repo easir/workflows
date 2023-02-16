@@ -270,6 +270,7 @@ jobs:
           CONFIG_AUTH_URL: "http://api.domain/token"
         with:
           image: node:15.12.0
+          options: -v ${{ github.workspace }}:.
           run: |
             rm -f .npmrc
             echo "${{secrets.npmrc}}" > .npmrc
@@ -281,6 +282,7 @@ jobs:
         uses: addnab/docker-run-action@v3
         with:
           image: buildkite/puppeteer:latest
+          options: -v ${{ github.workspace }}:.
           run: |
             npm run test:karma
 
@@ -289,6 +291,7 @@ jobs:
         uses: addnab/docker-run-action@v3
         with:
           image: node:15.12.0
+          options: -v ${{ github.workspace }}:.
           run: |
             npm run test:jest
 
@@ -297,6 +300,7 @@ jobs:
         uses: addnab/docker-run-action@v3
         with:
           image: node:15.12.0-alpine
+          options: -v ${{ github.workspace }}:.
           run: |
             node_modules/.bin/jscs --config=.jscsrc src/app
 
@@ -305,6 +309,7 @@ jobs:
         uses: addnab/docker-run-action@v3
         with:
           image: node:15.12.0-alpine
+          options: -v ${{ github.workspace }}:.
           run: |
             npm run test:eslint
 
