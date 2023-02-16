@@ -275,6 +275,34 @@ jobs:
             npm install
             npm run build
 
+      - name: karma tests
+        if: inputs.ApplicationLanguage == 'nodejs'
+        uses: docker://buildkite/puppeteer:latest
+        with:
+          run: |
+            npm run test:karma
+
+      - name: jest tests
+        if: inputs.ApplicationLanguage == 'nodejs'
+        uses: docker://node:15.12.0
+        with:
+          run: |
+            npm run test:jest
+
+      - name: jest jscs
+        if: inputs.ApplicationLanguage == 'nodejs'
+        uses: docker://node:15.12.0-alpine
+        with:
+          run: |
+            node_modules/.bin/jscs --config=.jscsrc src/app
+
+      - name: jest jscs
+        if: inputs.ApplicationLanguage == 'nodejs'
+        uses: docker://node:15.12.0-alpine
+        with:
+          run: |
+            npm run test:eslint
+
 
   behat:
     if: inputs.RunBehatTests
