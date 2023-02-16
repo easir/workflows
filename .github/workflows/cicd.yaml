@@ -262,16 +262,11 @@ jobs:
       - name: nodesasdqwe
         if: inputs.ApplicationLanguage == 'nodejs'
         uses: addnab/docker-run-action@v3
-        env:
-          APPCONFIG_API: "//api.domain"
-          APPCONFIG_SOCKETAUTH: "//api.domain/socket"
-          APPCONFIG_UPLOAD: "//api.domain"
-          CONFIG_API_URL: "http://api.domain"
-          CONFIG_AUTH_URL: "http://api.domain/token"
         with:
           image: node:15.12.0
-          options: -v ${{ github.workspace }}:.
+          options: -v ${{ github.workspace }}:/work -e APPCONFIG_API=//api.domain" -e APPCONFIG_SOCKETAUTH="//api.domain/socket" -e APPCONFIG_UPLOAD="//api.domain" -e CONFIG_API_URL="http://api.domain" -e CONFIG_AUTH_URL="http://api.domain/token"
           run: |
+            cd /work/
             rm -f .npmrc
             echo "${{secrets.npmrc}}" > .npmrc
             npm install
@@ -282,8 +277,9 @@ jobs:
         uses: addnab/docker-run-action@v3
         with:
           image: buildkite/puppeteer:latest
-          options: -v ${{ github.workspace }}:.
+          options: -v ${{ github.workspace }}:/work
           run: |
+            cd /work/
             npm run test:karma
 
       - name: jest tests
@@ -291,8 +287,9 @@ jobs:
         uses: addnab/docker-run-action@v3
         with:
           image: node:15.12.0
-          options: -v ${{ github.workspace }}:.
+          options: -v ${{ github.workspace }}:/work
           run: |
+            cd /work/
             npm run test:jest
 
       - name: jest jscs
@@ -300,8 +297,9 @@ jobs:
         uses: addnab/docker-run-action@v3
         with:
           image: node:15.12.0-alpine
-          options: -v ${{ github.workspace }}:.
+          options: -v ${{ github.workspace }}:/work
           run: |
+            cd /work/
             node_modules/.bin/jscs --config=.jscsrc src/app
 
       - name: jest jscs
@@ -309,8 +307,9 @@ jobs:
         uses: addnab/docker-run-action@v3
         with:
           image: node:15.12.0-alpine
-          options: -v ${{ github.workspace }}:.
+          options: -v ${{ github.workspace }}:/work
           run: |
+            cd /work/
             npm run test:eslint
 
 
