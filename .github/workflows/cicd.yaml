@@ -259,7 +259,7 @@ jobs:
         run: |
           composer exec -- phpunit
 
-      - name: node
+      - name: nodesasdqwe
         if: inputs.ApplicationLanguage == "nodejs"
         uses: docker://node:15.12.0
         env:
@@ -268,11 +268,12 @@ jobs:
           APPCONFIG_UPLOAD: "//api.domain"
           CONFIG_API_URL: "http://api.domain"
           CONFIG_AUTH_URL: "http://api.domain/token"
-        run: |
-          rm -f .npmrc
-          echo "${{secrets.npmrc}}" > .npmrc
-          npm install
-          npm run build
+        with:
+          run: |
+            rm -f .npmrc
+            echo "${{secrets.npmrc}}" > .npmrc
+            npm install
+            npm run build
 
 
   behat:
