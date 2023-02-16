@@ -372,13 +372,21 @@ jobs:
     runs-on: ${{needs.setup_variables.outputs.runners}}
     steps:
       - name: test
-        if: (success() || failure()) && (( needs.tests.result =='success' || needs.tests.result =='skipped' )|| github.event_name == 'pull_request') && inputs.PoChujMiBuildImage
+        if: |
+          always() && 
+          !contains(needs.*.result, 'failure') &&
+          !contains(needs.*.result, 'canceled') &&
+          inputs.PoChujMiBuildImage
         run: echo "dupa"
 
   build-image:
     timeout-minutes: 15
     needs: [ "setup_variables", "tests" ]
-    if: (success() || failure()) && (( needs.tests.result =='success' || needs.tests.result =='skipped' )|| github.event_name == 'pull_request') && inputs.PoChujMiBuildImage
+    if: |
+      always() && 
+      !contains(needs.*.result, 'failure') &&
+      !contains(needs.*.result, 'canceled') &&
+      inputs.PoChujMiBuildImage
     env: 
       GITHUB_TOKEN: ${{ secrets.token }}
     runs-on: ${{needs.setup_variables.outputs.runners}}
