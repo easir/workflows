@@ -258,7 +258,22 @@ jobs:
         if: (success() || failure()) && inputs.ApplicationLanguage == "php" && inputs.SkipUnitTests != true
         run: |
           composer exec -- phpunit
+
       - name: node
+        if: inputs.ApplicationLanguage == "nodejs"
+        uses: docker://node:15.12.0
+        env:
+          APPCONFIG_API: "//api.domain"
+          APPCONFIG_SOCKETAUTH: "//api.domain/socket"
+          APPCONFIG_UPLOAD: "//api.domain"
+          CONFIG_API_URL: "http://api.domain"
+          CONFIG_AUTH_URL: "http://api.domain/token"
+        run: |
+          rm -f .npmrc
+          echo "${{secrets.npmrc}}" > .npmrc
+          npm install
+          npm run build
+
 
   behat:
     if: inputs.RunBehatTests
@@ -356,9 +371,6 @@ jobs:
         run: |
           rm -f .npmrc
           echo "${{secrets.npmrc}}" > .npmrc
-          ls -al ./
-          cat .npmrc
-          echo ${{github.event_name}}
 
       - name: Set up Docker Context for Buildx
         id: buildx-context
