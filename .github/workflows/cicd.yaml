@@ -128,7 +128,7 @@ jobs:
       imagetag: ${{ steps.imagetag.outputs.imagetag }}
       app: ${{ steps.imagetag.outputs.app }}
       rebuildManifest: ${{ steps.did-manifest-change.outputs.any_changed }}
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     env:
       GITHUB_TOKEN: ${{ secrets.token }}
       GH_TOKEN: ${{ secrets.numa-numa-token }}
