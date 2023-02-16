@@ -224,7 +224,7 @@ jobs:
           submodules: recursive
 
       - uses: shivammathur/setup-php@2.24.0
-        if: inputs.ApplicationLanguage == "php"
+        if: inputs.ApplicationLanguage == 'php'
         with:
           php-version: ${{inputs.PhpVersion}}
           extensions: ${{inputs.PhpExtensions}}
@@ -234,7 +234,7 @@ jobs:
           runner: ${{needs.setup_variables.outputs.runners}}
 
       - name: run Composer
-        if: inputs.ApplicationLanguage == "php"
+        if: inputs.ApplicationLanguage == 'php'
         run: |
           composer install --prefer-dist --no-ansi --no-progress --no-interaction ${{ inputs.ComposerAdditionalArguments }}
       
@@ -245,17 +245,17 @@ jobs:
           make ${{ inputs.UseMakeTargets }} -O -k
 
       - name: phpcs
-        if: (success() || failure()) && inputs.ApplicationLanguage == "php"
+        if: (success() || failure()) && inputs.ApplicationLanguage == 'php'
         run: |
           composer exec -- phpcs ${{ inputs.PhpcsWorkdir }}
 
       - name: phplint
-        if: (success() || failure()) && inputs.ApplicationLanguage == "php"
+        if: (success() || failure()) && inputs.ApplicationLanguage == 'php'
         run: |
           find . -name '*.php' -not -path './vendor/*' -print0 | xargs -0 php -l
 
       - name: phpunit
-        if: (success() || failure()) && inputs.ApplicationLanguage == "php" && inputs.SkipUnitTests != true
+        if: (success() || failure()) && inputs.ApplicationLanguage == 'php' && inputs.SkipUnitTests != true
         run: |
           composer exec -- phpunit
 
