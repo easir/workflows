@@ -26,34 +26,74 @@ on:
         required: false
         type: string
         default: "./src/"
+        description: "where is the code to be tested"
       SkipUnitTests:
         type: boolean
         required: false
       RunBehatTests:
         type: boolean
         required: false        
-        default: false     
-      UnitTestsExecutable:
-        required: false
-        type: string
-        default: "./vendor/bin/phpunit"
+        default: false
       PhpVersion:
         required: false
         type: string
         default: "8.1"
+        description: "php version to use, with minor version, no bugfix versions. default 8.1"
       PoChujMiBuildImage:
         required: false
         type: boolean
         default: true
+        description: "enable 'Michal' mode for building image"
       UseMakeTargets:
         required: false
         type: string
         default: ""
+        description: "If you are using makefile in project - specify targets here"
       PhpExtensions:
         type: string
         required: false
         default: "pdo_sqlite"
-        
+      SentryOrganisation:
+        type: string
+        required: false
+        default: "loyalty-factory-aps"
+        description: "Sentry Organisation"
+      SentryProjectName:
+        type: string
+        required: false
+        default: ""
+        description: "Name of a Sentry Project to use"
+      EnableSentryRelease: 
+        type: boolean
+        required: false
+        default: false
+        description: "enable/disable Sentry release"
+      SentryUploadSourceMaps:
+        type: boolean
+        required: false
+        default: false
+        description: "If You want to upload sourcemaps to sentry"
+      SentryTargetEnvironment:
+        type: string
+        required: false
+        default: "production"
+        description: "Target environment to build for Sentry"
+      ApplicationLanguage:
+        type: string
+        required: false
+        default: "php"
+        description: "Language used in repository (default - php, possible options: nodejs)"
+      UseManifest:
+        type: boolean
+        default: true
+        required: false
+        description: "wether the application uses Manifest or not"
+      UseNPM:
+        type: boolean
+        default: false
+        required: false
+        description: "UseNPM enables/disables the access to NPM repository"
+
     secrets:
       token:
         required: true
@@ -69,6 +109,12 @@ on:
         required: true
       gh-ssh-key:
         required: true
+      sentry-auth-token:
+        required: false
+      npmrc:
+        required: false
+
+  
   workflow_dispatch:
     
 
@@ -82,6 +128,7 @@ jobs:
       imagetag: ${{ steps.imagetag.outputs.imagetag }}
       app: ${{ steps.imagetag.outputs.app }}
       rebuildManifest: ${{ steps.did-manifest-change.outputs.any_changed }}
+      github-sha: ${{ steps.imagetag.outputs.github-sha }}
     runs-on: ubuntu-latest
     env:
       GITHUB_TOKEN: ${{ secrets.token }}
@@ -144,16 +191,30 @@ jobs:
           fi
           echo "imagetag=$tag" >> $GITHUB_OUTPUT
           echo "app=$app" >> $GITHUB_OUTPUT
+          echo "github-sha=$GITHUB_SHA" >> $GITHUB_OUTPUT
+
+      - name: Check file existence
+        id: check_files
+        uses: andstor/file-existence-action@v2.0.0
+        with:
+          files: "./manifest.yaml"
 
       - name: did manifest change?
+        if: steps.check_files.outputs.files_exists == 'true'
         id: did-manifest-change
         uses: tj-actions/changed-files@v35.1.0
         with:
           files: |
             ./manifest.yaml
+
       - name: print all outputs
         run: |
-          echo       runners: ${{ steps.runners.outputs.runners }}       environment: ${{ steps.environment.outputs.environment }}      imagetag: ${{ steps.imagetag.outputs.imagetag }}      app: ${{ steps.imagetag.outputs.app }}      rebuildManifest: ${{ steps.did-manifest-change.outputs.any_changed }}
+          echo       runners: ${{ steps.runners.outputs.runners }} \
+          environment: ${{ steps.environment.outputs.environment }} \
+          imagetag: ${{ steps.imagetag.outputs.imagetag }} \
+          app: ${{ steps.imagetag.outputs.app }} \
+          rebuildManifest: ${{ steps.did-manifest-change.outputs.any_changed }} \
+          github-sha: ${{ steps.imagetag.outputs.github-sha }}
 
   tests:
     if: ${{ inputs.SkipTests != true }}
@@ -170,6 +231,7 @@ jobs:
           submodules: recursive
 
       - uses: shivammathur/setup-php@2.24.0
+        if: inputs.ApplicationLanguage == 'php'
         with:
           php-version: ${{inputs.PhpVersion}}
           extensions: ${{inputs.PhpExtensions}}
@@ -179,6 +241,7 @@ jobs:
           runner: ${{needs.setup_variables.outputs.runners}}
 
       - name: run Composer
+        if: inputs.ApplicationLanguage == 'php'
         run: |
           composer install --prefer-dist --no-ansi --no-progress --no-interaction ${{ inputs.ComposerAdditionalArguments }}
       
@@ -189,21 +252,73 @@ jobs:
           make ${{ inputs.UseMakeTargets }} -O -k
 
       - name: phpcs
-        if: success() || failure()
-        # (php ./vendor/bin/phpcs ${{ inputs.PhpcsWorkdir }} || ./vendor/bin/phpcs ${{ inputs.PhpcsWorkdir }} || php ./bin/phpcs ${{ inputs.PhpcsWorkdir }} || ./bin/phpcs ${{ inputs.PhpcsWorkdir }})
+        if: (success() || failure()) && inputs.ApplicationLanguage == 'php'
         run: |
           composer exec -- phpcs ${{ inputs.PhpcsWorkdir }}
 
       - name: phplint
-        if: success() || failure()      
+        if: (success() || failure()) && inputs.ApplicationLanguage == 'php'
         run: |
           find . -name '*.php' -not -path './vendor/*' -print0 | xargs -0 php -l
 
       - name: phpunit
-        if: success() || failure() && inputs.SkipUnitTests != true
+        if: (success() || failure()) && inputs.ApplicationLanguage == 'php' && inputs.SkipUnitTests != true
         run: |
           composer exec -- phpunit
-      
+
+      - name: node
+        if: inputs.ApplicationLanguage == 'nodejs'
+        uses: addnab/docker-run-action@v3
+        with:
+          image: node:15.12.0
+          options: -v ${{ github.workspace }}:/work -e APPCONFIG_API=//api.domain" -e APPCONFIG_SOCKETAUTH="//api.domain/socket" -e APPCONFIG_UPLOAD="//api.domain" -e CONFIG_API_URL="http://api.domain" -e CONFIG_AUTH_URL="http://api.domain/token"
+          run: |
+            cd /work/
+            rm -f .npmrc
+            echo "${{secrets.npmrc}}" > .npmrc
+            npm install
+            npm run build
+
+      - name: karma tests
+        if: inputs.ApplicationLanguage == 'nodejs'
+        uses: addnab/docker-run-action@v3
+        with:
+          image: buildkite/puppeteer:latest
+          options: -v ${{ github.workspace }}:/work
+          run: |
+            cd /work/
+            npm run test:karma --no-sandbox
+
+      - name: jest tests
+        if: inputs.ApplicationLanguage == 'nodejs'
+        uses: addnab/docker-run-action@v3
+        with:
+          image: node:15.12.0
+          options: -v ${{ github.workspace }}:/work
+          run: |
+            cd /work/
+            npm run test:jest
+
+      - name: jest jscs
+        if: inputs.ApplicationLanguage == 'nodejs'
+        uses: addnab/docker-run-action@v3
+        with:
+          image: node:15.12.0-alpine
+          options: -v ${{ github.workspace }}:/work
+          run: |
+            cd /work/
+            node_modules/.bin/jscs --config=.jscsrc src/app
+
+      - name: jest jscs
+        if: inputs.ApplicationLanguage == 'nodejs'
+        uses: addnab/docker-run-action@v3
+        with:
+          image: node:15.12.0-alpine
+          options: -v ${{ github.workspace }}:/work
+          run: |
+            cd /work/
+            npm run test:eslint
+
 
   behat:
     if: inputs.RunBehatTests
@@ -231,7 +346,7 @@ jobs:
        
       - name: and test it
         uses: php-actions/behat@v1
-
+    
   manifest-generate:
     timeout-minutes: 5
     needs: setup_variables
@@ -251,17 +366,25 @@ jobs:
           manifest chart generate && helmpush chart "${{secrets.chartmuseum-url}}" --version "0.0.0-${{github.sha}}"
 
   # testofskip:
-  #   needs: setup_variables
+  #   needs: [ "setup_variables", "tests" ]
   #   runs-on: ${{needs.setup_variables.outputs.runners}}
   #   steps:
   #     - name: test
-  #       if: ${{ always() && ( needs.tests.result =='success' || needs.tests.result =='skipped' ) }}
+  #       if: |
+  #         always() && 
+  #         !contains(needs.*.result, 'failure') &&
+  #         !contains(needs.*.result, 'canceled') &&
+  #         inputs.PoChujMiBuildImage
   #       run: echo "dupa"
 
   build-image:
     timeout-minutes: 15
-    needs: [ "setup_variables", tests]
-    if: success() || failure() && (( needs.tests.result =='success' || needs.tests.result =='skipped' )|| github.event_name == 'pull_request') && inputs.PoChujMiBuildImage
+    needs: [ "setup_variables", "tests" ]
+    if: |
+      always() && 
+      !contains(needs.*.result, 'failure') &&
+      !contains(needs.*.result, 'canceled') &&
+      inputs.PoChujMiBuildImage
     env: 
       GITHUB_TOKEN: ${{ secrets.token }}
     runs-on: ${{needs.setup_variables.outputs.runners}}
@@ -287,12 +410,11 @@ jobs:
           token: ${{ secrets.numa-numa-token }}
           submodules: recursive
 
-      # - name: add ssh key
-      #   run: |
-      #     mkdir ~/.ssh/
-      #     echo '${{secrets.gh-ssh-key}}' > ~/.ssh/id_rsa
-      #     chmod 600 ~/.ssh/id_rsa
-      #     ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts
+      - name: authenticate to NPM
+        if: inputs.UseNPM
+        run: |
+          rm -f .npmrc
+          echo "${{secrets.npmrc}}" > .npmrc
 
       - name: Set up Docker Context for Buildx
         id: buildx-context
@@ -334,6 +456,12 @@ jobs:
       - name: Build and push Docker images
         uses: docker/build-push-action@v3.3.0
         with:
+          build-args: |
+            IMAGE_VERSION=${{ needs.setup_variables.outputs.github-sha }}
+            ENVIRONMENT=${{ needs.setup_variables.outputs.environment }}
+            SENTRY_ORG=${{inputs.SentryOrganisation}}
+            SENTRY_AUTH_TOKEN=${{secrets.sentry-auth-token}}
+            SENTRY_PROJECT=${{inputs.SentryProjectName}}
           context: .
           allow: network.host
           network: host
