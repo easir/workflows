@@ -128,6 +128,7 @@ jobs:
       imagetag: ${{ steps.imagetag.outputs.imagetag }}
       app: ${{ steps.imagetag.outputs.app }}
       rebuildManifest: ${{ steps.did-manifest-change.outputs.any_changed }}
+      github-sha: ${{ steps.imagetag.outputs.github-sha }}
     runs-on: ubuntu-latest
     env:
       GITHUB_TOKEN: ${{ secrets.token }}
@@ -190,6 +191,7 @@ jobs:
           fi
           echo "imagetag=$tag" >> $GITHUB_OUTPUT
           echo "app=$app" >> $GITHUB_OUTPUT
+          echo "github-sha=$GITHUB_SHA" >> $GITHUB_OUTPUT
 
       - name: Check file existence
         id: check_files
@@ -207,7 +209,12 @@ jobs:
 
       - name: print all outputs
         run: |
-          echo       runners: ${{ steps.runners.outputs.runners }}       environment: ${{ steps.environment.outputs.environment }}      imagetag: ${{ steps.imagetag.outputs.imagetag }}      app: ${{ steps.imagetag.outputs.app }}      rebuildManifest: ${{ steps.did-manifest-change.outputs.any_changed }}
+          echo       runners: ${{ steps.runners.outputs.runners }} \
+          environment: ${{ steps.environment.outputs.environment }} \
+          imagetag: ${{ steps.imagetag.outputs.imagetag }} \
+          app: ${{ steps.imagetag.outputs.app }} \
+          rebuildManifest: ${{ steps.did-manifest-change.outputs.any_changed }} \
+          github-sha: ${{ steps.imagetag.outputs.github-sha }}
 
   tests:
     if: ${{ inputs.SkipTests != true }}
@@ -458,7 +465,7 @@ jobs:
         uses: docker/build-push-action@v3.3.0
         with:
           build-args: |
-            IMAGE_VERSION=${{ GITHUB_SHA }}
+            IMAGE_VERSION=${{ needs.setup_variables.outputs.github-sha }}
             ENVIRONMENT=${{ needs.setup_variables.outputs.environment }}
             SENTRY_ORG=${{inputs.SentryOrganisation}}
             SENTRY_AUTH_TOKEN=${{secrets.sentry-auth-token}}
