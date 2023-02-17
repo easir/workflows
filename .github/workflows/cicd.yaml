@@ -304,7 +304,8 @@ jobs:
         with:
           version: v0.9.1
           endpoint: builders
-      
+          platforms: linux/arm64/v8,linux/amd64
+
       - name: Docker meta
         id: meta
         uses: docker/metadata-action@v4.1.1
