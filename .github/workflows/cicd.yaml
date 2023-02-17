@@ -346,15 +346,6 @@ jobs:
        
       - name: and test it
         uses: php-actions/behat@v1
-
-  SentryRelease:
-    if: inputs.EnableSentryRelease == true && needs.setup_variables.outputs.environment == 'prod'
-    needs: setup_variables
-    runs-on: ${{needs.setup_variables.outputs.runners}}
-    steps:
-      - name: Sentry release
-        run: |
-          echo "test"
     
   manifest-generate:
     timeout-minutes: 5
@@ -472,8 +463,6 @@ jobs:
             SENTRY_PROJECT=${{inputs.SentryProjectName}}
           context: .
           allow: network.host
-          cache-to:
-          cache-from:
           network: host
           push: true
           tags: ${{ steps.meta.outputs.tags }}
