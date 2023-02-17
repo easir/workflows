@@ -128,7 +128,7 @@ jobs:
       imagetag: ${{ steps.imagetag.outputs.imagetag }}
       app: ${{ steps.imagetag.outputs.app }}
       rebuildManifest: ${{ steps.did-manifest-change.outputs.any_changed }}
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     env:
       GITHUB_TOKEN: ${{ secrets.token }}
       GH_TOKEN: ${{ secrets.numa-numa-token }}
@@ -259,7 +259,7 @@ jobs:
         run: |
           composer exec -- phpunit
 
-      - name: nodesasdqwe
+      - name: node
         if: inputs.ApplicationLanguage == 'nodejs'
         uses: addnab/docker-run-action@v3
         with:
@@ -465,6 +465,8 @@ jobs:
             SENTRY_PROJECT=${{inputs.SentryProjectName}}
           context: .
           allow: network.host
+          cache-to:
+          cache-from:
           network: host
           push: true
           tags: ${{ steps.meta.outputs.tags }}
