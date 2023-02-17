@@ -280,7 +280,7 @@ jobs:
           options: -v ${{ github.workspace }}:/work
           run: |
             cd /work/
-            npm run test:karma
+            npm run test:karma --no-sandbox
 
       - name: jest tests
         if: inputs.ApplicationLanguage == 'nodejs'
