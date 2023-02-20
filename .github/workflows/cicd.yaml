@@ -101,6 +101,10 @@ on:
         type: boolean
         required: false
         default: false
+      DisableJestTests:
+        type: boolean
+        required: false
+        default: false
 
 
     secrets:
@@ -309,7 +313,7 @@ jobs:
             npm run test:jest
 
       - name: jest jscs
-        if: inputs.ApplicationLanguage == 'nodejs'
+        if: inputs.ApplicationLanguage == 'nodejs' && !inputs.DisableJestTests
         uses: addnab/docker-run-action@v3
         with:
           image: node:${{ inputs.NodeVersion }}-alpine
@@ -318,7 +322,7 @@ jobs:
             cd /work/
             node_modules/.bin/jscs --config=.jscsrc src/app
 
-      - name: jest jscs
+      - name: eslint
         if: inputs.ApplicationLanguage == 'nodejs'
         uses: addnab/docker-run-action@v3
         with:
