@@ -97,7 +97,11 @@ on:
         type: string
         required: false
         default: "15.12.0"
-        
+      DisableKarmaTests:
+        type: boolean
+        required: false
+        default: false
+
 
     secrets:
       token:
@@ -285,7 +289,7 @@ jobs:
             npm run build
 
       - name: karma tests
-        if: inputs.ApplicationLanguage == 'nodejs'
+        if: inputs.ApplicationLanguage == 'nodejs' && !inputs.DisableKarmaTests
         uses: addnab/docker-run-action@v3
         with:
           image: buildkite/puppeteer:latest
