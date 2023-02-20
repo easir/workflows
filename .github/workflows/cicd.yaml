@@ -303,7 +303,7 @@ jobs:
             npm run test:karma --no-sandbox
 
       - name: jest tests
-        if: inputs.ApplicationLanguage == 'nodejs'
+        if: inputs.ApplicationLanguage == 'nodejs' && !inputs.DisableJestTests
         uses: addnab/docker-run-action@v3
         with:
           image: node:${{ inputs.NodeVersion }}
