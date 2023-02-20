@@ -93,6 +93,11 @@ on:
         default: false
         required: false
         description: "UseNPM enables/disables the access to NPM repository"
+      NodeVersion:
+        type: string
+        required: false
+        default: "15.12.0"
+        
 
     secrets:
       token:
@@ -270,7 +275,7 @@ jobs:
         if: inputs.ApplicationLanguage == 'nodejs'
         uses: addnab/docker-run-action@v3
         with:
-          image: node:15.12.0
+          image: node:${{ inputs.NodeVersion }}
           options: -v ${{ github.workspace }}:/work -e APPCONFIG_API=//api.domain" -e APPCONFIG_SOCKETAUTH="//api.domain/socket" -e APPCONFIG_UPLOAD="//api.domain" -e CONFIG_API_URL="http://api.domain" -e CONFIG_AUTH_URL="http://api.domain/token"
           run: |
             cd /work/
@@ -293,7 +298,7 @@ jobs:
         if: inputs.ApplicationLanguage == 'nodejs'
         uses: addnab/docker-run-action@v3
         with:
-          image: node:15.12.0
+          image: node:${{ inputs.NodeVersion }}
           options: -v ${{ github.workspace }}:/work
           run: |
             cd /work/
@@ -303,7 +308,7 @@ jobs:
         if: inputs.ApplicationLanguage == 'nodejs'
         uses: addnab/docker-run-action@v3
         with:
-          image: node:15.12.0-alpine
+          image: node:${{ inputs.NodeVersion }}-alpine
           options: -v ${{ github.workspace }}:/work
           run: |
             cd /work/
@@ -313,7 +318,7 @@ jobs:
         if: inputs.ApplicationLanguage == 'nodejs'
         uses: addnab/docker-run-action@v3
         with:
-          image: node:15.12.0-alpine
+          image: node:${{ inputs.NodeVersion }}-alpine
           options: -v ${{ github.workspace }}:/work
           run: |
             cd /work/
