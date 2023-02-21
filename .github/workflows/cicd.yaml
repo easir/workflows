@@ -105,8 +105,15 @@ on:
         type: boolean
         required: false
         default: false
-
-
+      EnablePsalm:
+        type: boolean
+        required: false
+        default: false
+      EnablePhpstan:
+        type: boolean
+        required: false
+        default: false
+        
     secrets:
       token:
         required: true
@@ -278,6 +285,16 @@ jobs:
         if: (success() || failure()) && inputs.ApplicationLanguage == 'php' && inputs.SkipUnitTests != true
         run: |
           composer exec -- phpunit
+      
+      - name: phpunit
+        if: (success() || failure()) && inputs.ApplicationLanguage == 'php' && inputs.SkipUnitTests != true && inputs.EnablePhpstan
+        run: |
+          composer exec -- phpstan
+      
+      - name: phpunit
+        if: (success() || failure()) && inputs.ApplicationLanguage == 'php' && inputs.SkipUnitTests != true && inputs.EnablePsalm
+        run: |
+          composer exec -- psalm --long-progress
 
       - name: node
         if: inputs.ApplicationLanguage == 'nodejs'
