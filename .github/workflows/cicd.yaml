@@ -286,12 +286,12 @@ jobs:
         run: |
           composer exec -- phpunit
       
-      - name: phpunit
+      - name: phpstan
         if: (success() || failure()) && inputs.ApplicationLanguage == 'php' && inputs.SkipUnitTests != true && inputs.EnablePhpstan
         run: |
           composer exec -- phpstan analyse
       
-      - name: phpunit
+      - name: psalm
         if: (success() || failure()) && inputs.ApplicationLanguage == 'php' && inputs.SkipUnitTests != true && inputs.EnablePsalm
         run: |
           composer exec -- psalm --long-progress
