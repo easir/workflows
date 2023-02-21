@@ -113,7 +113,7 @@ on:
         type: boolean
         required: false
         default: false
-        
+
     secrets:
       token:
         required: true
@@ -289,7 +289,7 @@ jobs:
       - name: phpunit
         if: (success() || failure()) && inputs.ApplicationLanguage == 'php' && inputs.SkipUnitTests != true && inputs.EnablePhpstan
         run: |
-          composer exec -- phpstan
+          composer exec -- phpstan analyse
       
       - name: phpunit
         if: (success() || failure()) && inputs.ApplicationLanguage == 'php' && inputs.SkipUnitTests != true && inputs.EnablePsalm
