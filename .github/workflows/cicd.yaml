@@ -508,6 +508,6 @@ jobs:
       - name: summary
         run: |
           echo IMAGE_VERSION: ${{ needs.setup_variables.outputs.github-sha }} >> $GITHUB_STEP_SUMMARY
-          echo IMAGE TAGS : ${{ steps.meta.outputs.tags }} >> $GITHUB_STEP_SUMMARY
+          echo "IMAGE TAGS : ${{ steps.meta.outputs.tags }} >> $GITHUB_STEP_SUMMARY"
 
 
