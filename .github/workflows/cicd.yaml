@@ -233,12 +233,12 @@ jobs:
 
       - name: print all outputs
         run: |
-          echo       runners: ${{ steps.runners.outputs.runners }} \
+          echo       "runners: ${{ steps.runners.outputs.runners }} \
           environment: ${{ steps.environment.outputs.environment }} \
           imagetag: ${{ steps.imagetag.outputs.imagetag }} \
           app: ${{ steps.imagetag.outputs.app }} \
           rebuildManifest: ${{ steps.did-manifest-change.outputs.any_changed }} \
-          github-sha: ${{ steps.imagetag.outputs.github-sha }}
+          github-sha: ${{ steps.imagetag.outputs.github-sha }}" >> $GITHUB_STEP_SUMMARY
 
   tests:
     if: ${{ inputs.SkipTests != true }}
