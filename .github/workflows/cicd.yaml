@@ -504,3 +504,10 @@ jobs:
           secrets: |
             GIT_AUTH_TOKEN=${{ secrets.numa-numa-token }}
           github-token: ${{ secrets.numa-numa-token }}
+    
+      - name: summary
+        run: |
+          echo IMAGE_VERSION: ${{ needs.setup_variables.outputs.github-sha }} >> $GITHUB_JOB_SUMMARY
+          echo IMAGE TAGS : ${{ steps.meta.outputs.tags }} >> >> $GITHUB_JOB_SUMMARY
+
+
