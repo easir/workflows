@@ -113,6 +113,10 @@ on:
         type: boolean
         required: false
         default: false
+      AdditionalJestParameters:
+        type: string
+        default: ""
+        required: false
 
     secrets:
       token:
@@ -327,7 +331,7 @@ jobs:
           options: -v ${{ github.workspace }}:/work
           run: |
             cd /work/
-            npm run test:jest
+            npm run test:jest ${{ inputs.AdditionalJestParameters }}
 
       - name: jest jscs
         if: inputs.ApplicationLanguage == 'nodejs' && !inputs.DisableJestTests
