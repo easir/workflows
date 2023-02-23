@@ -173,7 +173,7 @@ jobs:
         if: inputs.ForceSelfHosted == false
         run: | 
           minutes=`gh api -H "Accept: application/vnd.github+json" /orgs/easir/settings/billing/actions | jq ".total_minutes_used"`
-          if (( $minutes < 2000 ))
+          if (( $minutes < 2700 ))
           then 
           export runners="ubuntu-latest"
           else
