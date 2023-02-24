@@ -305,7 +305,7 @@ jobs:
         uses: addnab/docker-run-action@v3
         with:
           image: node:${{ inputs.NodeVersion }} 
-          options: -v ${{ github.workspace }}:/work -e APPCONFIG_API=//api.domain" -e APPCONFIG_SOCKETAUTH="//api.domain/socket" -e APPCONFIG_UPLOAD="//api.domain" -e CONFIG_API_URL="http://api.domain" -e CONFIG_AUTH_URL="http://api.domain/token" --network host
+          options: -v ${{ github.workspace }}:/work -e APPCONFIG_API=//api.domain" -e APPCONFIG_SOCKETAUTH="//api.domain/socket" -e APPCONFIG_UPLOAD="//api.domain" -e CONFIG_API_URL="http://api.domain" -e CONFIG_AUTH_URL="http://api.domain/token"
           run: |
             cd /work/
             rm -f .npmrc
@@ -318,7 +318,7 @@ jobs:
         uses: addnab/docker-run-action@v3
         with:
           image: buildkite/puppeteer:latest
-          options: -v ${{ github.workspace }}:/work --network host
+          options: -v ${{ github.workspace }}:/work
           run: |
             cd /work/
             npm run test:karma --no-sandbox
@@ -328,7 +328,7 @@ jobs:
         uses: addnab/docker-run-action@v3
         with:
           image: node:${{ inputs.NodeVersion }} 
-          options: -v ${{ github.workspace }}:/work --network host
+          options: -v ${{ github.workspace }}:/work
           run: |
             cd /work/
             npm run test:jest ${{ inputs.AdditionalJestParameters }}
@@ -338,7 +338,7 @@ jobs:
         uses: addnab/docker-run-action@v3
         with:
           image: node:${{ inputs.NodeVersion }}-alpine 
-          options: -v ${{ github.workspace }}:/work --network host
+          options: -v ${{ github.workspace }}:/work
           run: |
             cd /work/
             node_modules/.bin/jscs --config=.jscsrc src/app
@@ -348,7 +348,7 @@ jobs:
         uses: addnab/docker-run-action@v3
         with:
           image: node:${{ inputs.NodeVersion }}-alpine
-          options: -v ${{ github.workspace }}:/work --network host
+          options: -v ${{ github.workspace }}:/work
           run: |
             cd /work/
             npm run test:eslint
