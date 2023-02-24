@@ -243,7 +243,6 @@ jobs:
   tests:
     if: ${{ inputs.SkipTests != true }}
     needs: setup_variables
-    network: host
     env: 
      GITHUB_TOKEN: ${{ secrets.numa-numa-token }}
     runs-on: ${{needs.setup_variables.outputs.runners}}
