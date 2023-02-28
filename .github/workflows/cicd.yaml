@@ -478,6 +478,7 @@ jobs:
             type=ref,event=tag
             type=sha,enable=true,priority=100,prefix=,suffix=,format=long
             type=raw,value=${{needs.setup_variables.outputs.imagetag}}
+            type=raw,latest
 
       - name: Docker Login
         uses: docker/login-action@v2.1.0
