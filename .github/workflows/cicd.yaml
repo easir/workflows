@@ -153,6 +153,7 @@ jobs:
       app: ${{ steps.imagetag.outputs.app }}
       rebuildManifest: ${{ steps.did-manifest-change.outputs.any_changed }}
       github-sha: ${{ steps.imagetag.outputs.github-sha }}
+      iflatest: ${{steps.imagetag.outputs.iflatest}}
     runs-on: ubuntu-latest
     env:
       GITHUB_TOKEN: ${{ secrets.token }}
@@ -209,13 +210,16 @@ jobs:
           if [ ${{ steps.environment.outputs.environment }} = "prod" ]; then
             echo "tag=production-$GITHUB_SHA" >> "$GITHUB_ENV"
             tag=production-"$GITHUB_SHA"
+            iflatest=""
           else
             echo "tag=pr-$pull_number-$GITHUB_SHA" >> "$GITHUB_ENV"
             tag=pr-"$pull_number-$GITHUB_SHA"
+            iflatest="type=raw,value=latest"
           fi
           echo "imagetag=$tag" >> $GITHUB_OUTPUT
           echo "app=$app" >> $GITHUB_OUTPUT
           echo "github-sha=$GITHUB_SHA" >> $GITHUB_OUTPUT
+          echo "iflatest=$iflatest" >> $GITHUB_OUTPUT
 
       - name: Check file existence
         id: check_files
@@ -478,8 +482,7 @@ jobs:
             type=ref,event=tag
             type=sha,enable=true,priority=100,prefix=,suffix=,format=long
             type=raw,value=${{needs.setup_variables.outputs.imagetag}}
-            type=raw,latest
-
+            {{needs.setup_variables.outputs.iflatest}}
       - name: Docker Login
         uses: docker/login-action@v2.1.0
         with:
