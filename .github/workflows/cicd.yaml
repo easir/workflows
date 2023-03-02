@@ -468,8 +468,6 @@ jobs:
         with:
           images: |
             ${{ secrets.docker-reg }}/${{needs.setup_variables.outputs.app}}
-          flavour:
-            latest=auto
           tags: |
             type=schedule
             type=ref,event=branch
@@ -480,7 +478,8 @@ jobs:
             type=ref,event=tag
             type=sha,enable=true,priority=100,prefix=,suffix=,format=long
             type=raw,value=${{needs.setup_variables.outputs.imagetag}}
-            
+            type=raw,value=latest,enable={{is_default_branch}}
+
       - name: Docker Login
         uses: docker/login-action@v2.1.0
         with:
