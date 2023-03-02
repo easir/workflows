@@ -189,6 +189,7 @@ jobs:
           export runners="self-hosted"
           fi
           echo "runners=$runners" >> $GITHUB_OUTPUT
+          echo "Hosted runners used minutes = $minutes" >> $GITHUB_STEP_SUMMARY
       # - name: variable runners output
       #   id: runners
       #   run: |
