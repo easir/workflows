@@ -171,7 +171,11 @@ jobs:
       - name: how meny already paid minutes we have on github action runners?
         id: runners
         if: inputs.ForceSelfHosted == false
-        run: | 
+        run: |
+          if ! command -v gh
+          then
+            apt install gh
+          fi
           minutes=`gh api -H "Accept: application/vnd.github+json" /orgs/easir/settings/billing/actions | jq ".total_minutes_used"`
           if (( $minutes < 2900 ))
           then 
