@@ -425,7 +425,7 @@ jobs:
     timeout-minutes: 15
     needs: [ "setup_variables", "tests" ]
     if: |
-      always() && (!contains(needs.*.result, 'failure') && !contains(needs.*.result, 'canceled') ) && inputs.PoChujMiBuildImage &&!canceled()
+      always() && (!contains(needs.*.result, 'failure') && !contains(needs.*.result, 'canceled') ) && inputs.PoChujMiBuildImage && !canceled()
     env: 
       GITHUB_TOKEN: ${{ secrets.token }}
     runs-on: ${{needs.setup_variables.outputs.runners}}
