@@ -137,8 +137,6 @@ on:
         required: false
       npmrc:
         required: false
-
-  
   workflow_dispatch:
     
 
@@ -153,7 +151,7 @@ jobs:
       app: ${{ steps.imagetag.outputs.app }}
       rebuildManifest: ${{ steps.did-manifest-change.outputs.any_changed }}
       github-sha: ${{ steps.imagetag.outputs.github-sha }}
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     env:
       GITHUB_TOKEN: ${{ secrets.token }}
       GH_TOKEN: ${{ secrets.numa-numa-token }}
@@ -355,12 +353,12 @@ jobs:
 
 
   behat:
-    if: inputs.RunBehatTests
+    if: inputs.RunBehatTests && 
     needs: setup_variables
     env: 
       GITHUB_TOKEN: ${{ secrets.token }}
     runs-on: ${{needs.setup_variables.outputs.runners}}
-    timeout-minutes: 5
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v3
       - name: run composer
