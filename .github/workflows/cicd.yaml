@@ -353,7 +353,7 @@ jobs:
 
 
   behat:
-    if: inputs.RunBehatTests && 
+    if: inputs.RunBehatTests
     needs: setup_variables
     env: 
       GITHUB_TOKEN: ${{ secrets.token }}
