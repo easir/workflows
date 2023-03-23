@@ -42,7 +42,7 @@ on:
       SkipImageBuild:
         required: false
         type: boolean
-        default: true
+        default: false
         description: "skip building image job"
       UseMakeTargets:
         required: false
