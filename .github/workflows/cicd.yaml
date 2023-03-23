@@ -39,11 +39,11 @@ on:
         type: string
         default: "8.1"
         description: "php version to use, with minor version, no bugfix versions. default 8.1"
-      PoChujMiBuildImage:
+      SkipImageBuild:
         required: false
         type: boolean
         default: true
-        description: "enable 'Michal' mode for building image"
+        description: "skip building image job"
       UseMakeTargets:
         required: false
         type: string
@@ -412,7 +412,7 @@ jobs:
   #         always() && 
   #         !contains(needs.*.result, 'failure') &&
   #         !contains(needs.*.result, 'canceled') &&
-  #         inputs.PoChujMiBuildImage
+  #         inputs.SkipImageBuild
   #       run: echo "dupa"
 
   build-image:
@@ -422,7 +422,7 @@ jobs:
       always() && 
       !contains(needs.*.result, 'failure') &&
       !contains(needs.*.result, 'canceled') &&
-      inputs.PoChujMiBuildImage
+      !inputs.SkipImageBuild
     env: 
       GITHUB_TOKEN: ${{ secrets.token }}
     runs-on: ${{needs.setup_variables.outputs.runners}}
