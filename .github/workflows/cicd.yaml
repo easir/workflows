@@ -296,7 +296,7 @@ jobs:
       - name: run Composer
         if: inputs.ApplicationLanguage == 'php'
         run: |
-          composer install --prefer-dist --no-ansi --no-progress --no-interaction ${{ inputs.ComposerAdditionalArguments }}
+          composer install --prefer-dist --no-progress --no-interaction ${{ inputs.ComposerAdditionalArguments }}
       
       - name: make files
         shell: sh
