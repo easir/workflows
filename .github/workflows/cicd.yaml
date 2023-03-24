@@ -284,7 +284,7 @@ jobs:
           make ${{ inputs.UseMakeTargets }} -O -k
 
       - name: phpcs
-        if: (success() || failure()) && inputs.ApplicationLanguage == 'php' && !SkipPhpcs
+        if: (success() || failure()) && inputs.ApplicationLanguage == 'php' && !inputs.SkipPhpcs
         run: |
           composer exec -- phpcs ${{ inputs.PhpcsWorkdir }}
 
