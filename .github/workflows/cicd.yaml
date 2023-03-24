@@ -197,6 +197,7 @@ jobs:
           export runners="self-hosted"
           fi
           echo "runners=$runners" >> $GITHUB_OUTPUT
+          echo "minutes=$minutes" >> $GITHUB_STEP_SUMMARY
       # - name: variable runners output
       #   id: runners
       #   run: |
@@ -250,12 +251,12 @@ jobs:
 
       - name: print all outputs
         run: |
-          echo       "runners: ${{ steps.runners.outputs.runners }} \
-          environment: ${{ steps.environment.outputs.environment }} \
-          imagetag: ${{ steps.imagetag.outputs.imagetag }} \
-          app: ${{ steps.imagetag.outputs.app }} \
-          rebuildManifest: ${{ steps.did-manifest-change.outputs.any_changed }} \
-          github-sha: ${{ steps.imagetag.outputs.github-sha }}" >> $GITHUB_STEP_SUMMARY
+          echo runners: ${{ steps.runners.outputs.runners }} >> $GITHUB_STEP_SUMMARY
+          echo environment: ${{ steps.environment.outputs.environment }} >> $GITHUB_STEP_SUMMARY
+          echo imagetag: ${{ steps.imagetag.outputs.imagetag }} >> $GITHUB_STEP_SUMMARY
+          echo app: ${{ steps.imagetag.outputs.app }} >> $GITHUB_STEP_SUMMARY
+          echo rebuildManifest: ${{ steps.did-manifest-change.outputs.any_changed }} >> $GITHUB_STEP_SUMMARY
+          echo github-sha: ${{ steps.imagetag.outputs.github-sha }} >> $GITHUB_STEP_SUMMARY
 
   tests-php:
     if: ${{ inputs.SkipTests != true }}
@@ -274,7 +275,7 @@ jobs:
           --health-timeout 5s
           --health-retries 5
           --appendonly yes
-          
+
     steps:
       - name: pull code
         uses: actions/checkout@v3
