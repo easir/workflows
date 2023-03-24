@@ -249,7 +249,7 @@ jobs:
     needs: setup_variables
     env: 
      GITHUB_TOKEN: ${{ secrets.numa-numa-token }}
-    runs-on: ubuntu-latest #${{needs.setup_variables.outputs.runners}}
+    runs-on: ${{needs.setup_variables.outputs.runners}}
     timeout-minutes: 15
     steps:
       - name: pull code
@@ -317,7 +317,7 @@ jobs:
         with:
           token: ${{ secrets.numa-numa-token }}
           submodules: recursive
-          
+
       - name: node
         uses: addnab/docker-run-action@v3
         with:
