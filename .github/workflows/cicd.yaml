@@ -430,7 +430,7 @@ jobs:
 
   build-image:
     timeout-minutes: 15
-    needs: [ "setup_variables", "tests" ]
+    needs: [ "setup_variables", "tests-nodejs","tests-php" ]
     if: |
       always() && 
       !contains(needs.*.result, 'failure') &&
