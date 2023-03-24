@@ -129,7 +129,6 @@ on:
         type: boolean
         default: false
         required: false
-      
 
     secrets:
       token:
@@ -275,6 +274,12 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
+      mariadb:
+        image: mariadb:10.1.16
+        ports:
+          - 3306
+        options: >-
+
 
     steps:
       - name: pull code
