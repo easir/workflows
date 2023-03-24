@@ -279,6 +279,7 @@ jobs:
         ports:
           - 3306
         options: >-
+          --env MYSQL_ROOT_PASSWORD=root
 
 
     steps:
