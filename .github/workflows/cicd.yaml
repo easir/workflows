@@ -268,7 +268,7 @@ jobs:
       redis:
         image: redis:3.2.3-alpine
         ports: 
-          - 6379
+          - 6379:6379
         options: >-
           --health-cmd "redis-cli ping"
           --health-interval 10s
@@ -277,7 +277,7 @@ jobs:
       mariadb:
         image: mariadb:10.1.16
         ports:
-          - 3306
+          - 3306:3306
         options: >-
           --env MYSQL_ROOT_PASSWORD=root
 
@@ -302,13 +302,13 @@ jobs:
         if: inputs.ApplicationLanguage == 'php'
         run: |
           composer install --prefer-dist --no-progress --no-interaction ${{ inputs.ComposerAdditionalArguments }}
-      - name: pause for a diagnosis
-        run: |
-          until cat dupa &> /dev/null
-          do
-            echo nie ma dupy
-            sleep 1
-          done
+      # - name: pause for a diagnosis
+      #   run: |
+      #     until cat dupa &> /dev/null
+      #     do
+      #       echo nie ma dupy
+      #       sleep 1
+      #     done
       - name: make files
         shell: sh
         if: ${{ inputs.UseMakeTargets != '' }}
