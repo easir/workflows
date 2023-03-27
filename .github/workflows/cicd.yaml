@@ -302,7 +302,13 @@ jobs:
         if: inputs.ApplicationLanguage == 'php'
         run: |
           composer install --prefer-dist --no-progress --no-interaction ${{ inputs.ComposerAdditionalArguments }}
-      
+      - name: pause for a diagnosis
+        run: |
+          until cat dupa &> /dev/null
+          do
+            echo nie ma dupy
+            sleep 1
+          done
       - name: make files
         shell: sh
         if: ${{ inputs.UseMakeTargets != '' }}
