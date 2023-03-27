@@ -117,6 +117,18 @@ on:
         type: string
         default: ""
         required: false
+      SkipPhpcs:
+        type: boolean
+        default: false
+        required: false
+      EnableMysql:
+        type: boolean
+        default: false
+        required: false
+      EnableRedis:
+        type: boolean
+        default: false
+        required: false
 
     secrets:
       token:
@@ -184,6 +196,7 @@ jobs:
           export runners="self-hosted"
           fi
           echo "runners=$runners" >> $GITHUB_OUTPUT
+          echo "minutes=$minutes" >> $GITHUB_STEP_SUMMARY
       # - name: variable runners output
       #   id: runners
       #   run: |
@@ -237,20 +250,37 @@ jobs:
 
       - name: print all outputs
         run: |
-          echo       "runners: ${{ steps.runners.outputs.runners }} \
-          environment: ${{ steps.environment.outputs.environment }} \
-          imagetag: ${{ steps.imagetag.outputs.imagetag }} \
-          app: ${{ steps.imagetag.outputs.app }} \
-          rebuildManifest: ${{ steps.did-manifest-change.outputs.any_changed }} \
-          github-sha: ${{ steps.imagetag.outputs.github-sha }}" >> $GITHUB_STEP_SUMMARY
+          echo runners: ${{ steps.runners.outputs.runners }} >> $GITHUB_STEP_SUMMARY
+          echo environment: ${{ steps.environment.outputs.environment }} >> $GITHUB_STEP_SUMMARY
+          echo imagetag: ${{ steps.imagetag.outputs.imagetag }} >> $GITHUB_STEP_SUMMARY
+          echo app: ${{ steps.imagetag.outputs.app }} >> $GITHUB_STEP_SUMMARY
+          echo rebuildManifest: ${{ steps.did-manifest-change.outputs.any_changed }} >> $GITHUB_STEP_SUMMARY
+          echo github-sha: ${{ steps.imagetag.outputs.github-sha }} >> $GITHUB_STEP_SUMMARY
 
-  tests:
+  tests-php:
     if: ${{ inputs.SkipTests != true }}
     needs: setup_variables
     env: 
      GITHUB_TOKEN: ${{ secrets.numa-numa-token }}
-    runs-on: ubuntu-latest #${{needs.setup_variables.outputs.runners}}
+    runs-on: ${{needs.setup_variables.outputs.runners}}
     timeout-minutes: 15
+    services:
+      redis:
+        image: redis:3.2.3-alpine
+        ports: 
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      mariadb:
+        image: mariadb:10.1.16
+        ports:
+          - 3306:3306
+        options: >-
+          --env MYSQL_ROOT_PASSWORD=root
+
     steps:
       - name: pull code
         uses: actions/checkout@v3
@@ -271,8 +301,14 @@ jobs:
       - name: run Composer
         if: inputs.ApplicationLanguage == 'php'
         run: |
-          composer install --prefer-dist --no-ansi --no-progress --no-interaction ${{ inputs.ComposerAdditionalArguments }}
-      
+          composer install --prefer-dist --no-progress --no-interaction ${{ inputs.ComposerAdditionalArguments }}
+      # - name: pause for a diagnosis
+      #   run: |
+      #     until cat dupa &> /dev/null
+      #     do
+      #       echo nie ma dupy
+      #       sleep 1
+      #     done
       - name: make files
         shell: sh
         if: ${{ inputs.UseMakeTargets != '' }}
@@ -280,7 +316,7 @@ jobs:
           make ${{ inputs.UseMakeTargets }} -O -k
 
       - name: phpcs
-        if: (success() || failure()) && inputs.ApplicationLanguage == 'php'
+        if: (success() || failure()) && inputs.ApplicationLanguage == 'php' && !inputs.SkipPhpcs
         run: |
           composer exec -- phpcs ${{ inputs.PhpcsWorkdir }}
 
@@ -304,8 +340,21 @@ jobs:
         run: |
           composer exec -- psalm --long-progress
 
+  tests-nodejs:
+    if: ${{ inputs.SkipTests != true && inputs.ApplicationLanguage == 'nodejs'}} 
+    needs: setup_variables
+    env: 
+     GITHUB_TOKEN: ${{ secrets.numa-numa-token }}
+    runs-on: ubuntu-latest #${{needs.setup_variables.outputs.runners}}
+    timeout-minutes: 15
+    steps:
+      - name: pull code
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.numa-numa-token }}
+          submodules: recursive
+
       - name: node
-        if: inputs.ApplicationLanguage == 'nodejs'
         uses: addnab/docker-run-action@v3
         with:
           image: node:${{ inputs.NodeVersion }} 
@@ -318,7 +367,7 @@ jobs:
             npm run build
 
       - name: karma tests
-        if: inputs.ApplicationLanguage == 'nodejs' && !inputs.DisableKarmaTests
+        if: true && !inputs.DisableKarmaTests
         uses: addnab/docker-run-action@v3
         with:
           image: buildkite/puppeteer:latest
@@ -417,7 +466,7 @@ jobs:
 
   build-image:
     timeout-minutes: 15
-    needs: [ "setup_variables", "tests" ]
+    needs: [ "setup_variables", "tests-nodejs","tests-php" ]
     if: |
       always() && 
       !contains(needs.*.result, 'failure') &&
