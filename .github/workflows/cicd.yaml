@@ -415,6 +415,12 @@ jobs:
     runs-on: ${{needs.setup_variables.outputs.runners}}
     timeout-minutes: 15
     steps:
+      - name: pull code
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.numa-numa-token }}
+          submodules: recursive
+
       - uses: shivammathur/setup-php@2.24.0
         if: inputs.ApplicationLanguage == 'php'
         with:
@@ -428,7 +434,6 @@ jobs:
       - name: run Composer
         if: inputs.ApplicationLanguage == 'php'
         run: |
-          cd ${{ github.workspace }}
           composer install --prefer-dist --no-progress --no-interaction ${{ inputs.ComposerAdditionalArguments }}
 
       - name: lets fire up the app
