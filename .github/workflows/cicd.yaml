@@ -415,16 +415,20 @@ jobs:
     runs-on: ${{needs.setup_variables.outputs.runners}}
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v3
-      - name: run composer
-        uses: addnab/docker-run-action@v3
+      - uses: shivammathur/setup-php@2.24.0
+        if: inputs.ApplicationLanguage == 'php'
         with:
-          image: composer:${{inputs.ComposerVersion}}
-          options: -v ${{ github.workspace }}:/app
-          run: |
-            ls -alr
-            pwd
-            composer install  --prefer-dist --no-ansi --no-progress --no-interaction ${{ inputs.ComposerAdditionalArguments }}
+          php-version: ${{inputs.PhpVersion}}
+          extensions: ${{inputs.PhpExtensions}}
+          coverage: pcov
+          tools: behat, phpunit, composer, phpcs, php-cs-fixer, phpcbf, phpstan, psalm, phplint, 
+        env:
+          runner: ${{needs.setup_variables.outputs.runners}}
+
+      - name: run Composer
+        if: inputs.ApplicationLanguage == 'php'
+        run: |
+          composer install --prefer-dist --no-progress --no-interaction ${{ inputs.ComposerAdditionalArguments }}
 
       - name: lets fire up the app
         env:
