@@ -428,6 +428,7 @@ jobs:
       - name: run Composer
         if: inputs.ApplicationLanguage == 'php'
         run: |
+          cd ${{ github.workspace }}
           composer install --prefer-dist --no-progress --no-interaction ${{ inputs.ComposerAdditionalArguments }}
 
       - name: lets fire up the app
