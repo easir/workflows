@@ -258,7 +258,7 @@ jobs:
           echo github-sha: ${{ steps.imagetag.outputs.github-sha }} >> $GITHUB_STEP_SUMMARY
 
   tests-php:
-    if: ${{ inputs.SkipTests != true }}
+    if: ${{ inputs.SkipTests != true && inputs.ApplicationLanguage == 'php'}}
     needs: setup_variables
     env:
      GITHUB_TOKEN: ${{ secrets.numa-numa-token }}
