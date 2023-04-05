@@ -573,7 +573,11 @@ jobs:
         run: |
           echo IMAGE_VERSION: ${{ needs.setup_variables.outputs.github-sha }} >> $GITHUB_STEP_SUMMARY
           echo "IMAGE TAGS : ${{ steps.meta.outputs.tags }} >> $GITHUB_STEP_SUMMARY"
-          echo "    {{ inputs.EnableSentryRelease && needs.setup_variables.outputs.environment == 'prod' }}"
+          
+      - name: ifcheck
+        if: inputs.EnableSentryRelease && needs.setup_variables.outputs.environment == 'prod'
+        run: |
+          echo just a check
 
   sentry-release:
     timeout-minutes: 5
