@@ -406,11 +406,11 @@ jobs:
             cd /work/
             npm run test:eslint
       - name: push artefacts
-        if: inputs.EnableSentryRelease && needs.setup_variables.outputs.environment == 'prod'
+        if: inputs.EnableSentryRelease #&& needs.setup_variables.outputs.environment == 'prod'
         uses: actions/upload-artifact@v3
         with:
-          name: application
           path: ${{ github.workspace }}/dist/
+          name: "application"
           retention-days: 1
 
   behat:
@@ -507,7 +507,12 @@ jobs:
       #   with:
       #     connect-server-url: ${{ secrets.TEST_OP_CONNECT_HOST }}
       #     connect-server-token: ${{ secrets.TEST_OP_CONNECT_TOKEN }}
-      - name: pull artefacts
+      - name: Download a Build Artifact
+        if: ${{ inputs.SkipTests != true && inputs.ApplicationLanguage == 'nodejs'}}      
+        uses: actions/download-artifact@v2.1.1
+        with:
+          name: "application"
+
       - name: pull code
         uses: actions/checkout@v3
         with:
