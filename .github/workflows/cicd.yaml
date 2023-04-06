@@ -492,7 +492,7 @@ jobs:
       !inputs.SkipImageBuild
     env:
       GITHUB_TOKEN: ${{ secrets.token }}
-    runs-on: ${{needs.setup_variables.outputs.runners}}
+    runs-on: self-hosted #${{needs.setup_variables.outputs.runners}}
     steps:
       # - name: Import secrets for DEV
       #   if: ${{ steps.environment.outputs.environment }} = "dev"
