@@ -412,6 +412,13 @@ jobs:
           path: ${{ github.workspace }}/dist/
           name: "application"
           retention-days: 1
+      - name: push artefacts
+        if: inputs.EnableSentryRelease #&& needs.setup_variables.outputs.environment == 'prod'
+        uses: actions/upload-artifact@v3
+        with:
+          path: ${{ github.workspace }}/dist/
+          name: "application"
+          retention-days: 1
 
   behat:
     if: inputs.RunBehatTests
@@ -572,6 +579,7 @@ jobs:
             SENTRY_ORG=${{inputs.SentryOrganisation}}
             SENTRY_AUTH_TOKEN=${{secrets.sentry-auth-token}}
             SENTRY_PROJECT=${{inputs.SentryProjectName}}
+            ARTIFACTS="true"
           context: .
           allow: network.host
           network: host
