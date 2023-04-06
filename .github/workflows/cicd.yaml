@@ -412,13 +412,6 @@ jobs:
           path: ${{ github.workspace }}/dist/
           name: "application"
           retention-days: 1
-      - name: push artefacts
-        if: inputs.EnableSentryRelease #&& needs.setup_variables.outputs.environment == 'prod'
-        uses: actions/upload-artifact@v3
-        with:
-          path: ${{ github.workspace }}/dist/
-          name: "application"
-          retention-days: 1
 
   behat:
     if: inputs.RunBehatTests
@@ -515,11 +508,16 @@ jobs:
       #     connect-server-url: ${{ secrets.TEST_OP_CONNECT_HOST }}
       #     connect-server-token: ${{ secrets.TEST_OP_CONNECT_TOKEN }}
       - name: Download a Build Artifact
-        if: ${{ inputs.SkipTests != true && inputs.ApplicationLanguage == 'nodejs'}}      
-        uses: actions/download-artifact@v2.1.1
+        if: ${{ inputs.SkipTests != true && inputs.ApplicationLanguage == 'nodejs'}}
+        id: download
+        uses: actions/download-artifact@v3.0.2
         with:
           name: "application"
 
+      - name: move artefact to proper directory
+        if: ${{ inputs.SkipTests != true && inputs.ApplicationLanguage == 'nodejs'}}
+        run: |
+          mv -v ${{steps.download.outputs.download-path}} ${{ github.workspace }}/dist
       - name: pull code
         uses: actions/checkout@v3
         with:
