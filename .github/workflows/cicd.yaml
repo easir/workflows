@@ -529,11 +529,10 @@ jobs:
           name: "application.tar.gz"
 
       - name: unpack the artifact
+        if: ${{ inputs.SkipTests != true && inputs.ApplicationLanguage == 'nodejs'}}
         run: |
           tar -xzvf application.tar.gz -C ./
-          ls -al
-          pwd
-      
+
       - name: authenticate to NPM
         if: inputs.UseNPM
         run: |
@@ -615,6 +614,16 @@ jobs:
       GITHUB_TOKEN: ${{ secrets.token }}
     runs-on: ${{needs.setup_variables.outputs.runners}}
     steps:
+      - name: Download a Build Artifact
+        id: download
+        uses: actions/download-artifact@v3.0.2
+        with:
+          name: "application.tar.gz"
+
+      - name: unpack the artifact
+        run: |
+          tar -xzvf application.tar.gz -C ./
+    
       - name: Sentry Release
         uses: getsentry/action-release@v1
         env:
@@ -624,3 +633,5 @@ jobs:
         with:
           environment: ${{ inputs.SentryTargetEnvironment }}
           version: ${{ needs.setup_variables.outputs.github-sha }}
+          sourcemaps: "dist/*.map"
+          
