@@ -608,7 +608,7 @@ jobs:
 
   sentry-release:
     timeout-minutes: 5
-    needs: [ "setup_variables", "build-image" ]
+    needs: [ setup_variables, build-image, tests-nodejs ]
     # if: inputs.EnableSentryRelease && needs.setup_variables.outputs.environment == 'prod'
     env:
       GITHUB_TOKEN: ${{ secrets.token }}
