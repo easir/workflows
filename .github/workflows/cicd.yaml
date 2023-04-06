@@ -486,7 +486,9 @@ jobs:
     if: |
       always() && 
       !contains(needs.*.result, 'failure') &&
+      !contains(needs.*.result, 'Failure') &&
       !contains(needs.*.result, 'canceled') &&
+      !contains(needs.*.result, 'Canceled') &&
       !inputs.SkipImageBuild
     env:
       GITHUB_TOKEN: ${{ secrets.token }}
