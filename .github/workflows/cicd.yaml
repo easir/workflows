@@ -524,8 +524,10 @@ jobs:
 
       - name: unpack the artifact
         run: |
-          tar -xzvf application.tar.gz ./
-
+          tar -xzvf application.tar.gz -C ./
+          ls -al
+          pwd
+          
       # - name: move artefact to proper directory
       #   if: ${{ inputs.SkipTests != true && inputs.ApplicationLanguage == 'nodejs'}}
       #   run: |
