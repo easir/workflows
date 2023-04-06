@@ -610,6 +610,7 @@ jobs:
     timeout-minutes: 5
     needs: [ setup_variables, build-image, tests-nodejs ]
     # if: inputs.EnableSentryRelease && needs.setup_variables.outputs.environment == 'prod'
+    if: always()
     env:
       GITHUB_TOKEN: ${{ secrets.token }}
     runs-on: ${{needs.setup_variables.outputs.runners}}
