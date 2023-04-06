@@ -518,6 +518,7 @@ jobs:
         if: ${{ inputs.SkipTests != true && inputs.ApplicationLanguage == 'nodejs'}}
         run: |
           mv -v ${{steps.download.outputs.download-path}} ${{ github.workspace }}/dist
+          sleep 1000
       - name: pull code
         uses: actions/checkout@v3
         with:
