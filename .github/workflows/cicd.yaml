@@ -515,6 +515,12 @@ jobs:
       #   with:
       #     connect-server-url: ${{ secrets.TEST_OP_CONNECT_HOST }}
       #     connect-server-token: ${{ secrets.TEST_OP_CONNECT_TOKEN }}
+      - name: pull code
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.numa-numa-token }}
+          submodules: recursive
+
       - name: Download a Build Artifact
         if: ${{ inputs.SkipTests != true && inputs.ApplicationLanguage == 'nodejs'}}
         id: download
@@ -527,18 +533,7 @@ jobs:
           tar -xzvf application.tar.gz -C ./
           ls -al
           pwd
-          
-      # - name: move artefact to proper directory
-      #   if: ${{ inputs.SkipTests != true && inputs.ApplicationLanguage == 'nodejs'}}
-      #   run: |
-      #     mv -vR ${{steps.download.outputs.download-path}}/* ${{ github.workspace }}/dist
-      #     sleep 1000
-      - name: pull code
-        uses: actions/checkout@v3
-        with:
-          token: ${{ secrets.numa-numa-token }}
-          submodules: recursive
-
+      
       - name: authenticate to NPM
         if: inputs.UseNPM
         run: |
