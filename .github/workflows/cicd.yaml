@@ -609,7 +609,7 @@ jobs:
   sentry-release:
     timeout-minutes: 5
     needs: [ "setup_variables", "build-image" ]
-    if: inputs.EnableSentryRelease && needs.setup_variables.outputs.environment == 'prod'
+    # if: inputs.EnableSentryRelease && needs.setup_variables.outputs.environment == 'prod'
     env:
       GITHUB_TOKEN: ${{ secrets.token }}
     runs-on: ${{needs.setup_variables.outputs.runners}}
@@ -634,4 +634,3 @@ jobs:
           environment: ${{ inputs.SentryTargetEnvironment }}
           version: ${{ needs.setup_variables.outputs.github-sha }}
           sourcemaps: "dist/*.map"
-          
