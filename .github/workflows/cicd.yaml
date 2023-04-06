@@ -415,8 +415,8 @@ jobs:
         if: inputs.EnableSentryRelease #&& needs.setup_variables.outputs.environment == 'prod'
         uses: actions/upload-artifact@v3
         with:
-          path: ${{ github.workspace }}/dist/
-          name: "application"
+          path: application.tar
+          name: "application.tar"
           retention-days: 1
 
   behat:
@@ -520,8 +520,12 @@ jobs:
         id: download
         uses: actions/download-artifact@v3.0.2
         with:
-          name: "application"
-          path: ${{ github.workspace }}/dist/
+          name: "application.tar"
+      - name: unpack the artifact
+        run: |
+          mkdir dist
+          cd dist
+          tar -xvc ../application.tar ./
 
       # - name: move artefact to proper directory
       #   if: ${{ inputs.SkipTests != true && inputs.ApplicationLanguage == 'nodejs'}}
