@@ -409,14 +409,14 @@ jobs:
         run: |
           ls -al
           pwd
-          tar -C ${{ github.workspace }} -cvf application.tar ./dist/
+          tar -C ${{ github.workspace }} -czvf application.tar.gz ./dist/
 
       - name: push artefacts
         if: inputs.EnableSentryRelease #&& needs.setup_variables.outputs.environment == 'prod'
         uses: actions/upload-artifact@v3
         with:
-          path: application.tar
-          name: "application.tar"
+          path: application.tar.gz
+          name: "application.tar.gz"
           retention-days: 1
 
   behat:
@@ -520,12 +520,11 @@ jobs:
         id: download
         uses: actions/download-artifact@v3.0.2
         with:
-          name: "application.tar"
+          name: "application.tar.gz"
+
       - name: unpack the artifact
         run: |
-          mkdir dist
-          cd dist
-          tar -xvc ../application.tar ./
+          tar -xzvf application.tar.gz ./
 
       # - name: move artefact to proper directory
       #   if: ${{ inputs.SkipTests != true && inputs.ApplicationLanguage == 'nodejs'}}
