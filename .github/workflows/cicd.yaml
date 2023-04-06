@@ -405,6 +405,12 @@ jobs:
           run: |
             cd /work/
             npm run test:eslint
+      - name: compress compiled application to preserve all attributes and make shit faster
+        run: |
+          ls -al
+          pwd
+          tar -C ${{ github.workspace }} -cvf application.tar ./dist/
+
       - name: push artefacts
         if: inputs.EnableSentryRelease #&& needs.setup_variables.outputs.environment == 'prod'
         uses: actions/upload-artifact@v3
