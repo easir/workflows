@@ -515,12 +515,13 @@ jobs:
         uses: actions/download-artifact@v3.0.2
         with:
           name: "application"
+          path: ${{ github.workspace }}/dist/
 
-      - name: move artefact to proper directory
-        if: ${{ inputs.SkipTests != true && inputs.ApplicationLanguage == 'nodejs'}}
-        run: |
-          mv -v ${{steps.download.outputs.download-path}} ${{ github.workspace }}/dist
-          sleep 1000
+      # - name: move artefact to proper directory
+      #   if: ${{ inputs.SkipTests != true && inputs.ApplicationLanguage == 'nodejs'}}
+      #   run: |
+      #     mv -vR ${{steps.download.outputs.download-path}}/* ${{ github.workspace }}/dist
+      #     sleep 1000
       - name: pull code
         uses: actions/checkout@v3
         with:
