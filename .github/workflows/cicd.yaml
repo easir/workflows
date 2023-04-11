@@ -595,37 +595,9 @@ jobs:
           secrets: |
             GIT_AUTH_TOKEN=${{ secrets.numa-numa-token }}
           github-token: ${{ secrets.numa-numa-token }}
-
-      - name: summary
-        run: |
-          echo IMAGE_VERSION: ${{ needs.setup_variables.outputs.github-sha }} >> $GITHUB_STEP_SUMMARY
-          echo "IMAGE TAGS : ${{ steps.meta.outputs.tags }} >> $GITHUB_STEP_SUMMARY"
           
-      - name: ifcheck
-        if: inputs.EnableSentryRelease && needs.setup_variables.outputs.environment == 'prod'
-        run: |
-          echo just a check
-
-  sentry-release:
-    timeout-minutes: 5
-    needs: [ setup_variables, build-image, tests-nodejs ]
-    # if: inputs.EnableSentryRelease && needs.setup_variables.outputs.environment == 'prod'
-    if: always()
-    env:
-      GITHUB_TOKEN: ${{ secrets.token }}
-    runs-on: ${{needs.setup_variables.outputs.runners}}
-    steps:
-      - name: Download a Build Artifact
-        id: download
-        uses: actions/download-artifact@v3.0.2
-        with:
-          name: "application.tar.gz"
-
-      - name: unpack the artifact
-        run: |
-          tar -xzvf application.tar.gz -C ./
-    
       - name: Sentry Release
+        if: inputs.EnableSentryRelease && needs.setup_variables.outputs.environment == 'prod'
         uses: getsentry/action-release@v1
         env:
           SENTRY_AUTH_TOKEN: ${{ secrets.sentry-auth-token }}
@@ -635,3 +607,8 @@ jobs:
           environment: ${{ inputs.SentryTargetEnvironment }}
           version: ${{ needs.setup_variables.outputs.github-sha }}
           sourcemaps: "dist/*.map"
+         
+      - name: summary
+        run: |
+          echo IMAGE_VERSION: ${{ needs.setup_variables.outputs.github-sha }} >> $GITHUB_STEP_SUMMARY
+          echo "IMAGE TAGS : ${{ steps.meta.outputs.tags }} >> $GITHUB_STEP_SUMMARY"
