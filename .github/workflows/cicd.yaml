@@ -56,7 +56,7 @@ on:
       SentryOrganisation:
         type: string
         required: false
-        default: "loyalty-factory-aps"
+        default: "loyalty-factory"
         description: "Sentry Organisation"
       SentryProjectName:
         type: string
