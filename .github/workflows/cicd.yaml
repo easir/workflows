@@ -587,6 +587,11 @@ jobs:
       GITHUB_TOKEN: ${{ secrets.token }}
     runs-on: ${{needs.setup_variables.outputs.runners}}
     steps:
+      - name: pull code
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.numa-numa-token }}
+          submodules: recursive
       - name: Sentry Release
         uses: getsentry/action-release@v1
         env:
