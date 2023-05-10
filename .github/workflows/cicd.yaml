@@ -368,6 +368,7 @@ jobs:
             echo "${{secrets.npmrc}}" > .npmrc
             chmod 666 .npmrc
             ls -al ./
+            npm login
             npm install
             npm run build
             cat /root/.npm/_logs/*.log
