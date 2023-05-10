@@ -370,6 +370,7 @@ jobs:
             ls -al ./
             npm install
             npm run build
+            cat /root/.npm/_logs/*.log
 
       - name: karma tests
         if: true && !inputs.DisableKarmaTests
