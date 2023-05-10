@@ -365,6 +365,7 @@ jobs:
             pwd
             ls -al ./
             echo "${{secrets.npmrc}}" > .npmrc
+            ls -al ./
             npm install
             npm run build
 
