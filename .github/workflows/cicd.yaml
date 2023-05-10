@@ -364,7 +364,7 @@ jobs:
             rm -f .npmrc
             pwd
             ls -al ./
-            apt install --no-cache libc6-compat bash make gcc g++ python3 python2 cyrus-sasl-dev pkgconf librdkafka-dev
+            apt install -y libc6-compat bash make gcc g++ python3 python2 cyrus-sasl-dev pkgconf librdkafka-dev
             echo "${{secrets.npmrc}}" > .npmrc
             chmod 666 .npmrc
             ls -al ./
