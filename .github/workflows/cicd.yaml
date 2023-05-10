@@ -362,6 +362,8 @@ jobs:
           run: |
             cd /work/
             rm -f .npmrc
+            pwd
+            ls -al ./
             echo "${{secrets.npmrc}}" > .npmrc
             npm install
             npm run build
