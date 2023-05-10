@@ -364,6 +364,7 @@ jobs:
             rm -f .npmrc
             pwd
             ls -al ./
+            apk add --no-cache libc6-compat bash make gcc g++ python3 python2 cyrus-sasl-dev pkgconf librdkafka-dev
             echo "${{secrets.npmrc}}" > .npmrc
             ls -al ./
             npm install
