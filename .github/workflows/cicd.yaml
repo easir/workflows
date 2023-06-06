@@ -428,7 +428,7 @@ jobs:
           token: ${{ secrets.numa-numa-token }}
           submodules: recursive
 
-      - uses: shivammathur/setup-php@2.24.0
+      - uses: shivammathur/setup-php@2.25.2
         if: inputs.ApplicationLanguage == 'php'
         with:
           php-version: ${{inputs.PhpVersion}}
