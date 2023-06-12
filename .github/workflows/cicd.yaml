@@ -362,13 +362,10 @@ jobs:
           run: |
             cd /work/
             rm -f .npmrc
-            pwd
-            ls -al ./
             apt install -y libc6-compat bash make gcc g++ python3 python2 cyrus-sasl-dev pkgconf librdkafka-dev
             echo "${{secrets.npmrc}}" > .npmrc
             chmod 666 .npmrc
-            ls -al ./
-#            npm login
+            RUN npm set registry https://npm.easir.com
             npm install -include=dev
             npm run build
             cat /root/.npm/_logs/*.log
