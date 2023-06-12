@@ -369,7 +369,7 @@ jobs:
             chmod 666 .npmrc
             ls -al ./
             npm login
-            npm install
+            npm install --dev
             npm run build
             cat /root/.npm/_logs/*.log
 
@@ -411,7 +411,6 @@ jobs:
           options: -v ${{ github.workspace }}:/work
           run: |
             cd /work/
-            npm install -g eslint
             npm run test:eslint
 
 
