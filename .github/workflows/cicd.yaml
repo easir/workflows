@@ -369,7 +369,7 @@ jobs:
             chmod 666 .npmrc
             ls -al ./
             npm login
-            npm install --dev
+            npm install -include=dev
             npm run build
             cat /root/.npm/_logs/*.log
 
