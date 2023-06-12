@@ -411,6 +411,7 @@ jobs:
           options: -v ${{ github.workspace }}:/work
           run: |
             cd /work/
+            npm install -g eslint
             npm run test:eslint
 
 
@@ -434,7 +435,7 @@ jobs:
           php-version: ${{inputs.PhpVersion}}
           extensions: ${{inputs.PhpExtensions}}
           coverage: pcov
-          tools: behat, phpunit, composer, phpcs, php-cs-fixer, phpcbf, phpstan, psalm, phplint, 
+          tools: behat, phpunit, composer, phpcs, php-cs-fixer, phpcbf, phpstan, psalm, phplint,
         env:
           runner: ${{needs.setup_variables.outputs.runners}}
 
@@ -580,7 +581,7 @@ jobs:
         run: |
           echo IMAGE_VERSION: ${{ needs.setup_variables.outputs.github-sha }} >> $GITHUB_STEP_SUMMARY
           echo "IMAGE TAGS : ${{ steps.meta.outputs.tags }} >> $GITHUB_STEP_SUMMARY"
-          
+
       - name: ifcheck
         if: inputs.EnableSentryRelease && needs.setup_variables.outputs.environment == 'prod'
         run: |
