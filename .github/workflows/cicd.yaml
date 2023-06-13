@@ -356,6 +356,8 @@ jobs:
 
       - name: node
         uses: addnab/docker-run-action@v3
+        env:
+          NODE_AUTH_TOKEN: ${{secrets.numa-numa-token}}
         with:
           image: node:${{ inputs.NodeVersion }}
           options: -v ${{ github.workspace }}:/work -e APPCONFIG_API=//api.domain" -e APPCONFIG_SOCKETAUTH="//api.domain/socket" -e APPCONFIG_UPLOAD="//api.domain" -e CONFIG_API_URL="http://api.domain" -e CONFIG_AUTH_URL="http://api.domain/token"
@@ -366,8 +368,6 @@ jobs:
             npm install -include=dev
             npm run build
             cat /root/.npm/_logs/*.log
-          env:
-            NODE_AUTH_TOKEN: ${{secrets.numa-numa-token}}
 
       - name: karma tests
         if: true && !inputs.DisableKarmaTests
