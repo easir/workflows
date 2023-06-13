@@ -369,11 +369,13 @@ jobs:
 #          ls -al ./
 #          echo "${{ secrets.npmrc }}" > .npmrc
 #          chmod 666 .npmrc
-
-      - name: node
+      - name: Setup Node
+        uses: actions/setup-node@v3
         with:
+          node-version: ${{ inputs.NodeVersion }}
           registry-url: 'https://npm.pkg.github.com'
           scope: '@easir'
+      - name: node
         run: |
           npm install -include=dev
           echo **** npm run build
