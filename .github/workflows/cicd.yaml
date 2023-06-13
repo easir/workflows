@@ -366,6 +366,7 @@ jobs:
           pwd
           ls -al ./
           echo "${{ secrets.npmrc }}" > .npmrc
+          sleep 300
       - name: node
         run: |
           npm install -include=dev
