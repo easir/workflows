@@ -351,7 +351,7 @@ jobs:
         APPCONFIG_UPLOAD: "//api.domain"
         CONFIG_API_URL: "http://api.domain"
         CONFIG_AUTH_URL: "http://api.domain/token"
-        NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        NODE_AUTH_TOKEN: ${{ secrets.numa-numa-token }}
     env:
       GITHUB_TOKEN: ${{ secrets.numa-numa-token }}
     runs-on: ${{needs.setup_variables.outputs.runners}}
