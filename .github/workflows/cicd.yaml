@@ -349,7 +349,6 @@ jobs:
       APPCONFIG_UPLOAD: "//api.domain"
       CONFIG_API_URL: "http://api.domain"
       CONFIG_AUTH_URL: "http://api.domain/token"
-      NODE_AUTH_TOKEN: ${{ secrets.numa-numa-token }}
       GITHUB_TOKEN: ${{ secrets.numa-numa-token }}
     runs-on: ${{needs.setup_variables.outputs.runners}}
     timeout-minutes: 15
@@ -363,20 +362,17 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: ${{ inputs.NodeVersion }}
-          registry-url: 'https://npm.pkg.github.com'
-          scope: '@easir'
       - run: |
           pwd
           ls -al ./
+          echo /npm.pkg.github.com/:_authToken=${{ secrets.numa-numa-token }} > .npmrc
+          echo @easir:registry=https://npm.pkg.github.com >> .npmrc
           cat .npmrc
-          npm login
       - name: node
         run: |
           npm install -include=dev
           echo **** npm run build
           npm run build
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.numa-numa-token }}
 
       # - name: karma tests
       #   if: true && !inputs.DisableKarmaTests
