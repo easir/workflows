@@ -365,7 +365,7 @@ jobs:
       - run: |
           pwd
           ls -al ./
-          echo ${{ secrets.npmrc }} > .npmrc
+          echo "${{ secrets.npmrc }}" > .npmrc
       - name: node
         run: |
           npm install -include=dev
