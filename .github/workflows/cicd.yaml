@@ -377,6 +377,7 @@ jobs:
       - name: karma tests
         if: true && !inputs.DisableKarmaTests
         run: |
+          npm i puppeteer
           npm run test:karma --no-sandbox
 
       - name: jest tests
