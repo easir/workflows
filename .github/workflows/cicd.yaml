@@ -366,48 +366,30 @@ jobs:
           pwd
           ls -al ./
           echo "${{ secrets.npmrc }}" > .npmrc
-          sleep 300
       - name: node
         run: |
           npm install -include=dev
           echo **** npm run build
           npm run build
 
-      # - name: karma tests
-      #   if: true && !inputs.DisableKarmaTests
-      #   uses: addnab/docker-run-action@v3
-      #   with:
-      #     image: buildkite/puppeteer:latest
-      #     options: -v ${{ github.workspace }}:/work
-      #     run: |
-      #       cd /work/
-      #       npm run test:karma --no-sandbox
+      - name: karma tests
+        if: true && !inputs.DisableKarmaTests
+        run: |
+          npm run test:karma --no-sandbox
 
-      # - name: jest tests
-      #   if: inputs.ApplicationLanguage == 'nodejs' && !inputs.DisableJestTests
-      #   uses: addnab/docker-run-action@v3
-      #   with:
-      #     image: node:${{ inputs.NodeVersion }}
-      #     options: -v ${{ github.workspace }}:/work
-      #     run: |
-      #       cd /work/
-      #       npm run test:jest ${{ inputs.AdditionalJestParameters }}
+      - name: jest tests
+        if: inputs.ApplicationLanguage == 'nodejs' && !inputs.DisableJestTests
+        run: |
+          npm run test:jest ${{ inputs.AdditionalJestParameters }}
 
-      # - name: jest jscs
-      #   if: inputs.ApplicationLanguage == 'nodejs' && !inputs.DisableJestTests
-      #   uses: addnab/docker-run-action@v3
-      #   with:
-      #     image: node:${{ inputs.NodeVersion }}-alpine
-      #     options: -v ${{ github.workspace }}:/work
-      #     run: |
-      #       cd /work/
-      #       node_modules/.bin/jscs --config=.jscsrc src/app
+      - name: jest jscs
+        if: inputs.ApplicationLanguage == 'nodejs' && !inputs.DisableJestTests
+        run: |
+          node_modules/.bin/jscs --config=.jscsrc src/app
 
       - name: eslint
         if: inputs.ApplicationLanguage == 'nodejs'
         run: |
-          cd /work/
-          npm install -g eslint
           npm run test:eslint
 
 
