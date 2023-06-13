@@ -351,7 +351,7 @@ jobs:
         APPCONFIG_UPLOAD: "//api.domain"
         CONFIG_API_URL: "http://api.domain"
         CONFIG_AUTH_URL: "http://api.domain/token"
-        NODE_AUTH_TOKEN: ${{ secrets.numa-numa-token }}
+        NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     env:
       GITHUB_TOKEN: ${{ secrets.numa-numa-token }}
     runs-on: ${{needs.setup_variables.outputs.runners}}
@@ -365,13 +365,15 @@ jobs:
       - name: prepare npmrc
         run: |
           rm -f .npmrc
-          pwd
-          ls -al ./
-          echo "${{ secrets.npmrc }}" > .npmrc
-          chmod 666 .npmrc
+#          pwd
+#          ls -al ./
+#          echo "${{ secrets.npmrc }}" > .npmrc
+#          chmod 666 .npmrc
 
       - name: node
-# apt install -y libc6-compat bash make gcc g++ python3 python2 cyrus-sasl-dev pkgconf librdkafka-dev
+        with:
+          registry-url: 'https://npm.pkg.github.com'
+          scope: '@easir'
         run: |
           npm install -include=dev
           echo **** npm run build
