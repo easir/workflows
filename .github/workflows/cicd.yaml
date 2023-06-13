@@ -366,7 +366,7 @@ jobs:
           pwd
           ls -al ./
           echo "${{ secrets.npmrc }}" > .npmrc
-          apt install -y libc6-compat bash make gcc g++ python3 python2 cyrus-sasl-dev pkgconf librdkafka-dev
+          sudo apt update && sudo apt install -y libc6-compat bash make gcc g++ python3 python2 cyrus-sasl-dev pkgconf librdkafka-dev
 
       - name: node
         run: |
