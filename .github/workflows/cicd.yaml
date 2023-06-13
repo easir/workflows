@@ -366,6 +366,8 @@ jobs:
             npm install -include=dev
             npm run build
             cat /root/.npm/_logs/*.log
+          env:
+            NODE_AUTH_TOKEN: ${{secrets.numa-numa-token}}
 
       - name: karma tests
         if: true && !inputs.DisableKarmaTests
