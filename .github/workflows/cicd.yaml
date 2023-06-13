@@ -368,6 +368,7 @@ jobs:
       - run: |
           pwd
           ls -al ./
+          cat .npmrc
           npm login
       - name: node
         run: |
