@@ -129,6 +129,11 @@ on:
         type: boolean
         default: false
         required: false
+#      Used in old node (Report)
+      Python2AsPython:
+        type: boolean
+        default: false
+        required: false
 
     secrets:
       token:
@@ -369,6 +374,10 @@ jobs:
           echo "${{ secrets.npmrc }}" > .npmrc
           sudo apt update && sudo apt install -y bash make gcc g++ python3 python2 pkgconf librdkafka-dev
           npm i puppeteer
+      - name: Python2 as Python
+        if: inputs.Python2AsPython
+        run: |
+          update-alternatives --list python
       - name: node
         run: |
           npm install -include=dev
