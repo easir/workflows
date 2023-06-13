@@ -382,7 +382,7 @@ jobs:
         run: |
           npm run test:jest ${{ inputs.AdditionalJestParameters }}
 
-      - name: jest jscs
+      - name: jscs tests
         if: inputs.ApplicationLanguage == 'nodejs' && !inputs.DisableJestTests
         run: |
           node_modules/.bin/jscs --config=.jscsrc src/app
