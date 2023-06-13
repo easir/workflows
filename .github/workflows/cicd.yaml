@@ -365,6 +365,10 @@ jobs:
           node-version: ${{ inputs.NodeVersion }}
           registry-url: 'https://npm.pkg.github.com'
           scope: '@easir'
+      - run: |
+          pwd
+          ls -al ./
+          npm login
       - name: node
         run: |
           npm install -include=dev
