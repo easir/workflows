@@ -357,18 +357,19 @@ jobs:
     runs-on: ${{needs.setup_variables.outputs.runners}}
     timeout-minutes: 15
     steps:
+      - name: prepare npmrc
+        run: |
+          apk add git
+          rm -f .npmrc
+    #          pwd
+    #          ls -al ./
+    #          echo "${{ secrets.npmrc }}" > .npmrc
+    #          chmod 666 .npmrc
       - name: pull code
         uses: actions/checkout@v3
         with:
           token: ${{ secrets.numa-numa-token }}
           submodules: recursive
-      - name: prepare npmrc
-        run: |
-          rm -f .npmrc
-#          pwd
-#          ls -al ./
-#          echo "${{ secrets.npmrc }}" > .npmrc
-#          chmod 666 .npmrc
       - name: Setup Node
         uses: actions/setup-node@v3
         with:
