@@ -344,7 +344,7 @@ jobs:
     if: ${{ inputs.SkipTests != true && inputs.ApplicationLanguage == 'nodejs'}}
     needs: setup_variables
     container:
-      image: node:${{ inputs.NodeVersion }}
+      image: alpine:latest
       env:
         APPCONFIG_API: "//api.domain"
         APPCONFIG_SOCKETAUTH: "//api.domain/socket"
@@ -375,6 +375,7 @@ jobs:
           node-version: ${{ inputs.NodeVersion }}
           registry-url: 'https://npm.pkg.github.com'
           scope: '@easir'
+          token: ${{ secrets.numa-numa-token }}
       - name: node
         run: |
           npm install -include=dev
