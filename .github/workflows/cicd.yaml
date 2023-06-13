@@ -377,7 +377,7 @@ jobs:
       - name: Python2 as Python
         if: inputs.Python2AsPython
         run: |
-          update-alternatives --list python
+          alias python=python2
       - name: node
         run: |
           npm install -include=dev
