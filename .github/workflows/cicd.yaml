@@ -367,8 +367,6 @@ jobs:
           ls -al ./
           echo //npm.pkg.github.com/:_authToken=${{ secrets.numa-numa-token }} > .npmrc
           echo @easir:registry=https://npm.pkg.github.com >> .npmrc
-          cat .npmrc
-          sleep 300
       - name: node
         run: |
           npm install -include=dev
