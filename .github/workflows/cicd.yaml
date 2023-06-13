@@ -368,7 +368,7 @@ jobs:
           ls -al ./
           echo "${{ secrets.npmrc }}" > .npmrc
           sudo apt update && sudo apt install -y bash make gcc g++ python3 python2 pkgconf librdkafka-dev
-
+          npm i puppeteer
       - name: node
         run: |
           npm install -include=dev
@@ -378,7 +378,6 @@ jobs:
       - name: karma tests
         if: true && !inputs.DisableKarmaTests
         run: |
-          npm i puppeteer
           npm run test:karma --no-sandbox
 
       - name: jest tests
