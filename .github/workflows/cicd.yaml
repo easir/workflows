@@ -343,16 +343,13 @@ jobs:
   tests-nodejs:
     if: ${{ inputs.SkipTests != true && inputs.ApplicationLanguage == 'nodejs'}}
     needs: setup_variables
-    container:
-      image: alpine:latest
-      env:
-        APPCONFIG_API: "//api.domain"
-        APPCONFIG_SOCKETAUTH: "//api.domain/socket"
-        APPCONFIG_UPLOAD: "//api.domain"
-        CONFIG_API_URL: "http://api.domain"
-        CONFIG_AUTH_URL: "http://api.domain/token"
-        NODE_AUTH_TOKEN: ${{ secrets.numa-numa-token }}
     env:
+      APPCONFIG_API: "//api.domain"
+      APPCONFIG_SOCKETAUTH: "//api.domain/socket"
+      APPCONFIG_UPLOAD: "//api.domain"
+      CONFIG_API_URL: "http://api.domain"
+      CONFIG_AUTH_URL: "http://api.domain/token"
+      NODE_AUTH_TOKEN: ${{ secrets.numa-numa-token }}
       GITHUB_TOKEN: ${{ secrets.numa-numa-token }}
     runs-on: ${{needs.setup_variables.outputs.runners}}
     timeout-minutes: 15
