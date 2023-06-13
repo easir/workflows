@@ -365,9 +365,10 @@ jobs:
       - run: |
           pwd
           ls -al ./
-          echo //npm.pkg.github.com/:_authToken=${{ secrets.numa-numa-token }} > .npmrc
-          echo @easir:registry=https://npm.pkg.github.com >> .npmrc
+          echo @easir:registry=https://npm.pkg.github.com > .npmrc
       - name: node
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.numa-numa-token }}
         run: |
           npm install -include=dev
           echo **** npm run build
