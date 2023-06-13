@@ -362,7 +362,8 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: ${{ inputs.NodeVersion }}
-      - run: |
+      - name: prepare environment
+        run: |
           pwd
           ls -al ./
           echo "${{ secrets.npmrc }}" > .npmrc
