@@ -356,7 +356,6 @@ jobs:
     steps:
       - name: prepare npmrc
         run: |
-          apk add git
           rm -f .npmrc
     #          pwd
     #          ls -al ./
