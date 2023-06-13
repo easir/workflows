@@ -354,13 +354,6 @@ jobs:
     runs-on: ${{needs.setup_variables.outputs.runners}}
     timeout-minutes: 15
     steps:
-      - name: prepare npmrc
-        run: |
-          rm -f .npmrc
-    #          pwd
-    #          ls -al ./
-    #          echo "${{ secrets.npmrc }}" > .npmrc
-    #          chmod 666 .npmrc
       - name: pull code
         uses: actions/checkout@v3
         with:
