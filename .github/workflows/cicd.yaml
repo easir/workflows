@@ -386,7 +386,7 @@ jobs:
       - name: karma tests
         if: true && !inputs.DisableKarmaTests
         run: |
-          sudo apt install chromium-browser libnss3
+          sudo apt install -y chromium-browser libnss3
           npm i puppeteer
           npm run test:karma --no-sandbox
 
