@@ -386,7 +386,7 @@ jobs:
       - name: karma tests
         if: true && !inputs.DisableKarmaTests
         run: |
-          sudo apt install -y chromium-browser libnss3 libxss1 libasound2 libatk-bridge2.0-0 libgtk-3-0 libdrm2 libice6 libsm6
+          sudo apt install -y chromium-browser libgbm-dev libnss3 libxss1 libasound2 libatk-bridge2.0-0 libgtk-3-0 libdrm2 libice6 libsm6
           npm i puppeteer
           npm run test:karma --no-sandbox
 
