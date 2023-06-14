@@ -372,7 +372,7 @@ jobs:
           pwd
           ls -al ./
           echo "${{ secrets.npmrc }}" > .npmrc
-          sudo apt update && sudo apt install -y bash make gcc g++ python3 python2 pkgconf librdkafka-dev chromium-browser
+          sudo apt update && sudo apt install -y bash make gcc g++ python3 python2 pkgconf librdkafka-dev
       - name: Python2 as Python
         if: inputs.Python2AsPython
         run: |
@@ -386,6 +386,7 @@ jobs:
       - name: karma tests
         if: true && !inputs.DisableKarmaTests
         run: |
+          sudo apt install chromium-browser libnss3
           npm i puppeteer
           npm run test:karma --no-sandbox
 
