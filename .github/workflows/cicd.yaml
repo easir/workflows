@@ -129,6 +129,11 @@ on:
         type: boolean
         default: false
         required: false
+#      Used in old node (Report)
+      Python2AsPython:
+        type: boolean
+        default: false
+        required: false
 
     secrets:
       token:
@@ -181,7 +186,7 @@ jobs:
       - name: how meny already paid minutes we have on github action runners?
         id: runners
         if: inputs.ForceSelfHosted == false
-        run: | 
+        run: |
           type -p gh >/dev/null || (type -p curl >/dev/null || sudo apt install curl -y
           curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg \
           && sudo chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg \
@@ -205,7 +210,7 @@ jobs:
 
       - name: prod or not?
         id: environment
-        run: | 
+        run: |
           if [[ $GITHUB_REF_NAME = "master" ]]
             then
               export environment=prod
@@ -261,7 +266,7 @@ jobs:
     if: ${{ inputs.SkipTests != true && inputs.ApplicationLanguage == 'php'}}
     needs: setup_variables
     env:
-     GITHUB_TOKEN: ${{ secrets.numa-numa-token }}
+      GITHUB_TOKEN: ${{ secrets.numa-numa-token }}
     runs-on: ${{needs.setup_variables.outputs.runners}}
     timeout-minutes: 15
     services:
@@ -344,8 +349,13 @@ jobs:
     if: ${{ inputs.SkipTests != true && inputs.ApplicationLanguage == 'nodejs'}}
     needs: setup_variables
     env:
-     GITHUB_TOKEN: ${{ secrets.numa-numa-token }}
-    runs-on: ubuntu-latest #${{needs.setup_variables.outputs.runners}}
+      APPCONFIG_API: "//api.domain"
+      APPCONFIG_SOCKETAUTH: "//api.domain/socket"
+      APPCONFIG_UPLOAD: "//api.domain"
+      CONFIG_API_URL: "http://api.domain"
+      CONFIG_AUTH_URL: "http://api.domain/token"
+      GITHUB_TOKEN: ${{ secrets.numa-numa-token }}
+    runs-on: self-hosted #${{needs.setup_variables.outputs.runners}}
     timeout-minutes: 15
     steps:
       - name: pull code
@@ -353,65 +363,47 @@ jobs:
         with:
           token: ${{ secrets.numa-numa-token }}
           submodules: recursive
-
-      - name: node
-        uses: addnab/docker-run-action@v3
+      - name: Setup Node
+        uses: actions/setup-node@v3
         with:
-          image: node:${{ inputs.NodeVersion }}
-          options: -v ${{ github.workspace }}:/work -e APPCONFIG_API=//api.domain" -e APPCONFIG_SOCKETAUTH="//api.domain/socket" -e APPCONFIG_UPLOAD="//api.domain" -e CONFIG_API_URL="http://api.domain" -e CONFIG_AUTH_URL="http://api.domain/token"
-          run: |
-            cd /work/
-            rm -f .npmrc
-            pwd
-            ls -al ./
-            apt install -y libc6-compat bash make gcc g++ python3 python2 cyrus-sasl-dev pkgconf librdkafka-dev
-            echo "${{secrets.npmrc}}" > .npmrc
-            chmod 666 .npmrc
-            ls -al ./
-            npm login
-            npm install
-            npm run build
-            cat /root/.npm/_logs/*.log
+          node-version: ${{ inputs.NodeVersion }}
+      - name: prepare environment
+        run: |
+          pwd
+          ls -al ./
+          echo "${{ secrets.npmrc }}" > .npmrc
+          sudo apt update && sudo apt install -y bash make gcc g++ python3 python2 pkgconf librdkafka-dev
+      - name: Python2 as Python
+        if: inputs.Python2AsPython
+        run: |
+          alias python=python2
+      - name: node
+        run: |
+          npm install -include=dev
+          echo **** npm run build
+          npm run build
 
       - name: karma tests
         if: true && !inputs.DisableKarmaTests
-        uses: addnab/docker-run-action@v3
-        with:
-          image: buildkite/puppeteer:latest
-          options: -v ${{ github.workspace }}:/work
-          run: |
-            cd /work/
-            npm run test:karma --no-sandbox
+        run: |
+          sudo apt install -y chromium-browser ca-certificates fonts-liberation libasound2 libatk-bridge2.0-0 libatk1.0-0 libc6 libcairo2 libcups2 libdbus-1-3 libexpat1 libfontconfig1 libgbm1 libgcc1 libglib2.0-0 libgtk-3-0 libnspr4 libnss3 libpango-1.0-0 libpangocairo-1.0-0 libstdc++6 libx11-6 libx11-xcb1 libxcb1 libxcomposite1 libxcursor1 libxdamage1 libxext6 libxfixes3 libxi6 libxrandr2 libxrender1 libxss1 libxtst6 lsb-release wget xdg-utils
+          npm i puppeteer
+          npm run test:karma --no-sandbox
 
       - name: jest tests
         if: inputs.ApplicationLanguage == 'nodejs' && !inputs.DisableJestTests
-        uses: addnab/docker-run-action@v3
-        with:
-          image: node:${{ inputs.NodeVersion }}
-          options: -v ${{ github.workspace }}:/work
-          run: |
-            cd /work/
-            npm run test:jest ${{ inputs.AdditionalJestParameters }}
+        run: |
+          npm run test:jest ${{ inputs.AdditionalJestParameters }}
 
-      - name: jest jscs
+      - name: jscs tests
         if: inputs.ApplicationLanguage == 'nodejs' && !inputs.DisableJestTests
-        uses: addnab/docker-run-action@v3
-        with:
-          image: node:${{ inputs.NodeVersion }}-alpine
-          options: -v ${{ github.workspace }}:/work
-          run: |
-            cd /work/
-            node_modules/.bin/jscs --config=.jscsrc src/app
+        run: |
+          node_modules/.bin/jscs --config=.jscsrc src/app
 
       - name: eslint
         if: inputs.ApplicationLanguage == 'nodejs'
-        uses: addnab/docker-run-action@v3
-        with:
-          image: node:${{ inputs.NodeVersion }}-alpine
-          options: -v ${{ github.workspace }}:/work
-          run: |
-            cd /work/
-            npm run test:eslint
+        run: |
+          npm run test:eslint
 
 
   behat:
@@ -434,7 +426,7 @@ jobs:
           php-version: ${{inputs.PhpVersion}}
           extensions: ${{inputs.PhpExtensions}}
           coverage: pcov
-          tools: behat, phpunit, composer, phpcs, php-cs-fixer, phpcbf, phpstan, psalm, phplint, 
+          tools: behat, phpunit, composer, phpcs, php-cs-fixer, phpcbf, phpstan, psalm, phplint,
         env:
           runner: ${{needs.setup_variables.outputs.runners}}
 
@@ -459,8 +451,8 @@ jobs:
     container:
       image: docker-registry.easir.com/manifest:master-edc5d03a8b7a4530442e23d2bd87c0833b4bd0bd
       credentials:
-          username: ${{secrets.docker-login}}
-          password: ${{secrets.docker-pass}}
+        username: ${{secrets.docker-login}}
+        password: ${{secrets.docker-pass}}
     steps:
       - name: pull code
         uses: actions/checkout@v3
@@ -580,7 +572,7 @@ jobs:
         run: |
           echo IMAGE_VERSION: ${{ needs.setup_variables.outputs.github-sha }} >> $GITHUB_STEP_SUMMARY
           echo "IMAGE TAGS : ${{ steps.meta.outputs.tags }} >> $GITHUB_STEP_SUMMARY"
-          
+
       - name: ifcheck
         if: inputs.EnableSentryRelease && needs.setup_variables.outputs.environment == 'prod'
         run: |
