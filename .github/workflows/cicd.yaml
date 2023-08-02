@@ -154,6 +154,8 @@ on:
         required: false
       npmrc:
         required: false
+      composer-oauth:
+        required: false
   workflow_dispatch:
 
 
@@ -511,7 +513,11 @@ jobs:
         run: |
           rm -f .npmrc
           echo "${{secrets.npmrc}}" > .npmrc
-
+      - name: authenticate to composer
+        if: inputs.ApplicationLanguage == 'php'
+        run: |
+          echo "{\"github-oauth\": {\"github.com\": \"${{secrets.numa-numa-token}}\"}}" >> > $GITHUB_WORKSPACE/auth.json
+          
       - name: Set up Docker Context for Buildx
         id: buildx-context
         run: |
