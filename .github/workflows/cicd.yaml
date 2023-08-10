@@ -269,6 +269,14 @@ jobs:
     needs: setup_variables
     env:
       GITHUB_TOKEN: ${{ secrets.numa-numa-token }}
+      DB_HOST: localhost
+      DB_DATABASE: zebra-tests
+      DB_USERNAME: root
+      DB_PASSWORD: root
+      DB_PORT: "3306"
+      REDIS_HOST: localhost
+      REDIS_PORT: "6379"
+      REDIS_DB: zebra-tests
     runs-on: ${{needs.setup_variables.outputs.runners}}
     timeout-minutes: 15
     services:
