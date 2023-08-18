@@ -304,7 +304,12 @@ jobs:
         with:
           token: ${{ secrets.numa-numa-token }}
           submodules: recursive
-
+      - name: authenticate to composer
+        if: inputs.ApplicationLanguage == 'php'
+        run: |
+          echo "{\"github-oauth\": {\"github.com\": \"${{secrets.numa-numa-token}}\"}}" > $GITHUB_WORKSPACE/auth.json
+          usermod -a -G sudo "$(id -un)"
+          echo "%sudo ALL = (ALL) NOPASSWD: ALL" | sudo tee -a /etc/sudoers          
       - uses: shivammathur/setup-php@2.24.0
         if: inputs.ApplicationLanguage == 'php'
         with:
@@ -313,13 +318,7 @@ jobs:
           coverage: pcov
           tools: behat, phpunit, composer, phpcs, php-cs-fixer, phpcbf, phpstan, psalm, phplint,
         env:
-          runner: ${{needs.setup_variables.outputs.runners}}
-
-      - name: authenticate to composer
-        if: inputs.ApplicationLanguage == 'php'
-        run: |
-          echo "{\"github-oauth\": {\"github.com\": \"${{secrets.numa-numa-token}}\"}}" > $GITHUB_WORKSPACE/auth.json
-          
+          runner: self-hosted
       - name: run Composer
         if: inputs.ApplicationLanguage == 'php'
         run: |
@@ -381,18 +380,16 @@ jobs:
         with:
           token: ${{ secrets.numa-numa-token }}
           submodules: recursive
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ inputs.NodeVersion }}
       - name: prepare environment
         run: |
           pwd
           ls -al ./
           echo "${{ secrets.npmrc }}" > .npmrc
           sudo apt update && sudo apt install -y bash make gcc g++ python3 python2 pkgconf librdkafka-dev
-          usermod -a -G sudo "$(id -un)"
-          echo "%sudo ALL = (ALL) NOPASSWD: ALL" | sudo tee -a /etc/sudoers          
-      - name: Setup Node
-        uses: actions/setup-node@v3
-        with:
-          node-version: ${{ inputs.NodeVersion }}
       - name: Python2 as Python
         if: inputs.Python2AsPython
         run: |
