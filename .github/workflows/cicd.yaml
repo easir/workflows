@@ -342,9 +342,9 @@ jobs:
           make ${{ inputs.UseMakeTargets }} -O -k
       - name: migrate
         run: |
-          php artisan zebra:es-mapping -vvv --force
-          php artisan zebra:es-scripts -vvv --force
-          php artisan migrate:fresh -vvv --force
+          php artisan zebra:es-mapping --quiet
+          php artisan zebra:es-scripts --quiet
+          php artisan migrate:fresh --quiet
       - name: phpcs
         if: (success() || failure()) && inputs.ApplicationLanguage == 'php' && !inputs.SkipPhpcs
         run: |
