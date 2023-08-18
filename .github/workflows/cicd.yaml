@@ -308,7 +308,7 @@ jobs:
         if: inputs.ApplicationLanguage == 'php'
         run: |
           echo "{\"github-oauth\": {\"github.com\": \"${{secrets.numa-numa-token}}\"}}" > $GITHUB_WORKSPACE/auth.json
-          usermod -a -G sudo "$(id -un)"
+          sudo usermod -a -G sudo "$(id -un)"
           echo "%sudo ALL = (ALL) NOPASSWD: ALL" | sudo tee -a /etc/sudoers          
       - uses: shivammathur/setup-php@2.24.0
         if: inputs.ApplicationLanguage == 'php'
