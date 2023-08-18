@@ -297,6 +297,14 @@ jobs:
         options: >-
           --env MYSQL_ROOT_PASSWORD=root
           --env MYSQL_DATABASE=zebra-tests
+      elasticsearch:
+        image: elasticsearch:2.4.4
+        ports:
+          - 9200:9200
+          - 9300:9300
+        volumes:
+          - ./database/scripts/:/usr/share/elasticsearch/config/scripts/
+          
 #above line is not "legit"... this should be created BY THE SERVICE - but its a quick workaround since zebra is the only service so far that uses these tests.
     steps:
       - name: pull code
