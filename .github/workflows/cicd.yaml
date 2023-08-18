@@ -349,8 +349,8 @@ jobs:
       - name: phpunit
         if: (success() || failure()) && inputs.ApplicationLanguage == 'php' && inputs.SkipUnitTests != true
         run: |
-          composer exec -- phpunit
           sleep 30000
+          composer exec -- phpunit
 
       - name: phpstan
         if: (success() || failure()) && inputs.ApplicationLanguage == 'php' && inputs.SkipUnitTests != true && inputs.EnablePhpstan
