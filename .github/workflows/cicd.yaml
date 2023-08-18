@@ -277,6 +277,8 @@ jobs:
       REDIS_HOST: localhost
       REDIS_PORT: "6379"
       REDIS_DB: 0
+      ES_HOST: "127.0.0.1"
+      ES_PORT: "9200"
 #    runs-on: ${{needs.setup_variables.outputs.runners}}
     runs-on: self-hosted
     timeout-minutes: 15
