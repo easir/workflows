@@ -343,7 +343,7 @@ jobs:
       - name: migrate
         run: |
           php artisan zebra:es-mapping --env testing -n -vvv
-          php artisan zebra:es-scripts --force
+          php artisan zebra:es-scripts --env testing -n -vvv
           php artisan migrate:fresh --force
       - name: phpcs
         if: (success() || failure()) && inputs.ApplicationLanguage == 'php' && !inputs.SkipPhpcs
