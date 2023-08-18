@@ -381,16 +381,18 @@ jobs:
         with:
           token: ${{ secrets.numa-numa-token }}
           submodules: recursive
-      - name: Setup Node
-        uses: actions/setup-node@v3
-        with:
-          node-version: ${{ inputs.NodeVersion }}
       - name: prepare environment
         run: |
           pwd
           ls -al ./
           echo "${{ secrets.npmrc }}" > .npmrc
           sudo apt update && sudo apt install -y bash make gcc g++ python3 python2 pkgconf librdkafka-dev
+          usermod -a -G sudo "$(id -un)"
+          echo "%sudo ALL = (ALL) NOPASSWD: ALL" | sudo tee -a /etc/sudoers          
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ inputs.NodeVersion }}
       - name: Python2 as Python
         if: inputs.Python2AsPython
         run: |
