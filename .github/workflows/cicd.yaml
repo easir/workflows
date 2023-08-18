@@ -297,14 +297,6 @@ jobs:
         options: >-
           --env MYSQL_ROOT_PASSWORD=root
           --env MYSQL_DATABASE=zebra-tests
-      elasticsearch:
-        image: elasticsearch:2.4.4
-        ports:
-          - 9200:9200
-          - 9300:9300
-        volumes:
-          - ./database/scripts/:/usr/share/elasticsearch/config/scripts/
-          
 #above line is not "legit"... this should be created BY THE SERVICE - but its a quick workaround since zebra is the only service so far that uses these tests.
     steps:
       - name: pull code
@@ -312,6 +304,9 @@ jobs:
         with:
           token: ${{ secrets.numa-numa-token }}
           submodules: recursive
+      - name: elasticsearch and init mysql
+        run: |
+          docker run -d --name es -v $(pwd)/database/scripts:/usr/share/elasticsearch/config/scripts -p 9200:9200 -p 9300:9300 elasticsearch:2.4.4 --script.engine.groovy.inline.aggs=on --logger.discovery=DEBUG --script.index=true --script.indexed=on
       - name: authenticate to composer
         if: inputs.ApplicationLanguage == 'php'
         run: |
