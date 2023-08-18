@@ -269,7 +269,7 @@ jobs:
     needs: setup_variables
     env:
       GITHUB_TOKEN: ${{ secrets.numa-numa-token }}
-      DB_HOST: localhost
+      DB_HOST: "127.0.0.1"
       DB_DATABASE: zebra-tests
       DB_USERNAME: root
       DB_PASSWORD: root
@@ -308,8 +308,6 @@ jobs:
         if: inputs.ApplicationLanguage == 'php'
         run: |
           echo "{\"github-oauth\": {\"github.com\": \"${{secrets.numa-numa-token}}\"}}" > $GITHUB_WORKSPACE/auth.json
-          sudo usermod -a -G sudo "$(id -un)"
-          echo "%sudo ALL = (ALL) NOPASSWD: ALL" | sudo tee -a /etc/sudoers          
       - uses: shivammathur/setup-php@2.24.0
         if: inputs.ApplicationLanguage == 'php'
         with:
@@ -349,7 +347,6 @@ jobs:
       - name: phpunit
         if: (success() || failure()) && inputs.ApplicationLanguage == 'php' && inputs.SkipUnitTests != true
         run: |
-          sleep 30000
           composer exec -- phpunit
 
       - name: phpstan
