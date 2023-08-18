@@ -295,7 +295,8 @@ jobs:
           - 3306:3306
         options: >-
           --env MYSQL_ROOT_PASSWORD=root
-
+          --env MYSQL_DATABASE=zebra-tests
+#above line is not "legit"... this should be created BY THE SERVICE - but its a quick workaround since zebra is the only service so far that uses these tests.
     steps:
       - name: pull code
         uses: actions/checkout@v3
