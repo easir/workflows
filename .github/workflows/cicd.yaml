@@ -307,7 +307,7 @@ jobs:
       - name: elasticsearch and init mysql
         run: |
           docker run -d --name es -v $(pwd)/database/scripts:/usr/share/elasticsearch/config/scripts -p 9200:9200 -p 9300:9300 elasticsearch:2.4.4 --script.engine.groovy.inline.aggs=on --logger.discovery=DEBUG --script.index=true --script.indexed=on
-          sudo apt install mysql-client
+          sudo apt update && sudo apt install mysql-client
           mysql -h 127.0.0.1 -proot -u root zebra-tests < database/schema/mysql-schema.dump
       - name: authenticate to composer
         if: inputs.ApplicationLanguage == 'php'
