@@ -281,7 +281,7 @@ jobs:
       ES_PORT: "9200"
 #    runs-on: ${{needs.setup_variables.outputs.runners}}
     runs-on: self-hosted
-    timeout-minutes: 15
+    timeout-minutes: 30
     services:
       redis:
         image: redis:3.2.3-alpine
