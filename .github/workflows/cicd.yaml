@@ -576,11 +576,19 @@ jobs:
             type=raw,value=latest,enable={{is_default_branch}}
 
       - name: Docker Login
-        uses: docker/login-action@v2.1.0
+        uses: docker/login-action@v3.0.0
         with:
           registry: ${{ secrets.docker-reg }}
           username: ${{ secrets.docker-login }}
           password: ${{ secrets.docker-pass }}
+          ecr: false
+
+      - name: Docker Login
+        uses: docker/login-action@v3.0.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.numa-numa-token }}
           ecr: false
 
       - name: Build and push Docker images
