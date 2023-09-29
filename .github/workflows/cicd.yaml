@@ -562,6 +562,7 @@ jobs:
         with:
           images: |
             ${{ secrets.docker-reg }}/${{needs.setup_variables.outputs.app}}
+            ghcr.io/easir/${{needs.setup_variables.outputs.app}}
           tags: |
             type=schedule
             type=ref,event=branch
