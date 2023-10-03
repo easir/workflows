@@ -343,6 +343,7 @@ jobs:
         run: |
           make ${{ inputs.UseMakeTargets }} -O -k
       - name: migrate
+        if: ${{ needs.setup_variables.outputs.app == 'zebra' }}
         run: |
           php artisan zebra:es-mapping --env testing -n -vvv
           php artisan zebra:es-scripts --env testing -n -vvv
