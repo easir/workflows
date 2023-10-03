@@ -308,7 +308,7 @@ jobs:
           token: ${{ secrets.numa-numa-token }}
           submodules: recursive
       - name: elasticsearch and init mysql
-        if: ${{ needs.setup_variables.outputs.app == "zebra" }}
+        if: ${{ needs.setup_variables.outputs.app == 'zebra' }}
         run: |
           docker run -d --name es -v $(pwd)/database/scripts:/usr/share/elasticsearch/config/scripts -p 9200:9200 -p 9300:9300 elasticsearch:2.4.4 --script.engine.groovy.inline.aggs=on --logger.discovery=DEBUG --script.index=true --script.indexed=on
           sudo apt update && sudo apt install -y mysql-client
