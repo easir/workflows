@@ -269,7 +269,7 @@ jobs:
     needs: setup_variables
     env:
       GITHUB_TOKEN: ${{ secrets.numa-numa-token }}
-      DB_HOST: localhost
+      DB_HOST: "127.0.0.1"
       DB_DATABASE: zebra-tests
       DB_USERNAME: root
       DB_PASSWORD: root
@@ -277,8 +277,12 @@ jobs:
       REDIS_HOST: localhost
       REDIS_PORT: "6379"
       REDIS_DB: 0
-    runs-on: ${{needs.setup_variables.outputs.runners}}
-    timeout-minutes: 15
+      ES_HOST: "127.0.0.1"
+      ES_PORT: "9200"
+      AUTH_DOMAIN: "0EE2BEA7-87EC-4C45-81FB-04D1C871D975.wave.local"
+#    runs-on: ${{needs.setup_variables.outputs.runners}}
+    runs-on: self-hosted
+    timeout-minutes: 30
     services:
       redis:
         image: redis:3.2.3-alpine
@@ -303,7 +307,15 @@ jobs:
         with:
           token: ${{ secrets.numa-numa-token }}
           submodules: recursive
-
+      - name: elasticsearch and init mysql
+        run: |
+          docker run -d --name es -v $(pwd)/database/scripts:/usr/share/elasticsearch/config/scripts -p 9200:9200 -p 9300:9300 elasticsearch:2.4.4 --script.engine.groovy.inline.aggs=on --logger.discovery=DEBUG --script.index=true --script.indexed=on
+          sudo apt update && sudo apt install -y mysql-client
+          mysql -h 127.0.0.1 -proot -u root zebra-tests < database/schema/mysql-schema.dump
+      - name: authenticate to composer
+        if: inputs.ApplicationLanguage == 'php'
+        run: |
+          echo "{\"github-oauth\": {\"github.com\": \"${{secrets.numa-numa-token}}\"}}" > $GITHUB_WORKSPACE/auth.json
       - uses: shivammathur/setup-php@2.24.0
         if: inputs.ApplicationLanguage == 'php'
         with:
@@ -312,13 +324,7 @@ jobs:
           coverage: pcov
           tools: behat, phpunit, composer, phpcs, php-cs-fixer, phpcbf, phpstan, psalm, phplint,
         env:
-          runner: ${{needs.setup_variables.outputs.runners}}
-
-      - name: authenticate to composer
-        if: inputs.ApplicationLanguage == 'php'
-        run: |
-          echo "{\"github-oauth\": {\"github.com\": \"${{secrets.numa-numa-token}}\"}}" > $GITHUB_WORKSPACE/auth.json
-          
+          runner: self-hosted
       - name: run Composer
         if: inputs.ApplicationLanguage == 'php'
         run: |
@@ -335,7 +341,11 @@ jobs:
         if: ${{ inputs.UseMakeTargets != '' }}
         run: |
           make ${{ inputs.UseMakeTargets }} -O -k
-
+      - name: migrate
+        run: |
+          php artisan zebra:es-mapping --env testing -n -vvv
+          php artisan zebra:es-scripts --env testing -n -vvv
+          php artisan migrate:fresh --force
       - name: phpcs
         if: (success() || failure()) && inputs.ApplicationLanguage == 'php' && !inputs.SkipPhpcs
         run: |
@@ -541,7 +551,7 @@ jobs:
           docker context create builders
 
       - name: Docker Setup Buildx
-        uses: docker/setup-buildx-action@v2.2.1
+        uses: docker/setup-buildx-action@v3.0.0
         with:
           version: v0.9.1
           endpoint: builders
@@ -549,10 +559,11 @@ jobs:
 
       - name: Docker meta
         id: meta
-        uses: docker/metadata-action@v4.1.1
+        uses: docker/metadata-action@v5.0.0
         with:
           images: |
             ${{ secrets.docker-reg }}/${{needs.setup_variables.outputs.app}}
+            ghcr.io/easir/${{needs.setup_variables.outputs.app}}
           tags: |
             type=schedule
             type=ref,event=branch
@@ -566,15 +577,23 @@ jobs:
             type=raw,value=latest,enable={{is_default_branch}}
 
       - name: Docker Login
-        uses: docker/login-action@v2.1.0
+        uses: docker/login-action@v3.0.0
         with:
           registry: ${{ secrets.docker-reg }}
           username: ${{ secrets.docker-login }}
           password: ${{ secrets.docker-pass }}
           ecr: false
 
+      - name: Docker Login
+        uses: docker/login-action@v3.0.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.numa-numa-token }}
+          ecr: false
+
       - name: Build and push Docker images
-        uses: docker/build-push-action@v3.3.0
+        uses: docker/build-push-action@v5.0.0
         with:
           build-args: |
             IMAGE_VERSION=${{ needs.setup_variables.outputs.github-sha }}
