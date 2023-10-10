@@ -283,24 +283,6 @@ jobs:
 #    runs-on: ${{needs.setup_variables.outputs.runners}}
     runs-on: self-hosted
     timeout-minutes: 30
-    services:
-      redis:
-        image: redis:3.2.3-alpine
-        ports:
-          - 6379:6379
-        options: >-
-          --health-cmd "redis-cli ping"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-      mariadb:
-        image: mariadb:10.1.16
-        ports:
-          - 3306:3306
-        options: >-
-          --env MYSQL_ROOT_PASSWORD=root
-          --env MYSQL_DATABASE=zebra-tests
-#above line is not "legit"... this should be created BY THE SERVICE - but its a quick workaround since zebra is the only service so far that uses these tests.
     steps:
       - name: pull code
         uses: actions/checkout@v3
@@ -308,8 +290,11 @@ jobs:
           token: ${{ secrets.numa-numa-token }}
           submodules: recursive
       - name: elasticsearch and init mysql
+        if: ${{ needs.setup_variables.outputs.app == 'zebra' }}
         run: |
           docker run -d --name es -v $(pwd)/database/scripts:/usr/share/elasticsearch/config/scripts -p 9200:9200 -p 9300:9300 elasticsearch:2.4.4 --script.engine.groovy.inline.aggs=on --logger.discovery=DEBUG --script.index=true --script.indexed=on
+          docker run -d --env MYSQL_DATABASE=zebra-tests --env MYSQL_ROOT_PASSWORD=root -p 3306:3306 --name mariadb mariadb:10.1.16 
+          docker run -d --name redis -p 6379:6379 --health-cmd "redis-cli ping" --health-interval 10s --health-timeout 5s --health-retries 5 redis:3.2.3-alpine
           sudo apt update && sudo apt install -y mysql-client
           mysql -h 127.0.0.1 -proot -u root zebra-tests < database/schema/mysql-schema.dump
       - name: authenticate to composer
@@ -342,6 +327,7 @@ jobs:
         run: |
           make ${{ inputs.UseMakeTargets }} -O -k
       - name: migrate
+        if: ${{ needs.setup_variables.outputs.app == 'zebra' }}
         run: |
           php artisan zebra:es-mapping --env testing -n -vvv
           php artisan zebra:es-scripts --env testing -n -vvv
