@@ -550,6 +550,7 @@ jobs:
         with:
           images: |
             ${{ secrets.docker-reg }}/${{needs.setup_variables.outputs.app}}
+            ghcr.io/easir/${{needs.setup_variables.outputs.app}}
           tags: |
             type=schedule
             type=ref,event=branch
@@ -561,6 +562,14 @@ jobs:
             type=sha,enable=true,priority=100,prefix=,suffix=,format=long
             type=raw,value=${{needs.setup_variables.outputs.imagetag}}
             type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Docker Login
+        uses: docker/login-action@v3.0.0
+        with:
+          registry: ghcr.io
+          username: easir
+          password: ${{ secrets.numa-numa-token }}
+          ecr: false
 
       - name: Docker Login
         uses: docker/login-action@v3.0.0
