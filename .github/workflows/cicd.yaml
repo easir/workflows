@@ -562,6 +562,8 @@ jobs:
             type=sha,enable=true,priority=100,prefix=,suffix=,format=long
             type=raw,value=${{needs.setup_variables.outputs.imagetag}}
             type=raw,value=latest,enable={{is_default_branch}}
+          labels: |
+            org.opencontainers.image.source=https://github.com/easir/${{needs.setup_variables.outputs.app}}
 
       - name: Docker Login
         uses: docker/login-action@v3.0.0
