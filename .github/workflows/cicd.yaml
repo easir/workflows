@@ -269,7 +269,7 @@ jobs:
     needs: setup_variables
     env:
       GITHUB_TOKEN: ${{ secrets.numa-numa-token }}
-      DB_HOST: localhost
+      DB_HOST: "127.0.0.1"
       DB_DATABASE: zebra-tests
       DB_USERNAME: root
       DB_PASSWORD: root
@@ -277,33 +277,30 @@ jobs:
       REDIS_HOST: localhost
       REDIS_PORT: "6379"
       REDIS_DB: 0
+      ES_HOST: "127.0.0.1"
+      ES_PORT: "9200"
+      AUTH_DOMAIN: "0EE2BEA7-87EC-4C45-81FB-04D1C871D975.wave.local"
     runs-on: ${{needs.setup_variables.outputs.runners}}
-    timeout-minutes: 15
-    services:
-      redis:
-        image: redis:3.2.3-alpine
-        ports:
-          - 6379:6379
-        options: >-
-          --health-cmd "redis-cli ping"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-      mariadb:
-        image: mariadb:10.1.16
-        ports:
-          - 3306:3306
-        options: >-
-          --env MYSQL_ROOT_PASSWORD=root
-          --env MYSQL_DATABASE=zebra-tests
-#above line is not "legit"... this should be created BY THE SERVICE - but its a quick workaround since zebra is the only service so far that uses these tests.
+    timeout-minutes: 30
     steps:
       - name: pull code
         uses: actions/checkout@v3
         with:
           token: ${{ secrets.numa-numa-token }}
           submodules: recursive
-
+      - name: elasticsearch and init mysql
+        if: ${{ needs.setup_variables.outputs.app == 'zebra' }}
+        run: |
+          docker run -d --name es -v $(pwd)/database/scripts:/usr/share/elasticsearch/config/scripts -p 9200:9200 -p 9300:9300 elasticsearch:2.4.4 --script.engine.groovy.inline.aggs=on --logger.discovery=DEBUG --script.index=true --script.indexed=on
+          docker run -d --env MYSQL_DATABASE=zebra-tests --env MYSQL_ROOT_PASSWORD=root -p 3306:3306 --name mariadb mariadb:10.1.16 
+          docker run -d --name redis -p 6379:6379 --health-cmd "redis-cli ping" --health-interval 10s --health-timeout 5s --health-retries 5 redis:3.2.3-alpine
+          sudo apt update && sudo apt install -y mysql-client
+          sleep 15
+          mysql -h 127.0.0.1 -proot -u root zebra-tests < database/schema/mysql-schema.dump
+      - name: authenticate to composer
+        if: inputs.ApplicationLanguage == 'php'
+        run: |
+          echo "{\"github-oauth\": {\"github.com\": \"${{secrets.numa-numa-token}}\"}}" > $GITHUB_WORKSPACE/auth.json
       - uses: shivammathur/setup-php@2.24.0
         if: inputs.ApplicationLanguage == 'php'
         with:
@@ -312,13 +309,7 @@ jobs:
           coverage: pcov
           tools: behat, phpunit, composer, phpcs, php-cs-fixer, phpcbf, phpstan, psalm, phplint,
         env:
-          runner: ${{needs.setup_variables.outputs.runners}}
-
-      - name: authenticate to composer
-        if: inputs.ApplicationLanguage == 'php'
-        run: |
-          echo "{\"github-oauth\": {\"github.com\": \"${{secrets.numa-numa-token}}\"}}" > $GITHUB_WORKSPACE/auth.json
-          
+          runner: self-hosted
       - name: run Composer
         if: inputs.ApplicationLanguage == 'php'
         run: |
@@ -335,7 +326,12 @@ jobs:
         if: ${{ inputs.UseMakeTargets != '' }}
         run: |
           make ${{ inputs.UseMakeTargets }} -O -k
-
+      - name: migrate
+        if: ${{ needs.setup_variables.outputs.app == 'zebra' }}
+        run: |
+          php artisan zebra:es-mapping --env testing -n -vvv
+          php artisan zebra:es-scripts --env testing -n -vvv
+          php artisan migrate:fresh --force
       - name: phpcs
         if: (success() || failure()) && inputs.ApplicationLanguage == 'php' && !inputs.SkipPhpcs
         run: |
@@ -371,7 +367,7 @@ jobs:
       CONFIG_API_URL: "http://api.domain"
       CONFIG_AUTH_URL: "http://api.domain/token"
       GITHUB_TOKEN: ${{ secrets.numa-numa-token }}
-    runs-on: self-hosted #${{needs.setup_variables.outputs.runners}}
+    runs-on: ${{needs.setup_variables.outputs.runners}}
     timeout-minutes: 15
     steps:
       - name: pull code
@@ -553,6 +549,7 @@ jobs:
         with:
           images: |
             ${{ secrets.docker-reg }}/${{needs.setup_variables.outputs.app}}
+            ghcr.io/easir/${{needs.setup_variables.outputs.app}}
           tags: |
             type=schedule
             type=ref,event=branch
@@ -564,9 +561,19 @@ jobs:
             type=sha,enable=true,priority=100,prefix=,suffix=,format=long
             type=raw,value=${{needs.setup_variables.outputs.imagetag}}
             type=raw,value=latest,enable={{is_default_branch}}
+          labels: |
+            org.opencontainers.image.source=https://github.com/easir/${{needs.setup_variables.outputs.app}}
 
       - name: Docker Login
-        uses: docker/login-action@v2.1.0
+        uses: docker/login-action@v3.0.0
+        with:
+          registry: ghcr.io
+          username: easir
+          password: ${{ secrets.numa-numa-token }}
+          ecr: false
+
+      - name: Docker Login
+        uses: docker/login-action@v3.0.0
         with:
           registry: ${{ secrets.docker-reg }}
           username: ${{ secrets.docker-login }}
