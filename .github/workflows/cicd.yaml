@@ -345,6 +345,7 @@ jobs:
       - name: phpunit
         if: (success() || failure()) && inputs.ApplicationLanguage == 'php' && inputs.SkipUnitTests != true
         run: |
+          env
           composer exec -- phpunit
 
       - name: phpstan
