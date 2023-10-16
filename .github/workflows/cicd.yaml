@@ -350,6 +350,7 @@ jobs:
           composer exec -- phpunit
 
       - name: pause for a diagnosis
+        if: always()
         run: |
           until cat moveon &> /dev/null
           do
