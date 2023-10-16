@@ -348,8 +348,15 @@ jobs:
         run: |
           env
           composer exec -- phpunit
-          sleep 3000
-          
+
+      - name: pause for a diagnosis
+        run: |
+          until cat moveon &> /dev/null
+          do
+            echo not moving on
+            sleep 1
+          done
+
       - name: phpstan
         if: (success() || failure()) && inputs.ApplicationLanguage == 'php' && inputs.SkipUnitTests != true && inputs.EnablePhpstan
         run: |
