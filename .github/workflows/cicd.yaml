@@ -282,7 +282,7 @@ jobs:
       AUTH_DOMAIN: "0EE2BEA7-87EC-4C45-81FB-04D1C871D975.wave.local"
     #runs-on: ${{needs.setup_variables.outputs.runners}}
     runs-on: self-hosted
-    timeout-minutes: 300
+    timeout-minutes: 30
     steps:
       - name: pull code
         uses: actions/checkout@v3
