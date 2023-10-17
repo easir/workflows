@@ -185,7 +185,7 @@ jobs:
         if: inputs.ForceSelfHosted
         run: echo "runners=self-hosted" >> $GITHUB_OUTPUT
 
-      - name: how meny already paid minutes we have on github action runners?
+      - name: how many already paid minutes we have on github action runners?
         id: runners
         if: inputs.ForceSelfHosted == false
         run: |
@@ -348,15 +348,6 @@ jobs:
         run: |
           env
           composer exec -- phpunit
-
-      - name: pause for a diagnosis
-        if: always()
-        run: |
-          until cat moveon &> /dev/null
-          do
-            echo not moving on
-            sleep 1
-          done
 
       - name: phpstan
         if: (success() || failure()) && inputs.ApplicationLanguage == 'php' && inputs.SkipUnitTests != true && inputs.EnablePhpstan
