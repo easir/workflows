@@ -185,7 +185,7 @@ jobs:
         if: inputs.ForceSelfHosted
         run: echo "runners=self-hosted" >> $GITHUB_OUTPUT
 
-      - name: how meny already paid minutes we have on github action runners?
+      - name: how many already paid minutes we have on github action runners?
         id: runners
         if: inputs.ForceSelfHosted == false
         run: |
@@ -292,7 +292,7 @@ jobs:
         if: ${{ needs.setup_variables.outputs.app == 'zebra' }}
         run: |
           docker run -d --name es -v $(pwd)/database/scripts:/usr/share/elasticsearch/config/scripts -p 9200:9200 -p 9300:9300 elasticsearch:2.4.4 --script.engine.groovy.inline.aggs=on --logger.discovery=DEBUG --script.index=true --script.indexed=on
-          docker run -d --env MYSQL_DATABASE=zebra-tests --env MYSQL_ROOT_PASSWORD=root -p 3306:3306 --name mariadb mariadb:10.1.16 
+          docker run -d --env MYSQL_DATABASE=zebra-tests --env MYSQL_ROOT_PASSWORD=root -p 3306:3306 --name mariadb mariadb:10.6.10 
           docker run -d --name redis -p 6379:6379 --health-cmd "redis-cli ping" --health-interval 10s --health-timeout 5s --health-retries 5 redis:3.2.3-alpine
           sudo apt update && sudo apt install -y mysql-client
           sleep 15
