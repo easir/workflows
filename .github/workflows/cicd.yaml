@@ -309,7 +309,8 @@ jobs:
           php-version: ${{inputs.PhpVersion}}
           extensions: ${{inputs.PhpExtensions}}
           coverage: pcov
-          tools: behat, phpunit, composer, phpcs, php-cs-fixer, phpcbf, phpstan, psalm, phplint,
+          tools: composer
+          #behat, phpunit, composer, phpcs, php-cs-fixer, phpcbf, phpstan, psalm, phplint,
         env:
           runner: self-hosted
       - name: run Composer
