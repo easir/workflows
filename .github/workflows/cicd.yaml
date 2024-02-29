@@ -468,7 +468,7 @@ jobs:
     runs-on: ${{needs.setup_variables.outputs.runners}}
     if: needs.setup_variables.outputs.rebuildManifest == 'true'
     container:
-      image: docker-registry.easir.com/manifest:master-edc5d03a8b7a4530442e23d2bd87c0833b4bd0bd
+      image: docker-registry.easir.com/manifest:master-b9f7908a006ac2ae6fa452e1e8dcebc3fef4631d
       credentials:
         username: ${{secrets.docker-login}}
         password: ${{secrets.docker-pass}}
