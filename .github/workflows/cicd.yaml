@@ -196,19 +196,8 @@ jobs:
           && sudo apt update \
           && sudo apt install gh -y)
           minutes=`gh api -H "Accept: application/vnd.github+json" /orgs/easir/settings/billing/actions | jq ".total_minutes_used"`
-          if (( $minutes < 2700 ))
-          then 
-          export runners="ubuntu-latest"
-          else
-          export runners="self-hosted"
-          fi
-          echo "runners=$runners" >> $GITHUB_OUTPUT
+          echo "runners=ubuntu-latest" >> $GITHUB_OUTPUT
           echo "minutes=$minutes" >> $GITHUB_STEP_SUMMARY
-      # - name: variable runners output
-      #   id: runners
-      #   run: |
-      #     # if [ "${{ steps.hosted.outputs.runners }}" == "${{ steps.forced.outputs.runners }}" ] then echo "runners=${{ steps.hosted.outputs.runners }}" >> $GITHUB_OUTPUT;
-      #     if [ "${{ inputs.ForceSelfHosted }}" == "true" ] then echo "runners=${{ steps.forced.outputs.runners }}" >> $GITHUB_OUTPUT
 
       - name: prod or not?
         id: environment
