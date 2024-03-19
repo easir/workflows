@@ -34,16 +34,11 @@ on:
         type: boolean
         required: false
         default: false
-      UseComposerBehat:
-        description: "if You want to configure behat in Your composer - enable this"
-        type: boolean
-        required: false
-        default: false
-      BehatArguments:
-        description: "arguments passed to composer version of behat binary"
+      BehatVersion:
+        description: "behat version to use"
         type: string
         required: false
-        default: ""
+        default: "3.13.0"
       PhpVersion:
         required: false
         type: string
@@ -459,12 +454,9 @@ jobs:
         run: whoami && mkdir www && sudo php -d error_reporting="E_ALL & ~E_NOTICE & ~E_DEPRECATED" -S 0.0.0.0:8000 -t www public/index.php &
 
       - name: and test it
-        if: inputs.UseComposerBehat == false
         uses: php-actions/behat@v1
-
-      - name: test using composer defined behat
-        if: inputs.UseComposerBehat
-        run: composer exec -- behat {{ inputs.BehatArguments }}
+        with:
+          version: ${{ inputs.BehatVersion }}
 
   manifest-generate:
     timeout-minutes: 5
