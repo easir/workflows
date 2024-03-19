@@ -34,6 +34,11 @@ on:
         type: boolean
         required: false
         default: false
+      BehatVersion:
+        description: "behat version to use"
+        type: string
+        required: false
+        default: "3.13.0"
       PhpVersion:
         required: false
         type: string
@@ -450,6 +455,9 @@ jobs:
 
       - name: and test it
         uses: php-actions/behat@v1
+        with:
+          version: ${{ inputs.BehatVersion }}
+          php_version: ${{ inputs.PhpVersion }}
 
   manifest-generate:
     timeout-minutes: 5
