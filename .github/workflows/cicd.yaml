@@ -170,7 +170,7 @@ jobs:
       app: ${{ steps.imagetag.outputs.app }}
       rebuildManifest: ${{ steps.did-manifest-change.outputs.any_changed }}
       github-sha: ${{ steps.imagetag.outputs.github-sha }}
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     env:
       GITHUB_TOKEN: ${{ secrets.token }}
       GH_TOKEN: ${{ secrets.numa-numa-token }}
@@ -180,24 +180,24 @@ jobs:
       - name: pull code
         uses: actions/checkout@v3
 
-      - name: forced selfhosted runners
-        id: forced
-        if: inputs.ForceSelfHosted
-        run: echo "runners=self-hosted" >> $GITHUB_OUTPUT
+#      - name: forced selfhosted runners
+#        id: forced
+#        if: inputs.ForceSelfHosted
+#        run: echo "runners=ubuntu-latest" >> $GITHUB_OUTPUT
 
-      - name: how many already paid minutes we have on github action runners?
-        id: runners
-        if: inputs.ForceSelfHosted == false
-        run: |
-          type -p gh >/dev/null || (type -p curl >/dev/null || sudo apt install curl -y
-          curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg \
-          && sudo chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg \
-          && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null \
-          && sudo apt update \
-          && sudo apt install gh -y)
-          minutes=`gh api -H "Accept: application/vnd.github+json" /orgs/easir/settings/billing/actions | jq ".total_minutes_used"`
-          echo "runners=ubuntu-latest" >> $GITHUB_OUTPUT
-          echo "minutes=$minutes" >> $GITHUB_STEP_SUMMARY
+#      - name: how many already paid minutes we have on github action runners?
+#        id: runners
+#        if: inputs.ForceSelfHosted == false
+#        run: |
+#          type -p gh >/dev/null || (type -p curl >/dev/null || sudo apt install curl -y
+#          curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg \
+#          && sudo chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg \
+#          && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null \
+#          && sudo apt update \
+#          && sudo apt install gh -y)
+#          minutes=`gh api -H "Accept: application/vnd.github+json" /orgs/easir/settings/billing/actions | jq ".total_minutes_used"`
+#          echo "runners=ubuntu-latest" >> $GITHUB_OUTPUT
+#          echo "minutes=$minutes" >> $GITHUB_STEP_SUMMARY
 
       - name: prod or not?
         id: environment
@@ -301,7 +301,7 @@ jobs:
           tools: composer
           #behat, phpunit, composer, phpcs, php-cs-fixer, phpcbf, phpstan, psalm, phplint,
         env:
-          runner: self-hosted
+          runner: ubuntu-latest
       - name: run Composer
         if: inputs.ApplicationLanguage == 'php'
         run: |
