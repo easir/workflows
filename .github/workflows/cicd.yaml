@@ -482,7 +482,7 @@ jobs:
   #       run: echo "dupa"
 
   build-image:
-    timeout-minutes: 15
+    timeout-minutes: 30
     needs: [ "setup_variables", "tests-nodejs","tests-php" ]
     if: |
       always() && 
