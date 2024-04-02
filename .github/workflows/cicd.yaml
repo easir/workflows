@@ -528,13 +528,15 @@ jobs:
         id: buildx-context
         run: |
           docker context create builders
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
 
       - name: Docker Setup Buildx
-        uses: docker/setup-buildx-action@v2.2.1
+        uses: docker/setup-buildx-action@v3
         with:
           version: v0.9.1
           endpoint: builders
-          platforms: linux/arm64/v8,linux/amd64
+          platforms: linux/arm64,linux/amd64
 
       - name: Docker meta
         id: meta
@@ -574,7 +576,7 @@ jobs:
           ecr: false
 
       - name: Build and push Docker images
-        uses: docker/build-push-action@v3.3.0
+        uses: docker/build-push-action@v5
         with:
           build-args: |
             IMAGE_VERSION=${{ needs.setup_variables.outputs.github-sha }}
@@ -582,6 +584,7 @@ jobs:
             SENTRY_ORG=${{inputs.SentryOrganisation}}
             SENTRY_AUTH_TOKEN=${{secrets.sentry-auth-token}}
             SENTRY_PROJECT=${{inputs.SentryProjectName}}
+          platforms: linux/arm64,linux/amd64
           context: .
           allow: network.host
           network: host
