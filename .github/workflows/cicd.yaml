@@ -178,7 +178,7 @@ jobs:
       DO_E2E_TESTS: ${{ contains(github.event.head_commit.message, '/e2e') }}
     steps:
       - name: pull code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: forced selfhosted runners
         id: forced
@@ -232,7 +232,7 @@ jobs:
 
       - name: Check file existence
         id: check_files
-        uses: andstor/file-existence-action@v2.0.0
+        uses: andstor/file-existence-action@v3
         with:
           files: "./manifest.yaml"
 
@@ -273,7 +273,7 @@ jobs:
     timeout-minutes: 40
     steps:
       - name: pull code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           token: ${{ secrets.numa-numa-token }}
           submodules: recursive
@@ -292,7 +292,7 @@ jobs:
         if: inputs.ApplicationLanguage == 'php'
         run: |
           echo "{\"github-oauth\": {\"github.com\": \"${{secrets.numa-numa-token}}\"}}" > $GITHUB_WORKSPACE/auth.json
-      - uses: shivammathur/setup-php@2.24.0
+      - uses: shivammathur/setup-php@2.30.2
         if: inputs.ApplicationLanguage == 'php'
         with:
           php-version: ${{inputs.PhpVersion}}
@@ -364,7 +364,7 @@ jobs:
     timeout-minutes: 15
     steps:
       - name: pull code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           token: ${{ secrets.numa-numa-token }}
           submodules: recursive
@@ -420,12 +420,12 @@ jobs:
     timeout-minutes: 15
     steps:
       - name: pull code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           token: ${{ secrets.numa-numa-token }}
           submodules: recursive
 
-      - uses: shivammathur/setup-php@2.25.2
+      - uses: shivammathur/setup-php@2.30.2
         if: inputs.ApplicationLanguage == 'php'
         with:
           php-version: ${{inputs.PhpVersion}}
@@ -463,7 +463,7 @@ jobs:
         password: ${{secrets.docker-pass}}
     steps:
       - name: pull code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: generate manifest
         run: |
@@ -509,7 +509,7 @@ jobs:
       #     connect-server-url: ${{ secrets.TEST_OP_CONNECT_HOST }}
       #     connect-server-token: ${{ secrets.TEST_OP_CONNECT_TOKEN }}
       - name: pull code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           token: ${{ secrets.numa-numa-token }}
           submodules: recursive
@@ -540,7 +540,7 @@ jobs:
 
       - name: Docker meta
         id: meta
-        uses: docker/metadata-action@v4.1.1
+        uses: docker/metadata-action@v5.5.1
         with:
           images: |
             ${{ secrets.docker-reg }}/${{needs.setup_variables.outputs.app}}
@@ -613,7 +613,7 @@ jobs:
     runs-on: ${{needs.setup_variables.outputs.runners}}
     steps:
       - name: pull code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           token: ${{ secrets.numa-numa-token }}
           submodules: recursive
