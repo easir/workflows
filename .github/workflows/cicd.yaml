@@ -376,7 +376,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4.0.2
         with:
-          cache: ${{needs.setup_variables.outputs.app}}-cache
+          cache: 'yarn'
           node-version: ${{ inputs.NodeVersion }}
       - name: prepare environment
         run: |
