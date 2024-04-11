@@ -244,7 +244,7 @@ jobs:
       - name: did manifest change?
         if: steps.check_files.outputs.files_exists == 'true'
         id: did-manifest-change
-        uses: tj-actions/changed-files@v35.1.0
+        uses: tj-actions/changed-files@v41
         with:
           files: |
             ./manifest.yaml
