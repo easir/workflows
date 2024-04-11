@@ -376,7 +376,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v3
         with:
-          cache: ${{ steps.imagetag.outputs.app }}-cache
+          cache: ${{needs.setup_variables.outputs.app}}-cache
           node-version: ${{ inputs.NodeVersion }}
       - name: prepare environment
         run: |
