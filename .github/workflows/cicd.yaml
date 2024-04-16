@@ -376,7 +376,6 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4.0.2
         with:
-          cache: 'yarn'
           node-version: ${{ inputs.NodeVersion }}
       - name: prepare environment
         run: |
@@ -390,9 +389,9 @@ jobs:
           alias python=python2
       - name: node
         run: |
-          yarn install -include=dev
+          npm install -include=dev
           echo **** npm run build
-          yarn run build
+          npm run build
 
       - name: karma tests
         if: true && !inputs.DisableKarmaTests
