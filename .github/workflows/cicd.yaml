@@ -143,7 +143,10 @@ on:
         type: string
         default: "linux/arm64,linux/amd64"
         required: false
-
+      WithTarget:
+        type: boolean
+        default: false
+        required: false
     secrets:
       token:
         required: true
@@ -588,7 +591,29 @@ jobs:
           password: ${{ secrets.docker-pass }}
           ecr: false
 
+      - name: Build and push Docker images with target
+        if: inputs.WithTarget
+        uses: docker/build-push-action@v5
+        with:
+          build-args: |
+            IMAGE_VERSION=${{ needs.setup_variables.outputs.github-sha }}
+            ENVIRONMENT=${{ needs.setup_variables.outputs.environment }}
+            SENTRY_ORG=${{inputs.SentryOrganisation}}
+            SENTRY_AUTH_TOKEN=${{secrets.sentry-auth-token}}
+            SENTRY_PROJECT=${{inputs.SentryProjectName}}
+          platforms: linux/arm64,linux/amd64
+          context: .
+          allow: network.host
+          network: host
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          secrets: |
+            GIT_AUTH_TOKEN=${{ secrets.numa-numa-token }}
+          github-token: ${{ secrets.numa-numa-token }}
+          target: prod
+
       - name: Build and push Docker images
+        if: !inputs.WithTarget
         uses: docker/build-push-action@v5
         with:
           build-args: |
