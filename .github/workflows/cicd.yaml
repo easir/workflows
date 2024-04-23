@@ -613,7 +613,7 @@ jobs:
           target: prod
 
       - name: Build and push Docker images
-        if: !inputs.WithTarget
+        if: true && !inputs.WithTarget
         uses: docker/build-push-action@v5
         with:
           build-args: |
