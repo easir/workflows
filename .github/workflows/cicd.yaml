@@ -426,7 +426,7 @@ jobs:
     needs: setup_variables
     env:
       GITHUB_TOKEN: ${{ secrets.token }}
-      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/${{steps.imagetag.outputs.app}}
+      DATABASE_URL: ${{join(steps.imagetag.outputs.app, 'postgresql://postgres:postgres@localhost:5432/\n')}}
     runs-on: ${{needs.setup_variables.outputs.runners}}
     timeout-minutes: 15
     steps:
