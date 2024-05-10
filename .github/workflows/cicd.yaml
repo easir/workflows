@@ -426,7 +426,7 @@ jobs:
     needs: setup_variables
     env:
       GITHUB_TOKEN: ${{ secrets.token }}
-      DATABASE_URL: ${{join(steps.imagetag.outputs.app, 'postgresql://postgres:postgres@localhost:5432/\n')}}
+      DATABASE_URL: ${{join(needs.setup_variables.outputs.app, 'postgresql://postgres:postgres@localhost:5432/\n')}}
     runs-on: ${{needs.setup_variables.outputs.runners}}
     timeout-minutes: 15
     steps:
@@ -438,7 +438,7 @@ jobs:
       - name: start postgres
         if: inputs.BehatUsePostgresql
         run: |
-          docker run --rm --name postgres-db -p 5432:5432 -e POSTGRES_PASSWORD=postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=${{ steps.imagetag.outputs.app }} -d postgres:13.13
+          docker run --rm --name postgres-db -p 5432:5432 -e POSTGRES_PASSWORD=postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=${{ needs.setup_variables.outputs.app }} -d postgres:13.13
       - uses: shivammathur/setup-php@2.30.2
         if: inputs.ApplicationLanguage == 'php'
         with:
