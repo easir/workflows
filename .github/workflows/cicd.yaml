@@ -426,7 +426,7 @@ jobs:
     needs: setup_variables
     env:
       GITHUB_TOKEN: ${{ secrets.token }}
-      DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/${{ steps.imagetag.outputs.app }}"
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/${{steps.imagetag.outputs.app}}
     runs-on: ${{needs.setup_variables.outputs.runners}}
     timeout-minutes: 15
     steps:
@@ -435,7 +435,7 @@ jobs:
         with:
           token: ${{ secrets.numa-numa-token }}
           submodules: recursive
-      - name: start mysql and redis
+      - name: start postgres
         if: inputs.BehatUsePostgresql
         run: |
           docker run --rm --name postgres-db -p 5432:5432 -e POSTGRES_PASSWORD=postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=${{ steps.imagetag.outputs.app }} -d postgres:13.13
