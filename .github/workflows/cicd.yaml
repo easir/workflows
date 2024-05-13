@@ -435,10 +435,12 @@ jobs:
         with:
           token: ${{ secrets.numa-numa-token }}
           submodules: recursive
+
       - name: start postgres
         if: inputs.BehatUsePostgresql
         run: |
           docker run --rm --name postgres-db -p 5432:5432 -e POSTGRES_PASSWORD=postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=${{ needs.setup_variables.outputs.app }} -d postgres:13.13
+      
       - uses: shivammathur/setup-php@2.30.2
         if: inputs.ApplicationLanguage == 'php'
         with:
@@ -467,6 +469,7 @@ jobs:
         with:
           version: ${{ inputs.BehatVersion }}
           php_version: ${{ inputs.PhpVersion }}
+          php_extensions: ${{inputs.PhpExtensions}}
 
   manifest-generate:
     timeout-minutes: 5
