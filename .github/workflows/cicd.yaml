@@ -463,13 +463,16 @@ jobs:
         env:
           SHELL_VERBOSITY: "-1"
         run: whoami && mkdir www && sudo php -d error_reporting="E_ALL & ~E_NOTICE & ~E_DEPRECATED" -S 0.0.0.0:8000 -t www public/index.php &
+      
+      - name: test
+        run: ./vendor/bin/behat features
 
-      - name: and test it
-        uses: php-actions/behat@v1
-        with:
-          version: ${{ inputs.BehatVersion }}
-          php_version: ${{ inputs.PhpVersion }}
-          php_extensions: ${{inputs.PhpExtensions}}
+      # - name: and test it
+      #   uses: php-actions/behat@v1
+      #   with:
+      #     version: ${{ inputs.BehatVersion }}
+      #     php_version: ${{ inputs.PhpVersion }}
+      #     php_extensions: ${{inputs.PhpExtensions}}
 
   manifest-generate:
     timeout-minutes: 5
