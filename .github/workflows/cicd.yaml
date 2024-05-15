@@ -172,6 +172,7 @@ jobs:
       runners: ${{ steps.runners.outputs.runners }}
       environment: ${{ steps.environment.outputs.environment }}
       imagetag: ${{ steps.imagetag.outputs.imagetag }}
+      imagetag2: ${{ steps.imagetag.outputs.imagetag2 }}
       app: ${{ steps.imagetag.outputs.app }}
       rebuildManifest: ${{ steps.did-manifest-change.outputs.any_changed }}
       github-sha: ${{ steps.imagetag.outputs.github-sha }}
@@ -221,17 +222,23 @@ jobs:
       - name: GenerateTAG
         id: imagetag
         run: |
+          timestamp=$(date +%s)
           app=$(echo "$GITHUB_REPOSITORY" | cut -f 2 -d "/")
           pull_number=$(jq -r .pull_request.number "$GITHUB_EVENT_PATH")
           echo "app=$app" >> "$GITHUB_ENV"
           if [ ${{ steps.environment.outputs.environment }} = "prod" ]; then
             echo "tag=production-$GITHUB_SHA" >> "$GITHUB_ENV"
+            echo "tag2=production-$timestamp-$GITHUB_SHA" >> "$GITHUB_ENV"
+            tag2=production-"$timestamp"-"$GITHUB_SHA"
             tag=production-"$GITHUB_SHA"
           else
             echo "tag=pr-$pull_number-$GITHUB_SHA" >> "$GITHUB_ENV"
+            echo "tag2=pr-$pull_number-"$timestamp"-$GITHUB_SHA" >> "$GITHUB_ENV"
+            tag2=pr-$pull_number-"$timestamp"-"$GITHUB_SHA"
             tag=pr-"$pull_number-$GITHUB_SHA"
           fi
           echo "imagetag=$tag" >> $GITHUB_OUTPUT
+          echo "imagetag2=$tag2" >> $GITHUB_OUTPUT
           echo "app=$app" >> $GITHUB_OUTPUT
           echo "github-sha=$GITHUB_SHA" >> $GITHUB_OUTPUT
 
@@ -254,6 +261,7 @@ jobs:
           echo runners: ${{ steps.runners.outputs.runners }} >> $GITHUB_STEP_SUMMARY
           echo environment: ${{ steps.environment.outputs.environment }} >> $GITHUB_STEP_SUMMARY
           echo imagetag: ${{ steps.imagetag.outputs.imagetag }} >> $GITHUB_STEP_SUMMARY
+          echo imagetag2: ${{ steps.imagetag.outputs.imagetag2 }} >> $GITHUB_STEP_SUMMARY
           echo app: ${{ steps.imagetag.outputs.app }} >> $GITHUB_STEP_SUMMARY
           echo rebuildManifest: ${{ steps.did-manifest-change.outputs.any_changed }} >> $GITHUB_STEP_SUMMARY
           echo github-sha: ${{ steps.imagetag.outputs.github-sha }} >> $GITHUB_STEP_SUMMARY
@@ -563,6 +571,7 @@ jobs:
             type=ref,event=tag
             type=sha,enable=true,priority=100,prefix=,suffix=,format=long
             type=raw,value=${{needs.setup_variables.outputs.imagetag}}
+            type=raw,value=${{needs.setup_variables.outputs.imagetag2}}
             type=raw,value=latest,enable={{is_default_branch}}
           labels: |
             org.opencontainers.image.source=https://github.com/easir/${{needs.setup_variables.outputs.app}}
