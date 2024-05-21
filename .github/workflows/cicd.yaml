@@ -221,15 +221,16 @@ jobs:
       - name: GenerateTAG
         id: imagetag
         run: |
+          timestamp=$(date +%s)
           app=$(echo "$GITHUB_REPOSITORY" | cut -f 2 -d "/")
           pull_number=$(jq -r .pull_request.number "$GITHUB_EVENT_PATH")
           echo "app=$app" >> "$GITHUB_ENV"
           if [ ${{ steps.environment.outputs.environment }} = "prod" ]; then
-            echo "tag=production-$GITHUB_SHA" >> "$GITHUB_ENV"
-            tag=production-"$GITHUB_SHA"
+            echo "tag=production-$timestamp-$GITHUB_SHA" >> "$GITHUB_ENV"
+            tag=production-"$timestamp"-"$GITHUB_SHA"
           else
-            echo "tag=pr-$pull_number-$GITHUB_SHA" >> "$GITHUB_ENV"
-            tag=pr-"$pull_number-$GITHUB_SHA"
+            echo "tag=pr-$pull_number-"$timestamp"-$GITHUB_SHA" >> "$GITHUB_ENV"
+            tag=pr-"$pull_number-"$timestamp"-$GITHUB_SHA"
           fi
           echo "imagetag=$tag" >> $GITHUB_OUTPUT
           echo "app=$app" >> $GITHUB_OUTPUT
