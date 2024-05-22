@@ -139,10 +139,7 @@ on:
         type: boolean
         default: false
         required: false
-      WithTarget:
-        type: boolean
-        default: false
-        required: false
+
     secrets:
       token:
         required: true
@@ -163,6 +160,8 @@ on:
       npmrc:
         required: false
       composer-oauth:
+        required: false
+      gh-testing:
         required: false
   workflow_dispatch:
 
@@ -224,15 +223,16 @@ jobs:
       - name: GenerateTAG
         id: imagetag
         run: |
+          timestamp=$(date +%s)
           app=$(echo "$GITHUB_REPOSITORY" | cut -f 2 -d "/")
           pull_number=$(jq -r .pull_request.number "$GITHUB_EVENT_PATH")
           echo "app=$app" >> "$GITHUB_ENV"
           if [ ${{ steps.environment.outputs.environment }} = "prod" ]; then
-            echo "tag=production-$GITHUB_SHA" >> "$GITHUB_ENV"
-            tag=production-"$GITHUB_SHA"
+            echo "tag=production-$timestamp-$GITHUB_SHA" >> "$GITHUB_ENV"
+            tag=production-"$timestamp"-"$GITHUB_SHA"
           else
-            echo "tag=pr-$pull_number-$GITHUB_SHA" >> "$GITHUB_ENV"
-            tag=pr-"$pull_number-$GITHUB_SHA"
+            echo "tag=pr-$pull_number-"$timestamp"-$GITHUB_SHA" >> "$GITHUB_ENV"
+            tag=pr-"$pull_number-"$timestamp"-$GITHUB_SHA"
           fi
           echo "imagetag=$tag" >> $GITHUB_OUTPUT
           echo "app=$app" >> $GITHUB_OUTPUT
@@ -247,7 +247,7 @@ jobs:
       - name: did manifest change?
         if: steps.check_files.outputs.files_exists == 'true'
         id: did-manifest-change
-        uses: tj-actions/changed-files@v35.1.0
+        uses: tj-actions/changed-files@v44.4.0
         with:
           files: |
             ./manifest.yaml
@@ -586,29 +586,7 @@ jobs:
           password: ${{ secrets.docker-pass }}
           ecr: false
 
-      - name: Build and push Docker images with target
-        if: inputs.WithTarget
-        uses: docker/build-push-action@v5
-        with:
-          build-args: |
-            IMAGE_VERSION=${{ needs.setup_variables.outputs.github-sha }}
-            ENVIRONMENT=${{ needs.setup_variables.outputs.environment }}
-            SENTRY_ORG=${{inputs.SentryOrganisation}}
-            SENTRY_AUTH_TOKEN=${{secrets.sentry-auth-token}}
-            SENTRY_PROJECT=${{inputs.SentryProjectName}}
-          platforms: linux/arm64,linux/amd64
-          context: .
-          allow: network.host
-          network: host
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          secrets: |
-            GIT_AUTH_TOKEN=${{ secrets.numa-numa-token }}
-          github-token: ${{ secrets.numa-numa-token }}
-          target: prod
-
       - name: Build and push Docker images
-        if: !inputs.WithTarget
         uses: docker/build-push-action@v5
         with:
           build-args: |
@@ -625,6 +603,7 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           secrets: |
             GIT_AUTH_TOKEN=${{ secrets.numa-numa-token }}
+            TEST_TOKEN=${{ secrets.gh-testing }}
           github-token: ${{ secrets.numa-numa-token }}
 
       - name: summary
