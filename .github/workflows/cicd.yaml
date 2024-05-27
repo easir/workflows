@@ -427,7 +427,7 @@ jobs:
     env:
       GITHUB_TOKEN: ${{ secrets.token }}
       #DATABASE_URL: ${{join(needs.setup_variables.outputs.app, 'postgresql://postgres:postgres@postgres:5432/\n')}}
-      DATABASE_URL: 'postgresql://postgres:postgres@localhost:5432/filter'
+      DATABASE_URL: 'postgresql://postgres:postgres@localhost:5432/filter?driverOptions[schema]=public'
     runs-on: ${{needs.setup_variables.outputs.runners}}
     timeout-minutes: 15
     steps:
