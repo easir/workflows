@@ -139,6 +139,10 @@ on:
         type: boolean
         default: false
         required: false
+      Platforms:
+        type: string
+        default: "linux/arm64,linux/amd64"
+        required: false
 
     secrets:
       token:
@@ -545,7 +549,7 @@ jobs:
         with:
           version: v0.9.1
           endpoint: builders
-          platforms: linux/arm64,linux/amd64
+          platforms: ${{ inputs.Platforms }}
 
       - name: Docker meta
         id: meta
@@ -593,7 +597,7 @@ jobs:
             SENTRY_ORG=${{inputs.SentryOrganisation}}
             SENTRY_AUTH_TOKEN=${{secrets.sentry-auth-token}}
             SENTRY_PROJECT=${{inputs.SentryProjectName}}
-          platforms: linux/arm64,linux/amd64
+          platforms: ${{ inputs.Platforms }}
           context: .
           allow: network.host
           network: host
