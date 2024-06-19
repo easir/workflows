@@ -547,7 +547,7 @@ jobs:
       - name: Docker Setup Buildx
         uses: docker/setup-buildx-action@v3
         with:
-          version: v0.9.1
+          version: latest
           endpoint: builders
           platforms: ${{ inputs.Platforms }}
 
