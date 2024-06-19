@@ -1,0 +1,68 @@
+name: CICD - DEV Images
+
+on:
+  #  TODO ADD workflow_call
+  workflow_dispatch:
+
+jobs:
+  setup_variables:
+    timeout-minutes: 5
+    outputs:
+      runners: ${{ steps.runners.outputs.runners }}
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.token }}
+      GH_TOKEN: ${{ secrets.numa-numa-token }}
+      FORCE_PUSH: ${{ contains(github.event.head_commit.message, '/forcepush') }}
+      DO_E2E_TESTS: ${{ contains(github.event.head_commit.message, '/e2e') }}
+    steps:
+      - name: pull code
+        uses: actions/checkout@v4
+
+      - name: forced selfhosted runners
+        id: forced
+        if: inputs.ForceSelfHosted
+        run: echo "runners=self-hosted" >> $GITHUB_OUTPUT
+
+      - name: how many already paid minutes we have on github action runners?
+        id: runners
+        if: inputs.ForceSelfHosted == false
+        run: |
+          type -p gh >/dev/null || (type -p curl >/dev/null || sudo apt install curl -y
+          curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg \
+          && sudo chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg \
+          && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null \
+          && sudo apt update \
+          && sudo apt install gh -y)
+          minutes=`gh api -H "Accept: application/vnd.github+json" /orgs/easir/settings/billing/actions | jq ".total_minutes_used"`
+          echo "runners=ubuntu-latest" >> $GITHUB_OUTPUT
+          echo "minutes=$minutes" >> $GITHUB_STEP_SUMMARY
+
+      - name: print all outputs
+        run: |
+          echo runners: ${{ steps.runners.outputs.runners }} >> $GITHUB_STEP_SUMMARY
+#          echo environment: ${{ steps.environment.outputs.environment }} >> $GITHUB_STEP_SUMMARY
+#          echo imagetag: ${{ steps.imagetag.outputs.imagetag }} >> $GITHUB_STEP_SUMMARY
+#          echo app: ${{ steps.imagetag.outputs.app }} >> $GITHUB_STEP_SUMMARY
+#          echo github-sha: ${{ steps.imagetag.outputs.github-sha }} >> $GITHUB_STEP_SUMMARY
+
+
+  build-image:
+    strategy:
+      matrix:
+        target: [ "dev", "dev-xdebug" ]
+    timeout-minutes: 30
+    needs: [ "setup_variables"]
+    if: |
+      always() && 
+      !contains(needs.*.result, 'failure') &&
+      !contains(needs.*.result, 'canceled') &&
+      !inputs.SkipImageBuild
+    env:
+      GITHUB_TOKEN: ${{ secrets.token }}
+    runs-on: ${{needs.setup_variables.outputs.runners}}
+    steps:
+      - name: Test matrix
+        run: |
+          echo tag: ${{ matrix.target }}
+
