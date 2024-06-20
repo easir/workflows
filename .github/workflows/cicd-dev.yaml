@@ -1,7 +1,25 @@
 name: CICD - DEV Images
 
 on:
-  #  TODO ADD workflow_call
+  workflow_call:
+    inputs:
+      targets:
+        required: false
+        default: '["dev"]'
+        type: string
+    secrets:
+      token:
+        required: true
+      docker-reg:
+        required: true
+      docker-pass:
+        required: true
+      docker-login:
+        required: true
+      numa-numa-token:
+        required: true
+      gh-ssh-key:
+        required: true
   workflow_dispatch:
 
 jobs:
@@ -50,7 +68,7 @@ jobs:
   build-image:
     strategy:
       matrix:
-        target: [ "dev", "dev-xdebug" ]
+        target: ${{ fromJSON(github.event.inputs.targets)}}
     timeout-minutes: 30
     needs: [ "setup_variables"]
     if: |
