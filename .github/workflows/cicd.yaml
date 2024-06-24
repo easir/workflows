@@ -466,11 +466,11 @@ jobs:
         run: whoami && mkdir www && sudo php -d error_reporting="E_ALL & ~E_NOTICE & ~E_DEPRECATED" -S 0.0.0.0:8000 -t www public/index.php &
       
       - name: test
-        if: ${{ !inputs.BehatUsePostgresql }}
+        if: ${{ inputs.BehatUsePostgresql }}
         run: ./vendor/bin/behat features
 
       - name: and test it
-        if: ${{ inputs.BehatUsePostgresql }}
+        if: ${{ !inputs.BehatUsePostgresql }}
         uses: php-actions/behat@v1
         with:
           version: ${{ inputs.BehatVersion }}
