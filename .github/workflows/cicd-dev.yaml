@@ -5,7 +5,7 @@ on:
     inputs:
       targets:
         required: false
-        default: "[\"project\"]"
+        default: "['project']"
         type: string
     secrets:
       token:
