@@ -426,7 +426,7 @@ jobs:
     needs: setup_variables
     env:
       GITHUB_TOKEN: ${{ secrets.token }}
-      DATABASE_URL: ${{join(needs.setup_variables.outputs.app, 'postgresql://postgres:postgres@postgres:5432/\n')}}
+      DATABASE_URL: ${{join(needs.setup_variables.outputs.app, 'postgresql://postgres:postgres@localhost:5432/\n')}}
     runs-on: ${{needs.setup_variables.outputs.runners}}
     timeout-minutes: 15
     steps:
@@ -466,7 +466,7 @@ jobs:
       
       - name: test
         env:
-          DATABASE_URL: 'postgresql://postgres:postgres@localhost:5432/filter?driverOptions[schema]=public'
+          DATABASE_URL: 'postgresql://postgres:postgres@localhost:5432/${{ needs.setup_variables.outputs.app }}?driverOptions[schema]=public'
         if: ${{ inputs.BehatUsePostgresql }}
         run: ./vendor/bin/behat features
 
