@@ -39,6 +39,11 @@ on:
         type: string
         required: false
         default: "3.13.0"
+      BehatUsePostgresql:
+        type: boolean
+        required: false
+        default: false
+        description: "use postgresql in behat tests"
       PhpVersion:
         required: false
         type: string
@@ -443,6 +448,11 @@ jobs:
           token: ${{ secrets.numa-numa-token }}
           submodules: recursive
 
+      - name: start postgres
+        if: inputs.BehatUsePostgresql
+        run: |
+          docker run --rm --name postgres-db -p 5432:5432 -e POSTGRES_PASSWORD=postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=${{ needs.setup_variables.outputs.app }} -d postgres:13.13
+      
       - uses: shivammathur/setup-php@2.30.2
         if: inputs.ApplicationLanguage == 'php'
         with:
@@ -465,12 +475,20 @@ jobs:
         env:
           SHELL_VERBOSITY: "-1"
         run: whoami && mkdir www && sudo php -d error_reporting="E_ALL & ~E_NOTICE & ~E_DEPRECATED" -S 0.0.0.0:8000 -t www public/index.php &
+      
+      - name: test
+        env:
+          DATABASE_URL: 'postgresql://postgres:postgres@localhost:5432/${{ needs.setup_variables.outputs.app }}?driverOptions[schema]=public'
+        if: ${{ inputs.BehatUsePostgresql }}
+        run: ./vendor/bin/behat features
 
       - name: and test it
+        if: ${{ !inputs.BehatUsePostgresql }}
         uses: php-actions/behat@v1
         with:
           version: ${{ inputs.BehatVersion }}
           php_version: ${{ inputs.PhpVersion }}
+          php_extensions: ${{inputs.PhpExtensions}}
 
   manifest-generate:
     timeout-minutes: 5
