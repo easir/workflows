@@ -60,7 +60,10 @@ jobs:
       - name: Set up correct matrix format
         id: set-matrix
         run: |
-          echo "matrix=\$(jq -cr '@json' <<< '${{ inputs.targets }}')" >> $GITHUB_OUTPUT
+          matrix_value=\$(jq -cr '@json' <<< '${{ inputs.targets }}')
+          echo "matrix=$matrix_value" >> $GITHUB_OUTPUT
+          echo "Generated matrix: $matrix_value"
+#          echo "matrix=\$(jq -cr '@json' <<< '${{ inputs.targets }}')" >> $GITHUB_OUTPUT
 
       - name: print all outputs
         run: |
