@@ -5,7 +5,7 @@ on:
     inputs:
       targets:
         required: false
-        default: "['project']"
+        default: '["dev", "dev-xdebug"]'
         type: string
     secrets:
       token:
@@ -27,6 +27,7 @@ jobs:
     timeout-minutes: 5
     outputs:
       runners: ${{ steps.runners.outputs.runners }}
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
     runs-on: ubuntu-latest
     env:
       GITHUB_TOKEN: ${{ secrets.token }}
@@ -56,9 +57,14 @@ jobs:
           echo "runners=ubuntu-latest" >> $GITHUB_OUTPUT
           echo "minutes=$minutes" >> $GITHUB_STEP_SUMMARY
 
+      - name: Set up correct matrix format
+        id: set-matrix
+        run: echo "matrix=$(jq -cr '@json' <<< "${{ inputs.targets }}")" >> $GITHUB_OUTPUT
+
       - name: print all outputs
         run: |
           echo runners: ${{ steps.runners.outputs.runners }} >> $GITHUB_STEP_SUMMARY
+          echo matrix: ${{ steps.set-matrix.outputs.matrix }} >> $GITHUB_STEP_SUMMARY
 #          echo environment: ${{ steps.environment.outputs.environment }} >> $GITHUB_STEP_SUMMARY
 #          echo imagetag: ${{ steps.imagetag.outputs.imagetag }} >> $GITHUB_STEP_SUMMARY
 #          echo app: ${{ steps.imagetag.outputs.app }} >> $GITHUB_STEP_SUMMARY
