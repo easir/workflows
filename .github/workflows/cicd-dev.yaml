@@ -65,7 +65,7 @@ jobs:
       - name: print all outputs
         run: |
           echo runners: ${{ steps.runners.outputs.runners }} >> $GITHUB_STEP_SUMMARY
-          echo matrix: ${{ steps.set-matrix.outputs.matrix }} >> $GITHUB_STEP_SUMMARY
+          echo matrix: '${{ steps.set-matrix.outputs.matrix }}'' >> $GITHUB_STEP_SUMMARY
 #          echo environment: ${{ steps.environment.outputs.environment }} >> $GITHUB_STEP_SUMMARY
 #          echo imagetag: ${{ steps.imagetag.outputs.imagetag }} >> $GITHUB_STEP_SUMMARY
 #          echo app: ${{ steps.imagetag.outputs.app }} >> $GITHUB_STEP_SUMMARY
