@@ -11,11 +11,6 @@ on:
         type: string
         default: "linux/arm64"
         required: false
-      ForceBuild:
-        description: 'To distinguish workflow_call from regular manual run'
-        type: boolean
-        required: false
-        default: false
     secrets:
       token:
         required: true
@@ -105,7 +100,6 @@ jobs:
           echo dockerfileChanged: ${{ steps.did-docker-change.outputs.any_changed }} >> $GITHUB_STEP_SUMMARY
           echo environment: ${{ steps.variables.outputs.environment }} >> $GITHUB_STEP_SUMMARY
           echo app: ${{ steps.variables.outputs.app }} >> $GITHUB_STEP_SUMMARY
-          echo github ${{ toJSON(github) }} >> $GITHUB_STEP_SUMMARY
 
   build-image:
     strategy:
@@ -113,11 +107,11 @@ jobs:
         target: ${{ fromJSON(needs.setup_variables.outputs.matrix)}}
     timeout-minutes: 30
     needs: [ "setup_variables"]
-#    WORKING, DISABLE FOR NOW!
     if: |
-      !always() && 
+      always() && 
       !contains(needs.*.result, 'failure') &&
-      !contains(needs.*.result, 'canceled')
+      !contains(needs.*.result, 'canceled') &&
+      (github.event_name == 'workflow_dispatch' || needs.setup_variables.outputs.dockerfileChanged == 'true')
     env:
       GITHUB_TOKEN: ${{ secrets.token }}
     runs-on: ${{needs.setup_variables.outputs.runners}}
