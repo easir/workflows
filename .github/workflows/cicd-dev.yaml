@@ -178,7 +178,6 @@ jobs:
           ecr: false
 
       - name: Build and push Docker images with target
-        if: inputs.WithTarget
         uses: docker/build-push-action@v5
         with:
           build-args: |
