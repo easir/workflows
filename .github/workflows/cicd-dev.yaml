@@ -1,0 +1,194 @@
+name: CICD - DEV Images
+
+on:
+  workflow_call:
+    inputs:
+      targets:
+        required: false
+        default: '["dev"]'
+        type: string
+      Platforms:
+        type: string
+        default: "linux/arm64"
+        required: false
+    secrets:
+      token:
+        required: true
+      docker-reg:
+        required: true
+      docker-pass:
+        required: true
+      docker-login:
+        required: true
+      numa-numa-token:
+        required: true
+      gh-ssh-key:
+        required: true
+  workflow_dispatch:
+
+jobs:
+  setup_variables:
+    timeout-minutes: 5
+    outputs:
+      runners: ${{ steps.runners.outputs.runners }}
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+      dockerfileChanged: ${{ steps.did-docker-change.outputs.any_changed }}
+      environment: ${{ steps.variables.outputs.environment }}
+      app: ${{ steps.variables.outputs.app }}
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.token }}
+      GH_TOKEN: ${{ secrets.numa-numa-token }}
+      FORCE_PUSH: ${{ contains(github.event.head_commit.message, '/forcepush') }}
+      DO_E2E_TESTS: ${{ contains(github.event.head_commit.message, '/e2e') }}
+    steps:
+      - name: pull code
+        uses: actions/checkout@v4
+
+      - name: forced selfhosted runners
+        id: forced
+        if: inputs.ForceSelfHosted
+        run: echo "runners=self-hosted" >> $GITHUB_OUTPUT
+
+      - name: how many already paid minutes we have on github action runners?
+        id: runners
+        if: inputs.ForceSelfHosted == false
+        run: |
+          type -p gh >/dev/null || (type -p curl >/dev/null || sudo apt install curl -y
+          curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg \
+          && sudo chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg \
+          && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null \
+          && sudo apt update \
+          && sudo apt install gh -y)
+          minutes=`gh api -H "Accept: application/vnd.github+json" /orgs/easir/settings/billing/actions | jq ".total_minutes_used"`
+          echo "runners=ubuntu-latest" >> $GITHUB_OUTPUT
+          echo "minutes=$minutes" >> $GITHUB_STEP_SUMMARY
+
+      - name: Set up correct matrix format
+        id: set-matrix
+        run: |
+          matrix_value=$(jq -cr '@json' <<< '${{ inputs.targets }}')
+          echo "matrix=$matrix_value" >> $GITHUB_OUTPUT
+          echo "Generated matrix: $matrix_value"
+
+      - name: Set rest of the vars
+        id: variables
+        run: |
+          app=$(echo "$GITHUB_REPOSITORY" | cut -f 2 -d "/")
+          echo "app=$app" >> $GITHUB_OUTPUT
+          echo "environment=dev" >> $GITHUB_OUTPUT
+
+
+      - name: Check docker file existence
+        id: check_files
+        uses: andstor/file-existence-action@v3
+        with:
+          files: "./Dockerfile"
+
+      - name: did Dockerfile change?
+        if: steps.check_files.outputs.files_exists == 'true'
+        id: did-docker-change
+        uses: tj-actions/changed-files@v44.4.0
+        with:
+          files: |
+            ./Dockerfile
+
+      - name: print all outputs
+        run: |
+          echo runners: ${{ steps.runners.outputs.runners }} >> $GITHUB_STEP_SUMMARY
+          echo matrix: ${{ steps.set-matrix.outputs.matrix }} >> $GITHUB_STEP_SUMMARY
+          echo dockerfileChanged: ${{ steps.did-docker-change.outputs.any_changed }} >> $GITHUB_STEP_SUMMARY
+          echo environment: ${{ steps.variables.outputs.environment }} >> $GITHUB_STEP_SUMMARY
+          echo app: ${{ steps.variables.outputs.app }} >> $GITHUB_STEP_SUMMARY
+
+  build-image:
+    strategy:
+      matrix:
+        target: ${{ fromJSON(needs.setup_variables.outputs.matrix)}}
+    timeout-minutes: 30
+    needs: [ "setup_variables"]
+    if: |
+      always() && 
+      !contains(needs.*.result, 'failure') &&
+      !contains(needs.*.result, 'canceled') &&
+      (github.event_name == 'workflow_dispatch' || needs.setup_variables.outputs.dockerfileChanged == 'true')
+    env:
+      GITHUB_TOKEN: ${{ secrets.token }}
+    runs-on: ${{needs.setup_variables.outputs.runners}}
+    steps:
+      - name: pull code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.numa-numa-token }}
+          submodules: recursive
+      - name: Test matrix
+        run: |
+          echo tag: ${{ matrix.target }}
+
+      - name: Set up Docker Context for Buildx
+        id: buildx-context
+        run: |
+          docker context create builders
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Docker Setup Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          version: latest
+          endpoint: builders
+          platforms: ${{ inputs.Platforms }}
+
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v5.5.1
+        with:
+          images: |
+            ${{ secrets.docker-reg }}/${{needs.setup_variables.outputs.app}}
+            ghcr.io/easir/${{needs.setup_variables.outputs.app}}
+          tags: |
+            type=schedule
+            type=ref,event=branch
+            type=raw,value=${{needs.setup_variables.outputs.imagetag}}
+          labels: |
+            org.opencontainers.image.source=https://github.com/easir/${{needs.setup_variables.outputs.app}}
+
+      - name: Docker Login
+        uses: docker/login-action@v3.0.0
+        with:
+          registry: ghcr.io
+          username: easir
+          password: ${{ secrets.numa-numa-token }}
+          ecr: false
+
+      - name: Docker Login
+        uses: docker/login-action@v3.0.0
+        with:
+          registry: ${{ secrets.docker-reg }}
+          username: ${{ secrets.docker-login }}
+          password: ${{ secrets.docker-pass }}
+          ecr: false
+
+      - name: Build and push Docker images with target
+        uses: docker/build-push-action@v5
+        with:
+          build-args: |
+            IMAGE_VERSION=${{ needs.setup_variables.outputs.environment }}
+            ENVIRONMENT=${{ needs.setup_variables.outputs.environment }}
+          platforms: linux/arm64,linux/amd64
+          context: .
+          allow: network.host
+          network: host
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          secrets: |
+            GIT_AUTH_TOKEN=${{ secrets.numa-numa-token }}
+          github-token: ${{ secrets.numa-numa-token }}
+          target: ${{ matrix.target }}
+
+      - name: summary
+        run: |
+          echo IMAGE_VERSION: ${{ needs.setup_variables.outputs.environment }} >> $GITHUB_STEP_SUMMARY
+          echo TARGET: ${{ matrix.target }} >> $GITHUB_STEP_SUMMARY
+          echo "IMAGE TAGS : ${{ steps.meta.outputs.tags }} >> $GITHUB_STEP_SUMMARY"
