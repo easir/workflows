@@ -149,8 +149,7 @@ jobs:
             ghcr.io/easir/${{needs.setup_variables.outputs.app}}
           tags: |
             type=schedule
-            type=ref,event=branch
-            type=raw,value=${{needs.setup_variables.outputs.imagetag}}
+            type=raw,value=${{ matrix.target }}
           labels: |
             org.opencontainers.image.source=https://github.com/easir/${{needs.setup_variables.outputs.app}}
 
