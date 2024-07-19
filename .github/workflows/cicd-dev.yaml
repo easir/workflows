@@ -145,13 +145,13 @@ jobs:
         uses: docker/metadata-action@v5.5.1
         with:
           images: |
-            ${{ secrets.docker-reg }}/${{needs.setup_variables.outputs.app}}
-            ghcr.io/easir/${{needs.setup_variables.outputs.app}}
+            ${{ secrets.docker-reg }}/${{needs.setup_variables.outputs.app}}/${{ matrix.target }}
+            ghcr.io/easir/${{needs.setup_variables.outputs.app}}/${{ matrix.target }}
           tags: |
             type=schedule
-            type=raw,value=${{ matrix.target }}
+            type=raw,value=latest
           labels: |
-            org.opencontainers.image.source=https://github.com/easir/${{needs.setup_variables.outputs.app}}
+            org.opencontainers.image.source=https://github.com/easir/${{needs.setup_variables.outputs.app}}/${{ matrix.target }}
 
       - name: Docker Login
         uses: docker/login-action@v3.0.0
