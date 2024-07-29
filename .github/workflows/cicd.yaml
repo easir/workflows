@@ -627,7 +627,7 @@ jobs:
             SENTRY_ORG=${{inputs.SentryOrganisation}}
             SENTRY_AUTH_TOKEN=${{secrets.sentry-auth-token}}
             SENTRY_PROJECT=${{inputs.SentryProjectName}}
-          platforms: linux/arm64,linux/amd64
+          platforms: ${{ inputs.Platforms }}
           context: .
           allow: network.host
           network: host
@@ -659,6 +659,8 @@ jobs:
           secrets: |
             GIT_AUTH_TOKEN=${{ secrets.numa-numa-token }}
           github-token: ${{ secrets.numa-numa-token }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
       - name: summary
         run: |
