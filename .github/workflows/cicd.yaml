@@ -455,7 +455,7 @@ jobs:
         if: inputs.BehatUsePostgresql
         run: |
           docker run --rm --name postgres-db -p 5432:5432 -e POSTGRES_PASSWORD=postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=${{ needs.setup_variables.outputs.app }} -d postgres:13.13
-      
+
       - uses: shivammathur/setup-php@2.30.2
         if: inputs.ApplicationLanguage == 'php'
         with:
@@ -478,7 +478,7 @@ jobs:
         env:
           SHELL_VERBOSITY: "-1"
         run: whoami && mkdir www && sudo php -d error_reporting="E_ALL & ~E_NOTICE & ~E_DEPRECATED" -S 0.0.0.0:8000 -t www public/index.php &
-      
+
       - name: test
         env:
           DATABASE_URL: 'postgresql://postgres:postgres@localhost:5432/${{ needs.setup_variables.outputs.app }}?driverOptions[schema]=public'
@@ -627,7 +627,7 @@ jobs:
             SENTRY_ORG=${{inputs.SentryOrganisation}}
             SENTRY_AUTH_TOKEN=${{secrets.sentry-auth-token}}
             SENTRY_PROJECT=${{inputs.SentryProjectName}}
-          platforms: linux/arm64,linux/amd64
+          platforms: ${{ inputs.Platforms }}
           context: .
           allow: network.host
           network: host
@@ -637,6 +637,8 @@ jobs:
             GIT_AUTH_TOKEN=${{ secrets.numa-numa-token }}
           github-token: ${{ secrets.numa-numa-token }}
           target: prod
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
       - name: Build and push Docker images
         if: true && !inputs.WithTarget
@@ -657,6 +659,8 @@ jobs:
           secrets: |
             GIT_AUTH_TOKEN=${{ secrets.numa-numa-token }}
           github-token: ${{ secrets.numa-numa-token }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
       - name: summary
         run: |
