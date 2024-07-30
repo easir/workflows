@@ -150,7 +150,7 @@ on:
         required: false
       Platforms:
         type: string
-        default: "linux/amd64"
+        default: "linux/arm64,linux/amd64"
         required: false
       WithTarget:
         type: boolean
