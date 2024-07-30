@@ -1,0 +1,24 @@
+name: Cleanup caches by a branch
+on:
+  workflow_call:
+    secrets:
+      numa-numa-token:
+        required: true
+  workflow_dispatch:
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Cleanup
+        run: |
+          echo "INIT"
+        env:
+          GH_TOKEN: ${{ secrets.numa-numa-token }}
+          REPO: ${{ github.repository }}
+          BRANCH: refs/pull/${{ github.event.pull_request.number }}/merge
+
+      - name: summary
+        run: |
+          echo REPO: ${{ github.repository }} >> $GITHUB_STEP_SUMMARY
+          echo "IMAGE TAGS : ${{ github.event.pull_request.number }} >> $GITHUB_STEP_SUMMARY"
