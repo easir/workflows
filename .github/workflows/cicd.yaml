@@ -638,7 +638,7 @@ jobs:
           github-token: ${{ secrets.numa-numa-token }}
           target: prod
           cache-from: type=gha
-          cache-to: type=gha,mode=max
+#          cache-to: type=gha,mode=max
 
       - name: Build and push Docker images
         if: true && !inputs.WithTarget
