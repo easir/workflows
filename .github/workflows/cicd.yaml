@@ -314,6 +314,7 @@ jobs:
         if: ${{ needs.setup_variables.outputs.app == 'report-service' }}
         run: |
           docker run -d --env ELASTICSEARCH_HOST=127.0.0.1:9200 --env ELASTICSEARCH_INDEX=testreport --name es -p 127.0.0.1:9200:9200 -p 127.0.0.1:9300:9300 -e "discovery.type=single-node" docker.elastic.co/elasticsearch/elasticsearch:7.17.23
+          echo curl http://127.0.0.1:9200/_health
       - name: authenticate to composer
         if: inputs.ApplicationLanguage == 'php'
         run: |
