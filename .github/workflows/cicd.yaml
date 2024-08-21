@@ -313,10 +313,7 @@ jobs:
       - name: elasticsearch 7
         if: ${{ needs.setup_variables.outputs.app == 'report-service' }}
         run: |
-          docker run -d --name es -p 9200:9200 -p 9300:9300 elasticsearch:7.17.2 --logger.discovery=DEBUG
-          sleep 15
-          echo "waiting for elasticsearch"
-          until curl -s http://localhost:9200/_cluster/health?wait_for_status=yellow
+          docker run -d --name es -p 9200:9200 -p 9300:9300 elasticsearch:7.17.2 --logger.discovery=DEBUG --health-cmd "curl http://localhost:9200/_cluster/health" --health-interval 10s --health-timeout 5s --health-retries 10
       - name: authenticate to composer
         if: inputs.ApplicationLanguage == 'php'
         run: |
