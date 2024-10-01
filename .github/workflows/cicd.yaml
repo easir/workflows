@@ -583,6 +583,7 @@ jobs:
           version: latest
           endpoint: builders
           platforms: ${{ inputs.Platforms }}
+          buildkitd-flags: --debug
 
       - name: Docker meta
         id: meta
@@ -623,7 +624,7 @@ jobs:
 
       - name: Build and push Docker images with target
         if: inputs.WithTarget
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           build-args: |
             IMAGE_VERSION=${{ needs.setup_variables.outputs.github-sha }}
@@ -643,11 +644,11 @@ jobs:
           github-token: ${{ secrets.numa-numa-token }}
           target: prod
           cache-from: type=gha
-#          cache-to: type=gha,mode=max
+          cache-to: type=gha,mode=max
 
       - name: Build and push Docker images
         if: true && !inputs.WithTarget
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           build-args: |
             IMAGE_VERSION=${{ needs.setup_variables.outputs.github-sha }}
