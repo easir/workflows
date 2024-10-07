@@ -446,7 +446,7 @@ jobs:
     needs: setup_variables
     env:
       GITHUB_TOKEN: ${{ secrets.token }}
-    runs-on: self-hosted #${{needs.setup_variables.outputs.runners}}
+    runs-on: ${{needs.setup_variables.outputs.runners}}
     timeout-minutes: 15
     steps:
       - name: pull code
@@ -460,15 +460,15 @@ jobs:
         run: |
           docker run --rm --name postgres-db -p 5432:5432 -e POSTGRES_PASSWORD=postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=${{ needs.setup_variables.outputs.app }} -d postgres:13.13
 
-#      - uses: shivammathur/setup-php@2.30.2
-#        if: inputs.ApplicationLanguage == 'php'
-#        with:
-#          php-version: ${{inputs.PhpVersion}}
-#          extensions: ${{inputs.PhpExtensions}}
-#          coverage: pcov
-#          tools: composer
-#        env:
-#          runner: ${{needs.setup_variables.outputs.runners}}
+      - uses: shivammathur/setup-php@2.30.2
+        if: inputs.ApplicationLanguage == 'php'
+        with:
+          php-version: ${{inputs.PhpVersion}}
+          extensions: ${{inputs.PhpExtensions}}
+          coverage: pcov
+          tools: composer
+        env:
+          runner: ${{needs.setup_variables.outputs.runners}}
 
       - name: authenticate to composer
         run: |
