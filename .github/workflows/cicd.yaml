@@ -464,9 +464,9 @@ jobs:
         run: |
           docker run --rm --name postgres-db -p 5432:5432 -e POSTGRES_PASSWORD=postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=${{ needs.setup_variables.outputs.app }} -d postgres:13.13
 
-      - name: authenticate to composer
-        run: |
-          echo "{\"github-oauth\": {\"github.com\": \"${{secrets.numa-numa-token}}\"}}" > $GITHUB_WORKSPACE/auth.json
+#      - name: authenticate to composer
+#        run: |
+#          echo "{\"github-oauth\": {\"github.com\": \"${{secrets.numa-numa-token}}\"}}" > $GITHUB_WORKSPACE/auth.json
 
       - uses: shivammathur/setup-php@2.30.2
         if: inputs.ApplicationLanguage == 'php'
