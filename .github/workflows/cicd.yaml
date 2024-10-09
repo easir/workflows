@@ -482,7 +482,6 @@ jobs:
         if: inputs.ApplicationLanguage == 'php'
         run: |
           composer config github-oauth.github.com ${{ secrets.token }}
-#          composer diagnose
           composer install --prefer-dist --no-progress --no-interaction ${{ inputs.ComposerAdditionalArguments }}
 
       - name: lets fire up the app
