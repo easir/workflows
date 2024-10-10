@@ -476,12 +476,12 @@ jobs:
           coverage: pcov
           tools: composer
         env:
-          runner: ${{needs.setup_variables.outputs.runners}}
+          runner: ubuntu-latest
 
       - name: run Composer
         if: inputs.ApplicationLanguage == 'php'
         run: |
-          composer config github-oauth.github.com ${{ secrets.token }}
+          composer config github-oauth.github.com ${{ secrets.numa-numa-token }}
           composer install --prefer-dist --no-progress --no-interaction ${{ inputs.ComposerAdditionalArguments }}
 
       - name: lets fire up the app
