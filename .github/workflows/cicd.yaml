@@ -468,7 +468,7 @@ jobs:
 #        run: |
 #          echo "{\"github-oauth\": {\"github.com\": \"${{secrets.numa-numa-token}}\"}}" > $GITHUB_WORKSPACE/auth.json
 
-      - uses: shivammathur/setup-php@2.30.2
+      - uses: shivammathur/setup-php@v2
         if: inputs.ApplicationLanguage == 'php'
         with:
           php-version: ${{inputs.PhpVersion}}
