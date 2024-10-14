@@ -478,7 +478,7 @@ jobs:
           coverage: pcov
           tools: composer
         env:
-          runner: ubuntu-latest
+          runner: ${{needs.setup_variables.outputs.runners}}
 
       - name: run Composer
         if: inputs.ApplicationLanguage == 'php'
