@@ -468,10 +468,11 @@ jobs:
 #        run: |
 #          echo "{\"github-oauth\": {\"github.com\": \"${{secrets.numa-numa-token}}\"}}" > $GITHUB_WORKSPACE/auth.json
 
-      - name: Add SSH key
-        uses: webfactory/ssh-agent@v0.9.0
-        with:
-          ssh-private-key: ${{ secrets.gh-ssh-key }}
+#      Workaround failing GH token in composer (Telecom/Vehicle service)
+#      - name: Add SSH key
+#        uses: webfactory/ssh-agent@v0.9.0
+#        with:
+#          ssh-private-key: ${{ secrets.gh-ssh-key }}
 
       - uses: shivammathur/setup-php@v2
         if: inputs.ApplicationLanguage == 'php'
@@ -486,6 +487,7 @@ jobs:
       - name: run Composer
         if: inputs.ApplicationLanguage == 'php'
         run: |
+          composer clear-cache
           composer config github-oauth.github.com ${{ secrets.numa-numa-token }}
           composer install --prefer-dist --no-progress --no-interaction ${{ inputs.ComposerAdditionalArguments }}
 
@@ -580,11 +582,6 @@ jobs:
         if: inputs.ApplicationLanguage == 'php'
         run: |
           echo "{\"github-oauth\": {\"github.com\": \"${{secrets.numa-numa-token}}\"}}" > $GITHUB_WORKSPACE/auth.json
-
-      - name: Add SSH key
-        uses: webfactory/ssh-agent@v0.9.0
-        with:
-          ssh-private-key: ${{ secrets.gh-ssh-key }}
 
       - name: Set up Docker Context for Buildx
         id: buildx-context
