@@ -540,7 +540,7 @@ jobs:
     if: |
       always() && 
       !contains(needs.*.result, 'failure') &&
-      !contains(needs.*.result, 'canceled') &&
+      !cancelled() &&
       !inputs.SkipImageBuild
     env:
       GITHUB_TOKEN: ${{ secrets.token }}
