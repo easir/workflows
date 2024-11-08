@@ -510,7 +510,7 @@ jobs:
     runs-on: ${{needs.setup_variables.outputs.runners}}
     if: needs.setup_variables.outputs.rebuildManifest == 'true'
     container:
-      image: docker-registry.easir.com/manifest:newenvs
+      image: docker-registry.easir.com/manifest-php:latest
       credentials:
         username: ${{secrets.docker-login}}
         password: ${{secrets.docker-pass}}
@@ -520,7 +520,7 @@ jobs:
 
       - name: generate manifest
         run: |
-          manifest chart generate && helmpush chart "${{secrets.chartmuseum-url}}" --version "0.0.0-newenvs-${{github.sha}}"
+          manifest && helmpush chart "${{secrets.chartmuseum-url}}" --version "0.0.0-newenvs-${{github.sha}}"
 
   # testofskip:
   #   needs: [ "setup_variables", "tests" ]
