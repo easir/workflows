@@ -520,7 +520,7 @@ jobs:
 
       - name: generate manifest
         run: |
-          manifest && helmpush chart "${{secrets.chartmuseum-url}}" --version "0.0.0-newenvs-${{github.sha}}"
+          manifest "0.0.1-${{github.sha}}-manifestv2" && helmpush chart "${{secrets.chartmuseum-url}}" --version "0.0.1-${{github.sha}}-manifestv2"
 
   # testofskip:
   #   needs: [ "setup_variables", "tests" ]
