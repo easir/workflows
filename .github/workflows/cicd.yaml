@@ -143,7 +143,7 @@ on:
         type: boolean
         default: false
         required: false
-#      Used in old node (Report)
+      #      Used in old node (Report)
       Python2AsPython:
         type: boolean
         default: false
@@ -464,7 +464,7 @@ jobs:
         run: |
           echo "{\"github-oauth\": {\"github.com\": \"${{secrets.numa-numa-token}}\"}}" > $GITHUB_WORKSPACE/auth.json
 
-#      Workaround failing GH token in composer (Telecom/Vehicle service)
+      #      Workaround failing GH token in composer (Telecom/Vehicle service)
       - name: Add SSH key
         uses: webfactory/ssh-agent@v0.9.0
         with:
@@ -520,11 +520,10 @@ jobs:
 
       - name: generate manifest
         run: |
-          manifest generate \ 
-            image.repository=${{secrets.chartmuseum-url}}/${{ needs.setup_variables.outputs.app }} \
-            image.tag=${{ needs.setup_variables.outputs.imagetag }} \
-            --chartVersion="0.0.1-${{github.sha}}-manifestv2" \
-            --chartHome="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY" \
+          manifest generate ${{ needs.setup_variables.outputs.app }} 0.0.1-${{github.sha}}-manifestv2 \ 
+            --set image.repository=${{secrets.chartmuseum-url}}/${{ needs.setup_variables.outputs.app }} \
+            --set image.tag=${{ needs.setup_variables.outputs.imagetag }} \
+            --home="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY" \
           && helmpush chart "${{secrets.chartmuseum-url}}" --version "0.0.1-${{github.sha}}-manifestv2"
 
   # testofskip:
