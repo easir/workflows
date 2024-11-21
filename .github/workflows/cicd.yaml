@@ -520,10 +520,11 @@ jobs:
 
       - name: generate manifest
         run: |
-          manifest generate image.repository=${{secrets.chartmuseum-url}}/${{ needs.setup_variables.outputs.app }} \
+          manifest generate \ 
+            image.repository=${{secrets.chartmuseum-url}}/${{ needs.setup_variables.outputs.app }} \
+            image.tag=${{ needs.setup_variables.outputs.imagetag }} \
             --chartVersion="0.0.1-${{github.sha}}-manifestv2" \
             --chartHome="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY" \
-            --appVersion=${{ needs.setup_variables.outputs.imagetag }} \
           && helm template chart --validate --values=chart/values.yaml \
           && helmpush chart "${{secrets.chartmuseum-url}}" --version "0.0.1-${{github.sha}}-manifestv2"
 
