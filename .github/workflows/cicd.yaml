@@ -521,10 +521,9 @@ jobs:
       - name: generate manifest
         run: |
           manifest generate \ 
-            --set "image.repository=${{secrets.chartmuseum-url}}/${{ needs.setup_variables.outputs.app }}" \
-            --set "image.tag=${{ needs.setup_variables.outputs.imagetag }}" \
-            --home "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY" \
             "${{ needs.setup_variables.outputs.app }}" "0.0.1-${{github.sha}}-manifestv2" \
+            --set="image.repository=${{secrets.chartmuseum-url}}/${{ needs.setup_variables.outputs.app }}" \
+            --set="image.tag=${{ needs.setup_variables.outputs.imagetag }}" \
           && helmpush chart "${{secrets.chartmuseum-url}}" --version "0.0.1-${{github.sha}}-manifestv2"
 
   # testofskip:
