@@ -525,7 +525,6 @@ jobs:
             image.tag=${{ needs.setup_variables.outputs.imagetag }} \
             --chartVersion="0.0.1-${{github.sha}}-manifestv2" \
             --chartHome="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY" \
-          && helm template chart --validate --values=chart/values.yaml \
           && helmpush chart "${{secrets.chartmuseum-url}}" --version "0.0.1-${{github.sha}}-manifestv2"
 
   # testofskip:
