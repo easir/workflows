@@ -521,7 +521,24 @@ jobs:
       - name: generate manifest
         run: |
           manifest chart generate && helmpush chart "${{secrets.chartmuseum-url}}" --version "0.0.0-newenvs-${{github.sha}}"
+  old-manifest-generate:
+    timeout-minutes: 5
+    needs: setup_variables
+    runs-on: ${{needs.setup_variables.outputs.runners}}
+    if: needs.setup_variables.outputs.rebuildManifest == 'true'
+    container:
+      image: docker-registry.easir.com/manifest:onprem
+      credentials:
+        username: ${{secrets.docker-login}}
+        password: ${{secrets.docker-pass}}
+    steps:
+      - name: pull code
+        uses: actions/checkout@v4
 
+      - name: generate manifest
+        run: |
+          manifest chart generate && helmpush chart "${{secrets.chartmuseum-url}}" --version "0.0.0-oldenvs-${{github.sha}}"
+          
   # testofskip:
   #   needs: [ "setup_variables", "tests" ]
   #   runs-on: ${{needs.setup_variables.outputs.runners}}
