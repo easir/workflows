@@ -1,0 +1,33 @@
+---
+on:
+  workflow_call:
+    inputs:
+    secrets:
+       numa-numa-token:
+        required: true
+
+jobs:
+  setup_variables:
+    timeout-minutes: 5
+    runs-on: ubuntu-latest
+    steps:
+      - name: pull code # pull repo apki
+        uses: actions/checkout@v4
+      - name: pull flux-prod
+        with:
+          repository: easir/flux-prod
+          token: ${{ secrets.numa-numa-token }}
+          path: flux-prod
+        uses: actions/checkout@v4
+
+      - name: sprawdz staging oraz prod sha oraz tag jaki jest aktualnie w flux-prod
+        outputs:
+          prod-digest:
+          current-release-candidate-digest:
+          staging-digest:
+        run: echo "test"
+      - name: job
+        run: echo job 
+      - name: porównaj
+        run: echo porownalem
+        
