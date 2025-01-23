@@ -1,7 +1,6 @@
 ---
 on:
   workflow_call:
-    inputs:
     secrets:
        numa-numa-token:
         required: true
@@ -30,4 +29,3 @@ jobs:
         run: echo job 
       - name: porównaj
         run: echo porownalem
-        
