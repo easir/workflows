@@ -10,22 +10,30 @@ jobs:
     timeout-minutes: 5
     runs-on: ubuntu-latest
     steps:
-      # - name: pull code # pull repo apki
-      #   uses: actions/checkout@v4
-      # - name: pull flux-prod
-      #   with:
-      #     repository: easir/flux-prod
-      #     token: ${{ secrets.numa-numa-token }}
-      #     path: flux-prod
-      #   uses: actions/checkout@v4
+      - name: pull code # pull repo apki
+        uses: actions/checkout@v4
+      - name: pull flux-prod
+        with:
+          repository: easir/flux-prod
+          token: ${{ secrets.numa-numa-token }}
+          path: flux-prod
+        uses: actions/checkout@v4
       - name: job
         run: |
           env
           echo _____________________
           echo ${{ github.repository }}
       - name: pdf is special
-        if: ${{ github.repository == 'easir/auth-bff' }}
-        run: echo yeah - mom said pdf is special
+        if: ${{ github.repository == 'easir/pdf' }}
+        run: |
+          echo yeah - mom said pdf is special
+          repo=$(cat flux-prod/clusters/skoda/staging/helm-pdf.yaml 2>/dev/null | yq '.spec.values.Image')
+          tag=$(cat flux-prod/clusters/skoda/staging/helm-pdf.yaml 2>/dev/null | yq '.spec.values.ImageTag')
+          #remove this echo before going real
+          echo docker buildx imagetools create --tag $repo:sad-prod-$epoch $repo:sad-release-candidate
+          prodrepo=$(cat flux-prod/clusters/skoda/production/helm-pdf.yaml 2>/dev/null | yq '.spec.values.Image')
+          prodtag=$(cat flux-prod/clusters/skoda/production/helm-pdf.yaml 2>/dev/null | yq '.spec.values.ImageTag')
+
       - name: sprawdz staging oraz prod sha oraz tag jaki jest aktualnie w flux-prod
         # outputs:
         #   prod-digest:
