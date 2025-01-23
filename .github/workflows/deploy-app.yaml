@@ -10,14 +10,14 @@ jobs:
     timeout-minutes: 5
     runs-on: ubuntu-latest
     steps:
-      - name: pull code # pull repo apki
-        uses: actions/checkout@v4
-      - name: pull flux-prod
-        with:
-          repository: easir/flux-prod
-          token: ${{ secrets.numa-numa-token }}
-          path: flux-prod
-        uses: actions/checkout@v4
+      # - name: pull code # pull repo apki
+      #   uses: actions/checkout@v4
+      # - name: pull flux-prod
+      #   with:
+      #     repository: easir/flux-prod
+      #     token: ${{ secrets.numa-numa-token }}
+      #     path: flux-prod
+      #   uses: actions/checkout@v4
       - name: job
         run: |
           env
