@@ -25,7 +25,7 @@ jobs:
         #   prod-digest:
         #   current-release-candidate-digest:
         #   staging-digest:
-        run: echo "test"
+        run: |
+          cat flux-prod/clusters/skoda/staging/helm-auth-bff.yaml
       - name: porównaj
         run: echo porownalem
-
