@@ -21,7 +21,7 @@ jobs:
       - name: job
         run: env
       - name: pdf is special
-        if: ${{ github.actions.repository == 'pdf' }}
+        if: ${{ github.actions.repository == 'easir/auth-bff' }}
         run: echo yeah - mom said pdf is special
       - name: sprawdz staging oraz prod sha oraz tag jaki jest aktualnie w flux-prod
         # outputs:
