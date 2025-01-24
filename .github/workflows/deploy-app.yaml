@@ -7,6 +7,8 @@ on:
 
 jobs:
   setup_variables:
+    env:
+      GITHUB_TOKEN: ${{ secrets.numa-numa-token }}  
     timeout-minutes: 5
     runs-on: ubuntu-latest
     steps:
@@ -15,7 +17,6 @@ jobs:
       - name: pull flux-prod
         with:
           repository: easir/flux-prod
-          token: ${{ secrets.numa-numa-token }}
           path: flux-prod
         uses: actions/checkout@v4
       - name: docker login
@@ -41,8 +42,6 @@ jobs:
           echo _____________________
           echo ${{ github.repository }}
       - name: get the digests of images
-        env:
-          GITHUB_TOKEN: ${{ secrets.numa-numa-token }}
         if: ${{ github.repository != 'easir/pdf' }}
         run: |
           repo=$(cat flux-prod/clusters/skoda/staging/helm-$(echo $github.repository | cut -d "/" -f 2).yaml 2>/dev/null | yq '.spec.values.image.repository')
