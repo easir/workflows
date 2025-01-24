@@ -41,6 +41,8 @@ jobs:
           echo _____________________
           echo ${{ github.repository }}
       - name: get the digests of images
+        env:
+          GITHUB_TOKEN: ${{ secrets.numa-numa-token }}
         if: ${{ github.repository != 'easir/pdf' }}
         run: |
           repo=$(cat flux-prod/clusters/skoda/staging/helm-$(echo $github.repository | cut -d "/" -f 2).yaml 2>/dev/null | yq '.spec.values.image.repository')
