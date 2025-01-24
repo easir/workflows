@@ -55,19 +55,14 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.numa-numa-token }}      
         if: ${{ github.repository != 'easir/pdf' }}
         run: |
-          ls -al
-          pwd 
           app=$(echo $GITHUB_REPOSITORY | cut -d "/" -f 2)
-          echo $app
-          ls -al flux-prod
-          cat flux-prod/clusters/skoda/staging/helm-$app.yaml | yq '.spec.values.image.repository'
           repo=$(cat flux-prod/clusters/skoda/staging/helm-$app.yaml 2>/dev/null | yq '.spec.values.image.repository')
           tag=$(cat flux-prod/clusters/skoda/staging/helm-$app.yaml 2>/dev/null | yq '.spec.values.image.tag')
           prodrepo=$(cat flux-prod/clusters/skoda/production/helm-$app.yaml 2>/dev/null | yq '.spec.values.image.repository')
           prodtag=$(cat flux-prod/clusters/skoda/production/helm-$app.yaml 2>/dev/null | yq '.spec.values.image.tag')
-          current_rc_image=$repo:$(docker buildx imagetools inspect $repo:sad-release-candidate --format "{{json .Manifest}}" | jq -r '.digest | split(":")[1]')
-          next_rc_image=$repo:$(docker buildx imagetools inspect $repo:$tag --format "{{json .Manifest}}" | jq -r '.digest | split(":")[1]')
-          prod_image=$prodrepo:$(docker buildx imagetools inspect $prodrepo:$prodtag --format "{{json .Manifest}}" | jq -r '.digest | split(":")[1]')
+          current_rc_image=$repo@$(docker buildx imagetools inspect $repo:sad-release-candidate --format "{{json .Manifest}}" | jq -r '.digest')
+          next_rc_image=$repo@$(docker buildx imagetools inspect $repo:$tag --format "{{json .Manifest}}" | jq -r '.digest')
+          prod_image=$prodrepo@$(docker buildx imagetools inspect $prodrepo:$prodtag --format "{{json .Manifest}}" | jq -r '.digest')
           echo $repo $tag $prodrepo $prodtag
           echo "CURRENT RC $current_rc_image........... NEXT: $next_rc_image .... PROD: $prod_image"
 
