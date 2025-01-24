@@ -61,6 +61,7 @@ jobs:
           current_rc_image=$repo:$(docker buildx imagetools inspect $repo:sad-release-candidate --format "{{json .Manifest}}" | jq -r '.digest | split(":")[1]')
           next_rc_image=$repo:$(docker buildx imagetools inspect $repo:$tag --format "{{json .Manifest}}" | jq -r '.digest | split(":")[1]')
           prod_image=$prodrepo:$(docker buildx imagetools inspect $prodrepo:$prodtag --format "{{json .Manifest}}" | jq -r '.digest | split(":")[1]')
+          echo $repo $tag $prodrepo $prodtag
           echo "CURRENT RC $current_rc_image........... NEXT: $next_rc_image .... PROD: $prod_image"
 
       - name: pdf is special
