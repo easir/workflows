@@ -57,7 +57,7 @@ jobs:
         run: |
           ls -al
           pwd 
-          app=$(echo {{$github.repository}} | cut -d "/" -f 2)
+          app=$(echo $GITHUB_REPOSITORY | cut -d "/" -f 2)
           echo $app
           ls -al flux-prod
           cat flux-prod/clusters/skoda/staging/helm-$app.yaml | yq '.spec.values.image.repository'
