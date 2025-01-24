@@ -51,8 +51,9 @@ jobs:
           echo _____________________
           echo ${{ github.repository }}
       - name: get the digests of images
+        id: normal-services
         env:
-          GITHUB_TOKEN: ${{ secrets.numa-numa-token }}      
+          GITHUB_TOKEN: ${{ secrets.numa-numa-token }}
         if: ${{ github.repository != 'easir/pdf' }}
         run: |
           app=$(echo $GITHUB_REPOSITORY | cut -d "/" -f 2)
@@ -63,10 +64,14 @@ jobs:
           current_rc_image=$repo@$(docker buildx imagetools inspect $repo:sad-release-candidate --format "{{json .Manifest}}" | jq -r '.digest')
           next_rc_image=$repo@$(docker buildx imagetools inspect $repo:$tag --format "{{json .Manifest}}" | jq -r '.digest')
           prod_image=$prodrepo@$(docker buildx imagetools inspect $prodrepo:$prodtag --format "{{json .Manifest}}" | jq -r '.digest')
-          echo $repo $tag $prodrepo $prodtag
-          echo "CURRENT RC $current_rc_image........... NEXT: $next_rc_image .... PROD: $prod_image"
-
+          echo "prod_image=$prod_image" >> $GITHUB_OUTPUT
+          echo "current_rc_image=$current_rc_image" >> $GITHUB_OUTPUT
+          echo "next_rc_image=$next_rc_image" >> $GITHUB_OUTPUT
+          echo "production image $prodrepo with tag $prodtag ( Sha: $prod_image) " >> $GITHUB_SUMMARY
+          echo "current release candidate is marked on: $repo with tag sad-release-candidate ( Sha: $current_rc_image) " >> $GITHUB_SUMMARY
+          echo "pl image $prodrepo with tag $prodtag ( Sha: $prod_image) " >> $GITHUB_SUMMARY
       - name: pdf is special
+        id: special-services
         if: ${{ github.repository == 'easir/pdf' }}
         run: |
           echo yeah - mom said pdf is special
@@ -76,13 +81,19 @@ jobs:
           #echo docker buildx imagetools create --tag $repo:sad-prod-$epoch $repo:sad-release-candidate
           prodrepo=$(cat flux-prod/clusters/skoda/production/helm-pdf.yaml 2>/dev/null | yq '.spec.values.Image')
           prodtag=$(cat flux-prod/clusters/skoda/production/helm-pdf.yaml 2>/dev/null | yq '.spec.values.ImageTag')
-
-      - name: sprawdz staging oraz prod sha oraz tag jaki jest aktualnie w flux-prod
-        # outputs:
-        #   prod-digest:
-        #   current-release-candidate-digest:
-        #   staging-digest:
+          current_rc_image=$repo@$(docker buildx imagetools inspect $repo:sad-release-candidate --format "{{json .Manifest}}" | jq -r '.digest')
+          next_rc_image=$repo@$(docker buildx imagetools inspect $repo:$tag --format "{{json .Manifest}}" | jq -r '.digest')
+          prod_image=$prodrepo@$(docker buildx imagetools inspect $prodrepo:$prodtag --format "{{json .Manifest}}" | jq -r '.digest')
+          echo "prod_image=$prod_image" >> $GITHUB_OUTPUT
+          echo "current_rc_image=$current_rc_image" >> $GITHUB_OUTPUT
+          echo "next_rc_image=$next_rc_image" >> $GITHUB_OUTPUT
+          echo "production image $prodrepo with tag $prodtag ( Sha: $prod_image) " >> $GITHUB_SUMMARY
+          echo "current release candidate is marked on: $repo with tag sad-release-candidate ( Sha: $current_rc_image) " >> $GITHUB_SUMMARY
+          echo "pl image $prodrepo with tag $prodtag ( Sha: $prod_image) " >> $GITHUB_SUMMARY          
+      - name: deploy app
+        if: ${{ github.repository != 'easir/pdf' }}
         run: |
           cat flux-prod/clusters/skoda/staging/helm-auth-bff.yaml
-      - name: porównaj
-        run: echo porownalem
+      - name: deploy "special" app
+        if: ${{ github.repository != 'easir/pdf' }}
+        run: echo mom said pdf is special
