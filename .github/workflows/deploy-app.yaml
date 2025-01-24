@@ -58,6 +58,7 @@ jobs:
           ls -al
           pwd 
           app=$(echo $github.repository | cut -d "/" -f 2)
+          cat flux-prod/clusters/skoda/staging/helm-$app.yaml 2>/dev/null | yq '.spec.values.image.repository'
           repo=$(cat flux-prod/clusters/skoda/staging/helm-$app.yaml 2>/dev/null | yq '.spec.values.image.repository')
           tag=$(cat flux-prod/clusters/skoda/staging/helm-$app.yaml 2>/dev/null | yq '.spec.values.image.tag')
           prodrepo=$(cat flux-prod/clusters/skoda/production/helm-$app.yaml 2>/dev/null | yq '.spec.values.image.repository')
