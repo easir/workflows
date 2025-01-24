@@ -20,6 +20,7 @@ jobs:
         with:
           repository: easir/flux-prod
           path: flux-prod
+          token: ${{ secrets.numa-numa-token }}
         uses: actions/checkout@v4
       - name: docker login
         env:
