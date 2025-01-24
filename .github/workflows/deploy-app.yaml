@@ -67,9 +67,9 @@ jobs:
           echo "prod_image=$prod_image" >> $GITHUB_OUTPUT
           echo "current_rc_image=$current_rc_image" >> $GITHUB_OUTPUT
           echo "next_rc_image=$next_rc_image" >> $GITHUB_OUTPUT
-          echo "production image $prodrepo with tag $prodtag ( Sha: $prod_image) " >> $GITHUB_SUMMARY
-          echo "current release candidate is marked on: $repo with tag sad-release-candidate ( Sha: $current_rc_image) " >> $GITHUB_SUMMARY
-          echo "pl image $prodrepo with tag $prodtag ( Sha: $prod_image) " >> $GITHUB_SUMMARY
+          echo "production image $prodrepo with tag $prodtag ( Sha: $prod_image) " >> $GITHUB_STEP_SUMMARY
+          echo "current release candidate is marked on: $repo with tag sad-release-candidate ( Sha: $current_rc_image) " >> $GITHUB_STEP_SUMMARY
+          echo "pl image $prodrepo with tag $prodtag ( Sha: $prod_image) " >> $GITHUB_STEP_SUMMARY
       - name: pdf is special
         id: special-services
         if: ${{ github.repository == 'easir/pdf' }}
@@ -87,9 +87,9 @@ jobs:
           echo "prod_image=$prod_image" >> $GITHUB_OUTPUT
           echo "current_rc_image=$current_rc_image" >> $GITHUB_OUTPUT
           echo "next_rc_image=$next_rc_image" >> $GITHUB_OUTPUT
-          echo "production image $prodrepo with tag $prodtag ( Sha: $prod_image) " >> $GITHUB_SUMMARY
-          echo "current release candidate is marked on: $repo with tag sad-release-candidate ( Sha: $current_rc_image) " >> $GITHUB_SUMMARY
-          echo "pl image $prodrepo with tag $prodtag ( Sha: $prod_image) " >> $GITHUB_SUMMARY          
+          echo "production image $prodrepo with tag $prodtag ( Sha: $prod_image) " >> $GITHUB_STEP_SUMMARY
+          echo "current release candidate is marked on: $repo with tag sad-release-candidate ( Sha: $current_rc_image) " >> $GITHUB_STEP_SUMMARY
+          echo "pl image $prodrepo with tag $prodtag ( Sha: $prod_image) " >> $GITHUB_STEP_SUMMARY          
       - name: deploy app
         if: ${{ github.repository != 'easir/pdf' }}
         run: |
