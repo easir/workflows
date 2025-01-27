@@ -6,7 +6,7 @@ on:
         required: true
 
 jobs:
-  setup_variables:
+  Deploy_App:
     timeout-minutes: 5
     runs-on: ubuntu-latest
     steps:
