@@ -7,6 +7,7 @@ on:
 
 jobs:
   Deploy_App:
+    environment: SME
     timeout-minutes: 5
     runs-on: ubuntu-latest
     steps:
@@ -90,10 +91,10 @@ jobs:
           echo "production image $prodrepo with tag $prodtag ( Sha: $prod_image) " >> $GITHUB_STEP_SUMMARY
           echo "current release candidate is marked on: $repo with tag sad-release-candidate ( Sha: $current_rc_image) " >> $GITHUB_STEP_SUMMARY
           echo "pl image $prodrepo with tag $prodtag ( Sha: $prod_image) " >> $GITHUB_STEP_SUMMARY          
-      - name: deploy app
+      - name: deploy app to SME
         if: ${{ github.repository != 'easir/pdf' }}
         run: |
-          cat flux-prod/clusters/skoda/staging/helm-auth-bff.yaml
+          echo fff
       - name: deploy "special" app
         if: ${{ github.repository != 'easir/pdf' }}
         run: echo mom said pdf is special
