@@ -725,3 +725,26 @@ jobs:
         with:
           environment: ${{ inputs.SentryTargetEnvironment }}
           version: ${{ needs.setup_variables.outputs.github-sha }}
+  deployment_sme:
+    environment: SME
+    needs: [ "setup_variables", "build-image" ]
+    if: ${{ always() && inputs.EnableSentryRelease && needs.setup_variables.outputs.environment == 'prod' }}
+    runs-on: ${{needs.setup_variables.outputs.runners}}
+    env:
+      GITHUB_TOKEN: ${{ secrets.token }}
+    steps:
+      - name: simply updating the github environments
+        run: |
+          echo github env updated
+
+  deployment_sad_staging:
+    environment: SAD_Staging
+    needs: [ "setup_variables", "build-image" ]
+    if: ${{ always() && inputs.EnableSentryRelease && needs.setup_variables.outputs.environment == 'prod' }}
+    runs-on: ${{needs.setup_variables.outputs.runners}}
+    env:
+      GITHUB_TOKEN: ${{ secrets.token }}
+    steps:
+      - name: simply updating the github environments
+        run: |
+          echo github env updated
