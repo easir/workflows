@@ -7,7 +7,7 @@ on:
 
 jobs:
   Deploy_App:
-    environment: SME
+    environment: SAD_Prod
     timeout-minutes: 5
     runs-on: ubuntu-latest
     steps:
@@ -31,6 +31,11 @@ jobs:
           registry: ghcr.io
           username: easir
           password: ${{ secrets.numa-numa-token }}
+      - name: set epoch for deployment
+        id: set-epoch
+        run: |
+          epoch=$(date +%s)
+          echo "epoch=$epoch" >> "$GITHUB_OUTPUT"
       - name: Set up Docker Context for Buildx
         env:
           GITHUB_TOKEN: ${{ secrets.numa-numa-token }}
@@ -46,11 +51,6 @@ jobs:
           endpoint: builders
           platforms: "linux/arm64,linux/amd64"
           buildkitd-flags: --debug
-      - name: job
-        run: |
-          env
-          echo _____________________
-          echo ${{ github.repository }}
       - name: get the digests of images
         id: normal-services
         env:
@@ -78,8 +78,6 @@ jobs:
           echo yeah - mom said pdf is special
           repo=$(cat flux-prod/clusters/skoda/staging/helm-pdf.yaml 2>/dev/null | yq '.spec.values.Image')
           tag=$(cat flux-prod/clusters/skoda/staging/helm-pdf.yaml 2>/dev/null | yq '.spec.values.ImageTag')
-          #remove this echo before going real
-          #echo docker buildx imagetools create --tag $repo:sad-prod-$epoch $repo:sad-release-candidate
           prodrepo=$(cat flux-prod/clusters/skoda/production/helm-pdf.yaml 2>/dev/null | yq '.spec.values.Image')
           prodtag=$(cat flux-prod/clusters/skoda/production/helm-pdf.yaml 2>/dev/null | yq '.spec.values.ImageTag')
           current_rc_image=$repo@$(docker buildx imagetools inspect $repo:sad-release-candidate --format "{{json .Manifest}}" | jq -r '.digest')
@@ -91,10 +89,11 @@ jobs:
           echo "production image $prodrepo with tag $prodtag ( Sha: $prod_image) " >> $GITHUB_STEP_SUMMARY
           echo "current release candidate is marked on: $repo with tag sad-release-candidate ( Sha: $current_rc_image) " >> $GITHUB_STEP_SUMMARY
           echo "pl image $prodrepo with tag $prodtag ( Sha: $prod_image) " >> $GITHUB_STEP_SUMMARY          
-      - name: deploy app to SME
-        if: ${{ github.repository != 'easir/pdf' }}
+      - name: deploy app to SAD_Prod
+        if: ${{ github.repository != 'easir/pdf' && (steps.normal-services.outputs.current_rc_image != steps.normal-services.outputs.prod_image)}}
         run: |
-          echo fff
+          echo ok - so we do deploy.
+# docker buildx imagetools create --tag $staging_repo:sad-release-candidate $staging_repo:${{github.event.inputs.tag}}
       - name: deploy "special" app
         if: ${{ github.repository != 'easir/pdf' }}
         run: echo mom said pdf is special
