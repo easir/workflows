@@ -318,7 +318,7 @@ jobs:
         if: inputs.ApplicationLanguage == 'php'
         run: |
           echo "{\"github-oauth\": {\"github.com\": \"${{secrets.numa-numa-token}}\"}}" > $GITHUB_WORKSPACE/auth.json
-      - uses: shivammathur/setup-php@2.30.2
+      - uses: shivammathur/setup-php@v2
         if: inputs.ApplicationLanguage == 'php'
         with:
           php-version: ${{inputs.PhpVersion}}
@@ -328,6 +328,7 @@ jobs:
           #behat, phpunit, composer, phpcs, php-cs-fixer, phpcbf, phpstan, psalm, phplint,
         env:
           runner: ubuntu-latest
+          fail-fast: true
       - name: run Composer
         if: inputs.ApplicationLanguage == 'php'
         run: |
@@ -479,6 +480,7 @@ jobs:
           tools: composer
         env:
           runner: ${{needs.setup_variables.outputs.runners}}
+          fail-fast: true
 
       - name: run Composer
         if: inputs.ApplicationLanguage == 'php'
@@ -522,7 +524,7 @@ jobs:
         run: |
           manifest generate "${{ needs.setup_variables.outputs.app }}" "0.0.1-${{github.sha}}-manifestv2" --set="image.repository=ghcr.io/easir/${{ needs.setup_variables.outputs.app }}" --set="image.tag=${{ needs.setup_variables.outputs.imagetag }}"
           helmpush chart "${{secrets.chartmuseum-url}}" --version "0.0.1-${{github.sha}}-manifestv2"
-          
+
   # testofskip:
   #   needs: [ "setup_variables", "tests" ]
   #   runs-on: ${{needs.setup_variables.outputs.runners}}
