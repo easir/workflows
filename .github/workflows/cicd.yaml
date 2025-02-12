@@ -143,7 +143,7 @@ on:
         type: boolean
         default: false
         required: false
-      #      Used in old node (Report)
+#      Used in old node (Report)
       Python2AsPython:
         type: boolean
         default: false
@@ -464,7 +464,7 @@ jobs:
         run: |
           echo "{\"github-oauth\": {\"github.com\": \"${{secrets.numa-numa-token}}\"}}" > $GITHUB_WORKSPACE/auth.json
 
-      #      Workaround failing GH token in composer (Telecom/Vehicle service)
+#      Workaround failing GH token in composer (Telecom/Vehicle service)
       - name: Add SSH key
         uses: webfactory/ssh-agent@v0.9.0
         with:
@@ -521,8 +521,7 @@ jobs:
       - name: generate manifest
         run: |
           manifest generate "${{ needs.setup_variables.outputs.app }}" "0.0.1-${{github.sha}}-manifestv2" --set="image.repository=ghcr.io/easir/${{ needs.setup_variables.outputs.app }}" --set="image.tag=${{ needs.setup_variables.outputs.imagetag }}"
-          helmpush chart "${{secrets.chartmuseum-url}}" --version "0.0.1-${{github.sha}}-manifestv2"
-          
+          helmpush chart "${{secrets.chartmuseum-url}}" --version "0.0.1-${{github.sha}}-manifestv2" 
   # testofskip:
   #   needs: [ "setup_variables", "tests" ]
   #   runs-on: ${{needs.setup_variables.outputs.runners}}
@@ -709,3 +708,26 @@ jobs:
         with:
           environment: ${{ inputs.SentryTargetEnvironment }}
           version: ${{ needs.setup_variables.outputs.github-sha }}
+  deployment_sme:
+    environment: SME
+    needs: [ "setup_variables", "build-image" ]
+    if: ${{ always() && inputs.EnableSentryRelease && needs.setup_variables.outputs.environment == 'prod' }}
+    runs-on: ${{needs.setup_variables.outputs.runners}}
+    env:
+      GITHUB_TOKEN: ${{ secrets.token }}
+    steps:
+      - name: simply updating the github environments
+        run: |
+          echo github env updated
+
+  deployment_sad_staging:
+    environment: SAD_Staging
+    needs: [ "setup_variables", "build-image" ]
+    if: ${{ always() && inputs.EnableSentryRelease && needs.setup_variables.outputs.environment == 'prod' }}
+    runs-on: ${{needs.setup_variables.outputs.runners}}
+    env:
+      GITHUB_TOKEN: ${{ secrets.token }}
+    steps:
+      - name: simply updating the github environments
+        run: |
+          echo github env updated

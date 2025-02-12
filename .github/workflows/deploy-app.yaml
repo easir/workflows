@@ -86,4 +86,3 @@ jobs:
       - name: move release candidate to next image
         run: |
           docker buildx imagetools create --tag sad-release-candidate ${{steps.tags.outputs.next_rc_image}}
-# docker buildx imagetools create --tag $staging_repo:sad-release-candidate $staging_repo:${{github.event.inputs.tag}}
