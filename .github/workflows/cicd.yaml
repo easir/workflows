@@ -711,7 +711,7 @@ jobs:
   deployment_sme:
     environment: SME
     needs: [ "setup_variables", "build-image" ]
-    if: ${{ always() && inputs.EnableSentryRelease && needs.setup_variables.outputs.environment == 'prod' }}
+    if: ${{ always() && needs.setup_variables.outputs.environment == 'prod' }}
     runs-on: ${{needs.setup_variables.outputs.runners}}
     env:
       GITHUB_TOKEN: ${{ secrets.token }}
@@ -723,7 +723,7 @@ jobs:
   deployment_sad_staging:
     environment: SAD_Staging
     needs: [ "setup_variables", "build-image" ]
-    if: ${{ always() && inputs.EnableSentryRelease && needs.setup_variables.outputs.environment == 'prod' }}
+    if: ${{ always() && needs.setup_variables.outputs.environment == 'prod' }}
     runs-on: ${{needs.setup_variables.outputs.runners}}
     env:
       GITHUB_TOKEN: ${{ secrets.token }}
