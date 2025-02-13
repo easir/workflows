@@ -52,6 +52,8 @@ jobs:
           platforms: "linux/arm64,linux/amd64"
           buildkitd-flags: --debug
       - name: setup outputs uniformly
+        env:
+          GITHUB_TOKEN: ${{ secrets.numa-numa-token }}      
         id: tags
         run: |
           if [ "${{ github.repository }}" == 'easir/pdf']; then
@@ -76,10 +78,14 @@ jobs:
           echo "next_rc_image image with tag sad-release-candidate (Sha: $next_rc_image) " >> $GITHUB_STEP_SUMMARY
 
       - name: deploy app to SAD_Prod
+        env:
+          GITHUB_TOKEN: ${{ secrets.numa-numa-token }}
         if: ${{ steps.tags.outputs.current_rc_image != steps.tags.outputs.prod_image }}
         run: |
           docker buildx imagetools create --tag ${{steps.tags.outputs.current_rc_image}} sad-prod-${{steps.epoch.outputs.epoch}}
   
       - name: move release candidate to next image
+        env:
+          GITHUB_TOKEN: ${{ secrets.numa-numa-token }}
         run: |
           docker buildx imagetools create --tag sad-release-candidate ${{steps.tags.outputs.next_rc_image}}
