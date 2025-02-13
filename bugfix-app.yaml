@@ -37,3 +37,4 @@ on:
             docker buildx imagetools inspect $repo:${{github.event.inputs.tag}}
             docker buildx imagetools create --tag $repo:sad-prod-$epoch $repo:${{github.event.inputs.tag}}
             docker buildx imagetools create --tag $repo:sad-release-candidate $repo:${{github.event.inputs.tag}}
+
