@@ -10,22 +10,18 @@ jobs:
     environment: SAD_Prod
     timeout-minutes: 5
     runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.numa-numa-token }}    
     steps:
       - name: pull code
-        env:
-          GITHUB_TOKEN: ${{ secrets.numa-numa-token }}
         uses: actions/checkout@v4
       - name: pull flux-prod
-        env:
-          GITHUB_TOKEN: ${{ secrets.numa-numa-token }}
         with:
           repository: easir/flux-prod
           path: flux-prod
           token: ${{ secrets.numa-numa-token }}
         uses: actions/checkout@v4
       - name: docker login
-        env:
-          GITHUB_TOKEN: ${{ secrets.numa-numa-token }}
         uses: docker/login-action@v3.3.0
         with:
           registry: ghcr.io
@@ -37,23 +33,17 @@ jobs:
           epoch=$(date +%s)
           echo "epoch=$epoch" >> "$GITHUB_OUTPUT"
       - name: Set up Docker Context for Buildx
-        env:
-          GITHUB_TOKEN: ${{ secrets.numa-numa-token }}
         id: buildx-context
         run: |
           docker context create builders
       - name: Docker Setup Buildx
-        env:
-          GITHUB_TOKEN: ${{ secrets.numa-numa-token }}
         uses: docker/setup-buildx-action@v3
         with:
           version: latest
           endpoint: builders
           platforms: "linux/arm64,linux/amd64"
           buildkitd-flags: --debug
-      - name: setup outputs uniformly
-        env:
-          GITHUB_TOKEN: ${{ secrets.numa-numa-token }}      
+      - name: setup outputs uniformly 
         id: tags
         run: |
           if [ "${{ github.repository }}" == 'easir/pdf']; then
@@ -78,14 +68,10 @@ jobs:
           echo "next_rc_image image with tag sad-release-candidate (Sha: $next_rc_image) " >> $GITHUB_STEP_SUMMARY
 
       - name: deploy app to SAD_Prod
-        env:
-          GITHUB_TOKEN: ${{ secrets.numa-numa-token }}
         if: ${{ steps.tags.outputs.current_rc_image != steps.tags.outputs.prod_image }}
         run: |
           docker buildx imagetools create --tag ${{steps.tags.outputs.current_rc_image}} sad-prod-${{steps.epoch.outputs.epoch}}
   
       - name: move release candidate to next image
-        env:
-          GITHUB_TOKEN: ${{ secrets.numa-numa-token }}
         run: |
           docker buildx imagetools create --tag sad-release-candidate ${{steps.tags.outputs.next_rc_image}}
