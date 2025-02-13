@@ -1,0 +1,80 @@
+---
+on:
+  workflow_call:
+    secrets:
+       numa-numa-token:
+        required: true
+
+jobs:
+  Deploy_App:
+    environment: SAD_Prod
+    timeout-minutes: 5
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.numa-numa-token }}    
+    steps:
+      - name: pull code
+        uses: actions/checkout@v4
+      - name: pull flux-prod
+        with:
+          repository: easir/flux-prod
+          path: flux-prod
+          token: ${{ secrets.numa-numa-token }}
+        uses: actions/checkout@v4
+      - name: docker login
+        uses: docker/login-action@v3.3.0
+        with:
+          registry: ghcr.io
+          username: easir
+          password: ${{ secrets.numa-numa-token }}
+      - name: set epoch for deployment
+        id: epoch
+        run: |
+          epoch=$(date +%s)
+          echo "epoch=$epoch" >> "$GITHUB_OUTPUT"
+      - name: Set up Docker Context for Buildx
+        id: buildx-context
+        run: |
+          docker context create builders
+      - name: Docker Setup Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          version: latest
+          endpoint: builders
+          platforms: "linux/arm64,linux/amd64"
+          buildkitd-flags: --debug
+      - name: setup outputs uniformly 
+        id: tags
+        run: |
+          app=$(echo ${{ github.repository }} | cut -d "/" -f 2)
+          echo $app
+          echo _________________
+          if [ "${{ github.repository }}" == 'easir/pdf' ]; then
+            repo=$(cat flux-prod/clusters/skoda/staging/helm-pdf.yaml 2>/dev/null | yq '.spec.values.Image')
+            tag=$(cat flux-prod/clusters/skoda/staging/helm-pdf.yaml 2>/dev/null | yq '.spec.values.ImageTag')
+            prodrepo=$(cat flux-prod/clusters/skoda/production/helm-pdf.yaml 2>/dev/null | yq '.spec.values.Image')
+            prodtag=$(cat flux-prod/clusters/skoda/production/helm-pdf.yaml 2>/dev/null | yq '.spec.values.ImageTag')
+          else
+            repo=$(cat flux-prod/clusters/skoda/staging/helm-$app.yaml 2>/dev/null | yq '.spec.values.image.repository')
+            tag=$(cat flux-prod/clusters/skoda/staging/helm-$app.yaml 2>/dev/null | yq '.spec.values.image.tag')
+            prodrepo=$(cat flux-prod/clusters/skoda/production/helm-$app.yaml 2>/dev/null | yq '.spec.values.image.repository')
+            prodtag=$(cat flux-prod/clusters/skoda/production/helm-$app.yaml 2>/dev/null | yq '.spec.values.image.tag')
+          fi
+          current_rc_image=$repo@$(docker buildx imagetools inspect $repo:sad-release-candidate --format "{{json .Manifest}}" | jq -r '.digest')
+          next_rc_image=$repo@$(docker buildx imagetools inspect $repo:$tag --format "{{json .Manifest}}" | jq -r '.digest')
+          prod_image=$prodrepo@$(docker buildx imagetools inspect $prodrepo:$prodtag --format "{{json .Manifest}}" | jq -r '.digest')
+          echo "prod_image=$prod_image" >> $GITHUB_OUTPUT
+          echo "current_rc_image=$current_rc_image" >> $GITHUB_OUTPUT
+          echo "next_rc_image=$next_rc_image" >> $GITHUB_OUTPUT
+          echo "production image $prodrepo with tag $prodtag ( Sha: $prod_image) " >> $GITHUB_STEP_SUMMARY
+          echo "current release candidate is marked on: $repo with tag sad-release-candidate ( Sha: $current_rc_image) " >> $GITHUB_STEP_SUMMARY
+          echo "next_rc_image image with tag sad-release-candidate (Sha: $next_rc_image) " >> $GITHUB_STEP_SUMMARY
+
+      - name: deploy app to SAD_Prod
+        if: ${{ steps.tags.outputs.current_rc_image != steps.tags.outputs.prod_image }}
+        run: |
+          docker buildx imagetools create --tag ${{steps.tags.outputs.current_rc_image}} sad-prod-${{steps.epoch.outputs.epoch}}
+  
+      - name: move release candidate to next image
+        run: |
+          docker buildx imagetools create --tag sad-release-candidate ${{steps.tags.outputs.next_rc_image}}
