@@ -54,7 +54,7 @@ jobs:
       - name: setup outputs uniformly
         id: tags
         run: |
-          if [ ${{ github.repository }} == 'easir/pdf'] then
+          if [ "${{ github.repository }}" == 'easir/pdf'] then
           do
             repo=$(cat flux-prod/clusters/skoda/staging/helm-pdf.yaml 2>/dev/null | yq '.spec.values.Image')
             tag=$(cat flux-prod/clusters/skoda/staging/helm-pdf.yaml 2>/dev/null | yq '.spec.values.ImageTag')
