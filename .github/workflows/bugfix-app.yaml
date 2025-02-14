@@ -12,6 +12,8 @@ on:
 jobs:
     bugfixing:
       runs-on: ubuntu-latest
+      env:
+        GITHUB_TOKEN: ${{ secrets.numa-numa-token }}      
       steps:
         - name: Set up Docker Context for Buildx
           id: buildx-context
@@ -28,7 +30,7 @@ jobs:
           with:
             registry: ghcr.io
             username: easir
-            password: ${{ secrets.GH_TOKEN }}
+            password: ${{ secrets.numa-numa-token }}
         - name: bugfixing the service!
           run: |
             set -x
