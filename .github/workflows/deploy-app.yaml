@@ -2,7 +2,7 @@
 on:
   workflow_call:
     secrets:
-       numa-numa-token:
+      numa-numa-token:
         required: true
 
 jobs:

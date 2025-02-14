@@ -9,7 +9,7 @@ on:
        numa-numa-token:
         required: true
 
-  jobs:
+jobs:
     bugfixing:
       runs-on: ubuntu-latest
       steps:
