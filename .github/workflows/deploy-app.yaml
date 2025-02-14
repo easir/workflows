@@ -76,5 +76,6 @@ jobs:
           docker buildx imagetools create --tag ${{steps.tags.outputs.current_rc_image}} sad-prod-${{steps.epoch.outputs.epoch}}
   
       - name: move release candidate to next image
+        if: ${{ steps.tags.outputs.current_rc_image != steps.tags.outputs.next_rc_image }}
         run: |
           docker buildx imagetools create --tag ghcr.io/${{github.repository}}:sad-release-candidate ${{steps.tags.outputs.next_rc_image}}
