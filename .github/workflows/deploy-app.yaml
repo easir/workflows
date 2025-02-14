@@ -73,7 +73,7 @@ jobs:
       - name: deploy app to SAD_Prod
         if: ${{ steps.tags.outputs.current_rc_image != steps.tags.outputs.prod_image }}
         run: |
-          docker buildx imagetools create --tag ${{steps.tags.outputs.current_rc_image}} ghcr.io/${{github.repository}}:sad-prod-${{steps.epoch.outputs.epoch}}
+          docker buildx imagetools create --tag ghcr.io/${{github.repository}}:sad-prod-${{steps.epoch.outputs.epoch}} ${{steps.tags.outputs.current_rc_image}}
   
       - name: move release candidate to next image
         if: ${{ steps.tags.outputs.current_rc_image != steps.tags.outputs.next_rc_image }}
