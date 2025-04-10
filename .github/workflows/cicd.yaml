@@ -737,7 +737,7 @@ jobs:
 
   SBOM:
     timeout-minutes: 5
-    needs: [ "setup_variables" ]
+    needs: [ setup_variables, build-image ]
     runs-on: ${{ needs.setup_variables.outputs.runners }}
     #if: ${{ inputs.RunSBOM == true }}
     steps:
