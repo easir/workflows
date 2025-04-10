@@ -529,13 +529,13 @@ jobs:
           manifest generate "${{ needs.setup_variables.outputs.app }}" "0.0.1-${{github.sha}}-manifestv2" --set="image.repository=ghcr.io/easir/${{ needs.setup_variables.outputs.app }}" --set="image.tag=${{ needs.setup_variables.outputs.imagetag }}"
           helmpush chart "${{secrets.chartmuseum-url}}" --version "0.0.1-${{github.sha}}-manifestv2"
 
-  testofskip:
-    needs: [ "setup_variables", "build-image" ]
-    runs-on: ${{needs.setup_variables.outputs.runners}}
-    steps:
-      - name: test
-        if: ${{ inputs.RunSBOM == true }}
-        run: echo "dupa"
+  # testofskip:
+  #   needs: [ "setup_variables", "build-image" ]
+  #   runs-on: ${{needs.setup_variables.outputs.runners}}
+  #   steps:
+  #     - name: test
+  #       if: ${{ inputs.RunSBOM == true }}
+  #       run: echo "dupa"
 
   build-image:
     timeout-minutes: 30
@@ -737,7 +737,7 @@ jobs:
 
   SBOM:
     timeout-minutes: 5
-    needs: [ "setup_variables", "build-image" ]
+    #needs: [ "setup_variables", "build-image" ]
     runs-on: ${{needs.setup_variables.outputs.runners}}
     #if: ${{ inputs.RunSBOM == true }}
     steps:
