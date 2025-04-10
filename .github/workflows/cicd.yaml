@@ -156,6 +156,10 @@ on:
         type: boolean
         default: false
         required: false
+      RunSBOM:
+        type: boolean
+        default: false
+        required: false
     secrets:
       token:
         required: true
@@ -505,6 +509,140 @@ jobs:
           version: ${{ inputs.BehatVersion }}
           php_version: ${{ inputs.PhpVersion }}
           php_extensions: ${{inputs.PhpExtensions}}
+  SBOM:
+    timeout-minutes: 5
+    needs: setup_variables
+    runs-on: ${{needs.setup_variables.outputs.runners}}
+    if: inputs.RunSBOM
+    steps:
+      - name: Generate SBOM on Docker image
+        uses: anchore/sbom-action@v0.18.0
+        with:
+          image: ${{secrets.docker-reg}}/${{ needs.setup_variables.outputs.app }}:${{ needs.setup_variables.outputs.imagetag }}
+          registry-username: ${{ secrets.docker-login }}
+          registry-password: ${{ secrets.docker-pass }}
+          output-file: sbom.spdx.json
+          # ⬇️ only update the dependency graph when merged! WS comment: not sure what that is about
+          # dependency-snapshot: true 
+          artifact-name: sbom.spdx.json
+          format: spdx-json
+      - name: Scan SBOM
+        uses: anchore/scan-action@v3
+        id: scan_sbom
+        with:
+            sbom: sbom.spdx.json
+            fail-build: false
+            output-format: json
+      - name: Upload vulnerabilities artifact
+        uses: actions/upload-artifact@v4
+        if: success() || failure()
+        with:
+          name: vulnerabilities.json
+          path: ${{ steps.scan_sbom.outputs.json }}
+      - name: Build vulnerability scan report
+        id: vulnerability_scan_report
+        uses: actions/github-script@v7
+        if: success() || failure()
+        with:
+          script: |
+            let fs = require('fs')
+            let file = '${{ steps.scan.outputs.json }}'
+            let data
+  
+            try {
+              data = JSON.parse(fs.readFileSync(file, 'utf8'));
+            } catch(e) {
+              console.log(e)
+            }
+  
+            let output = `:microscope: vulnerability scan result: **failure in parsing report**`
+  
+  
+            if (typeof(data) == 'object') {
+              const issues = data.matches.length
+              output = `# Report for: \`${{ inputs.imageName }}\` : ${{ inputs.imageTag }}`
+              output += `\n:microscope: vulnerability scan result: \`${issues}\` issue(s) found `
+              severityCounter = {}
+              severitySortMap = {
+                'Critical': 0,
+                'High': 1,
+                'Medium': 2,
+                'Low': 3,
+                'Negligible': 4,
+              }
+              
+              if (issues > 0) {
+                let table = '\n'
+                table += '<details><summary>View details</summary>\n'
+                table += '\n'
+                table += '| Severity | Artifact | Affected version | Type | Fixes | Description | Source |\n'
+                table += '|----------|----------|------------------|------|-------|-------------|--------|\n'
+  
+                let criticals = 0
+                let highs = 0
+  
+                let matches = data.matches.sort(function(a, b) {
+                  return (severitySortMap[a.vulnerability.severity] > severitySortMap[b.vulnerability.severity]) ? 1 : -1
+                })
+  
+                for (match of matches) {
+                  let description = match.vulnerability.description || ''
+        
+                  if (description !== '') {
+                    description = match.vulnerability.description.replace(/[\r\n]/g, '<br>')
+                  }
+  
+                  let severity = match.vulnerability.severity
+                  let artifact_name = match.artifact.name
+                  let version = match.artifact.version
+                  let type = match.artifact.type
+                  let fixes = match.vulnerability.fix.versions.join('|') || 'N/A'
+                  let source = match.vulnerability.id
+                  let source_url = match.vulnerability.dataSource
+  
+                  if (! (severity in severityCounter)) {
+                    severityCounter[severity] = 0
+                  }
+                  
+                  severityCounter[severity] += 1
+                              
+                  if (severity == 'Negligible') {
+                    continue
+                  }
+  
+                  table += `| ${severity} | ${artifact_name} | ${version} | ${type} | \`${fixes}\` | ${description} | [${source}](${source_url})\n`
+                  if (severity == 'Critical') {
+                    criticals++
+                  }
+                  if (severity == 'High') {
+                    highs++
+                  }
+                }
+                output += highs > 0 ? ':warning:' : ''
+                
+                if (criticals > 0) {
+                  output += `\n:pause_button: **one or more vulnerabilities found with label _critical_, pausing build.** :rotating_light:`
+                }
+  
+                output += '\n| Severity | Count |\n'
+                output += '|----------|-------|\n'
+                for (sev in severityCounter) {
+                  output += `| ${sev} | ${severityCounter[sev]} |\n`
+                }
+                            
+                output += table
+                output += '</details>\n\n'
+              }
+  
+              try {
+                fs.writeFileSync('vulnerability_report.md', output);
+              } catch (err) {
+                console.error(err);
+              }
+            }  
+      - name: Add vulnerability report to summary
+        if: success() || failure()
+        run: cat vulnerability_report.md >> $GITHUB_STEP_SUMMARY
 
   manifest-generate:
     timeout-minutes: 5
