@@ -737,9 +737,8 @@ jobs:
 
   SBOM:
     timeout-minutes: 5
-    #needs: [ "setup_variables", "build-image" ]
-    #runs-on: ${{needs.setup_variables.outputs.runners}}
-    runs-on: ubuntu-latest
+    needs: [ "setup_variables" ]
+    runs-on: ${{ needs.setup_variables.outputs.runners }}
     #if: ${{ inputs.RunSBOM == true }}
     steps:
       - name: Generate SBOM on Docker image
