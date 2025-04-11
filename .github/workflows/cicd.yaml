@@ -737,7 +737,8 @@ jobs:
 
   SBOM:
     needs: [ setup_variables, build-image ]
-    runs-on: ${{ needs.setup_variables.outputs.runners }}
+    #runs-on: ${{ needs.setup_variables.outputs.runners }}
+    runs-on: ubuntu-latest
     #if: ${{ inputs.RunSBOM == true }}
     steps:
       - name: Generate SBOM on Docker image
