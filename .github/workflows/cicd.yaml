@@ -158,7 +158,7 @@ on:
         required: false
       RunSBOM:
         type: boolean
-        default: false
+        default: true
         required: false
     secrets:
       token:
