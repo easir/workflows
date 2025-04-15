@@ -789,7 +789,7 @@ jobs:
   
             if (typeof(data) == 'object') {
               const issues = data.matches.length
-              output = `# Report for: \`${{ inputs.imageName }}\` : ${{ inputs.imageTag }}`
+              output = `# Report for: \`${{ needs.setup_variables.outputs.app }}\` : ${{ needs.setup_variables.outputs.imagetag }}`
               output += `\n:microscope: vulnerability scan result: \`${issues}\` issue(s) found `
               severityCounter = {}
               severitySortMap = {
