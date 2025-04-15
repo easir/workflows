@@ -775,7 +775,7 @@ jobs:
         with:
           script: |
             let fs = require('fs')
-            let file = '${{ steps.scan.outputs.json }}'
+            let file = '${{ steps.scan_sbom.outputs.json }}'
             let data
   
             try {
