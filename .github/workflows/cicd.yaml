@@ -181,6 +181,8 @@ on:
         required: false
       composer-oauth:
         required: false
+      defectdojo-token:
+        required: true
   workflow_dispatch:
 
 
@@ -768,6 +770,20 @@ jobs:
         with:
           name: vulnerabilities.json
           path: ${{ steps.scan_sbom.outputs.json }}
+      - name: Publish vulnerabilities report to DefectDojo
+        id: import-scan
+        uses: ivanamat/defectdojo-import-scan@v1
+        with:
+          token: ${{ secrets.defectdojo-token }}
+          defectdojo_url: https://defectdojo.sandbox.easir.com
+          file: ${{ steps.scan_sbom.outputs.json }}
+          scan_type: Anchore Grype
+          engagement: 1
+          tags: ${{ needs.setup_variables.outputs.app }}
+      - name: Show response
+        run: |
+          set -e
+          printf '%s\n' '${{ steps.import-scan.outputs.response }}'
       - name: Build vulnerability scan report
         id: vulnerability_scan_report
         uses: actions/github-script@v7
