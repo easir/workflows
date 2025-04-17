@@ -770,20 +770,18 @@ jobs:
         with:
           name: vulnerabilities.json
           path: ${{ steps.scan_sbom.outputs.json }}
-      - name: Publish vulnerabilities report to DefectDojo
-        id: import-scan
-        uses: ivanamat/defectdojo-import-scan@v1
+      - name: Import scan results into defectdojo
+        id: import-scan-results-into-defectdojo
+        uses: alvacoder/defectdojo-upload@v1.1.3
         with:
-          token: ${{ secrets.defectdojo-token }}
           defectdojo_url: https://defectdojo.sandbox.easir.com
-          file: ${{ steps.scan_sbom.outputs.json }}
-          scan_type: Anchore Grype
-          engagement: 2
-          tags: ${{ needs.setup_variables.outputs.app }}
-      - name: Show response
-        run: |
-          set -e
-          printf '%s\n' '${{ steps.import-scan.outputs.response }}'
+          defectdojo_api_key: ${{ secrets.DEFECTOJO_TOKEN }}
+          defectdojo_product_type: main-platform
+          defectdojo_product: ${{ needs.setup_variables.outputs.app }}
+          defectdojo_environment_type: Production
+          defectdojo_scan_type: Anchore Grype
+          defectdojo_engagement_name: Github Actions Initiated SAST Scan
+          scan_results_file_name: ${{ steps.scan_sbom.outputs.json }}
       - name: Build vulnerability scan report
         id: vulnerability_scan_report
         uses: actions/github-script@v7
