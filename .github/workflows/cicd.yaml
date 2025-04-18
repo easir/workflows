@@ -181,8 +181,6 @@ on:
         required: false
       composer-oauth:
         required: false
-      defectdojo-token:
-        required: false
   workflow_dispatch:
 
 
@@ -775,7 +773,7 @@ jobs:
         uses: alvacoder/defectdojo-upload@v1.1.3
         with:
           defectdojo_url: https://defectdojo.sandbox.easir.com
-          defectdojo_api_key: ${{ secrets.defectdojo-token || secrets.DEFECTOJO_TOKEN}}
+          defectdojo_api_key: ${{ secrets.DEFECTOJO_TOKEN }}
           defectdojo_product_type: main-platform
           defectdojo_product: ${{ needs.setup_variables.outputs.app }}
           defectdojo_environment_type: Production
