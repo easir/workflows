@@ -181,6 +181,8 @@ on:
         required: false
       composer-oauth:
         required: false
+      defectdojo-token:
+        required: true
   workflow_dispatch:
 
 
@@ -768,6 +770,18 @@ jobs:
         with:
           name: vulnerabilities.json
           path: ${{ steps.scan_sbom.outputs.json }}
+      - name: Import scan results into defectdojo
+        id: import-scan-results-into-defectdojo
+        uses: alvacoder/defectdojo-upload@v1.1.3
+        with:
+          defectdojo_url: https://defectdojo.sandbox.easir.com
+          defectdojo_api_key: ${{ secrets.defectdojo-token }}
+          defectdojo_product_type: main-platform
+          defectdojo_product: ${{ needs.setup_variables.outputs.app }}
+          defectdojo_environment_type: Production
+          defectdojo_scan_type: Anchore Grype
+          defectdojo_engagement_name: Github Actions Initiated SAST Scan
+          scan_results_file_name: ${{ steps.scan_sbom.outputs.json }}
       - name: Build vulnerability scan report
         id: vulnerability_scan_report
         uses: actions/github-script@v7
