@@ -182,7 +182,7 @@ on:
       composer-oauth:
         required: false
       defectdojo-token:
-        required: true
+        required: false
   workflow_dispatch:
 
 
