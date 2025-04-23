@@ -783,7 +783,7 @@ jobs:
           defectdojo_scan_type: Anchore Grype
           defectdojo_engagement_name: Github Actions Initiated SAST Scan
           scan_results_file_name: ${{ steps.scan_sbom.outputs.json }}
-          upload_timeout: 300
+          upload_timeout: 500
       - name: Build vulnerability scan report
         id: vulnerability_scan_report
         uses: actions/github-script@v7
