@@ -773,7 +773,7 @@ jobs:
       - name: Import scan results into defectdojo (master only)
         if: ${{ github.ref == 'refs/heads/master' }}
         id: import-scan-results-into-defectdojo
-        uses: alvacoder/defectdojo-upload@v1.1.3
+        uses: lupo-src/defectdojo-upload@main
         with:
           defectdojo_url: https://defectdojo.sandbox.easir.com
           defectdojo_api_key: ${{ secrets.defectdojo-token }}
@@ -783,6 +783,7 @@ jobs:
           defectdojo_scan_type: Anchore Grype
           defectdojo_engagement_name: Github Actions Initiated SAST Scan
           scan_results_file_name: ${{ steps.scan_sbom.outputs.json }}
+          upload_timeout: 300
       - name: Build vulnerability scan report
         id: vulnerability_scan_report
         uses: actions/github-script@v7
