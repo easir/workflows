@@ -744,6 +744,7 @@ jobs:
       always() && 
       !contains(needs.*.result, 'failure') &&
       !cancelled() &&
+      !inputs.SkipImageBuild &&
       inputs.RunSBOM == true
     steps:
       - name: Generate SBOM on Docker image
