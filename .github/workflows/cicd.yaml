@@ -54,6 +54,10 @@ on:
         type: boolean
         default: false
         description: "skip building image job"
+      ImagePrefix:
+        type: string
+        required: false
+        default: "production"
       UseMakeTargets:
         required: false
         type: string
@@ -203,6 +207,7 @@ jobs:
       GH_TOKEN: ${{ secrets.numa-numa-token }}
       FORCE_PUSH: ${{ contains(github.event.head_commit.message, '/forcepush') }}
       DO_E2E_TESTS: ${{ contains(github.event.head_commit.message, '/e2e') }}
+      IMAGE_PREFIX: ${{ inputs.ImagePrefix }}
     steps:
       - name: pull code
         uses: actions/checkout@v4
@@ -248,8 +253,8 @@ jobs:
           pull_number=$(jq -r .pull_request.number "$GITHUB_EVENT_PATH")
           echo "app=$app" >> "$GITHUB_ENV"
           if [ ${{ steps.environment.outputs.environment }} = "prod" ]; then
-            echo "tag=production-$timestamp-$GITHUB_SHA" >> "$GITHUB_ENV"
-            tag=production-"$timestamp"-"$GITHUB_SHA"
+            echo "tag=$IMAGE_PREFIX-$timestamp-$GITHUB_SHA" >> "$GITHUB_ENV"
+            tag=$IMAGE_PREFIX-"$timestamp"-"$GITHUB_SHA"
           else
             echo "tag=pr-$pull_number-"$timestamp"-$GITHUB_SHA" >> "$GITHUB_ENV"
             tag=pr-"$pull_number-"$timestamp"-$GITHUB_SHA"
@@ -755,7 +760,7 @@ jobs:
           registry-password: ${{ secrets.docker-pass }}
           output-file: sbom.spdx.json
           # ⬇️ only update the dependency graph when merged! WS comment: not sure what that is about
-          # dependency-snapshot: true 
+          # dependency-snapshot: true
           artifact-name: sbom.spdx.json
           format: spdx-json
       - name: Scan SBOM
@@ -885,7 +890,7 @@ jobs:
               } catch (err) {
                 console.error(err);
               }
-            }  
+            }
       - name: Add vulnerability report to summary
         if: success() || failure()
         run: cat vulnerability_report.md >> $GITHUB_STEP_SUMMARY
