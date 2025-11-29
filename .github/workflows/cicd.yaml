@@ -183,6 +183,17 @@ on:
         required: false
       defectdojo-token:
         required: true
+    outputs:
+        platforms:
+            value: ${{ inputs.Platforms }}
+        imagetag:
+            value: ${{ jobs.setup_variables.outputs.imagetag }}
+        app:
+            value: ${{ jobs.setup_variables.outputs.app }}
+        github_sha:
+            value: ${{ jobs.setup_variables.outputs.github-sha }}
+        runners:
+            value: ${{ jobs.setup_variables.outputs.runners }}
   workflow_dispatch:
 
 
