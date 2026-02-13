@@ -319,7 +319,7 @@ jobs:
       - name: start mysql and redis
         run: |
           docker run -d --env MYSQL_DATABASE=zebra-tests --env MYSQL_ROOT_PASSWORD=root -p 3306:3306 --name mariadb mariadb:10.6.10
-          docker run -d --name redis -p 6379:6379 --health-cmd "redis-cli ping" --health-interval 10s --health-timeout 5s --health-retries 5 redis:3.2.3-alpine
+          docker run -d --name redis -p 6379:6379 --health-cmd "redis-cli ping" --health-interval 10s --health-timeout 5s --health-retries 5 valkey/valkey:8.1.5-alpine
       - name: elasticsearch and init mysql
         if: ${{ needs.setup_variables.outputs.app == 'zebra' }}
         run: |
