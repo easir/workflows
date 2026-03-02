@@ -53,7 +53,7 @@ on:
         required: false
         type: boolean
         default: false
-        description: "skip building image job"
+        description: "skip building image job (ignored when PR has 'build-image' label)"
       UseMakeTargets:
         required: false
         type: string
@@ -208,6 +208,7 @@ jobs:
       app: ${{ steps.imagetag.outputs.app }}
       rebuildManifest: ${{ steps.did-manifest-change.outputs.any_changed }}
       github-sha: ${{ steps.imagetag.outputs.github-sha }}
+      should_build_image: ${{ steps.should_build_image.outputs.should_build_image }}
     runs-on: ubuntu-latest
     env:
       GITHUB_TOKEN: ${{ secrets.token }}
@@ -282,6 +283,20 @@ jobs:
         with:
           files: |
             ./manifest.yaml
+
+      - name: compute should_build_image
+        id: should_build_image
+        env:
+          SKIP_IMAGE_BUILD: ${{ inputs.SkipImageBuild }}
+          HAS_BUILD_IMAGE_LABEL: ${{ github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'build-image') }}
+        run: |
+          if [[ "$HAS_BUILD_IMAGE_LABEL" == "true" ]]; then
+            echo "should_build_image=true" >> "$GITHUB_OUTPUT"
+          elif [[ "$SKIP_IMAGE_BUILD" == "true" ]]; then
+            echo "should_build_image=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "should_build_image=true" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: print all outputs
         run: |
@@ -557,7 +572,7 @@ jobs:
       always() && 
       !contains(needs.*.result, 'failure') &&
       !cancelled() &&
-      !inputs.SkipImageBuild
+      needs.setup_variables.outputs.should_build_image == 'true'
     env:
       GITHUB_TOKEN: ${{ secrets.token }}
     runs-on: ${{needs.setup_variables.outputs.runners}}
@@ -755,7 +770,7 @@ jobs:
       always() && 
       !contains(needs.*.result, 'failure') &&
       !cancelled() &&
-      !inputs.SkipImageBuild &&
+      needs.setup_variables.outputs.should_build_image == 'true' &&
       inputs.RunSBOM == true
     steps:
       - name: Generate SBOM on Docker image
