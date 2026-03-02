@@ -299,6 +299,8 @@ jobs:
           fi
 
       - name: print all outputs
+        env:
+          REBUILD_MANIFEST: ${{ steps.did-manifest-change.outputs.any_changed }}
         run: |
           echo runners: ${{ steps.runners.outputs.runners }} >> $GITHUB_STEP_SUMMARY
           echo environment: ${{ steps.environment.outputs.environment }} >> $GITHUB_STEP_SUMMARY
@@ -306,6 +308,9 @@ jobs:
           echo app: ${{ steps.imagetag.outputs.app }} >> $GITHUB_STEP_SUMMARY
           echo rebuildManifest: ${{ steps.did-manifest-change.outputs.any_changed }} >> $GITHUB_STEP_SUMMARY
           echo github-sha: ${{ steps.imagetag.outputs.github-sha }} >> $GITHUB_STEP_SUMMARY
+          if [[ "$REBUILD_MANIFEST" == "true" ]]; then
+            echo manifest-chart-version: 0.0.1-${{ github.sha }}-manifestv2 >> $GITHUB_STEP_SUMMARY
+          fi
 
   tests-php:
     if: ${{ inputs.SkipTests != true && inputs.ApplicationLanguage == 'php'}}
