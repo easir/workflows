@@ -53,7 +53,7 @@ on:
         required: false
         type: boolean
         default: false
-        description: "skip building image job (ignored when PR has 'build-image' label)"
+        description: "skip building image job (ignored when PR has 'deploy-test' label)"
       UseMakeTargets:
         required: false
         type: string
@@ -208,6 +208,7 @@ jobs:
       app: ${{ steps.imagetag.outputs.app }}
       rebuildManifest: ${{ steps.did-manifest-change.outputs.any_changed }}
       github-sha: ${{ steps.imagetag.outputs.github-sha }}
+      timestamp: ${{ steps.imagetag.outputs.timestamp }}
       should_build_image: ${{ steps.should_build_image.outputs.should_build_image }}
     runs-on: ubuntu-latest
     env:
@@ -269,6 +270,7 @@ jobs:
           echo "imagetag=$tag" >> $GITHUB_OUTPUT
           echo "app=$app" >> $GITHUB_OUTPUT
           echo "github-sha=$GITHUB_SHA" >> $GITHUB_OUTPUT
+          echo "timestamp=$timestamp" >> $GITHUB_OUTPUT
 
       - name: Check file existence
         id: check_files
@@ -288,9 +290,9 @@ jobs:
         id: should_build_image
         env:
           SKIP_IMAGE_BUILD: ${{ inputs.SkipImageBuild }}
-          HAS_BUILD_IMAGE_LABEL: ${{ github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'build-image') }}
+          HAS_DEPLOY_TEST_LABEL: ${{ github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'deploy-test') }}
         run: |
-          if [[ "$HAS_BUILD_IMAGE_LABEL" == "true" ]]; then
+          if [[ "$HAS_DEPLOY_TEST_LABEL" == "true" ]]; then
             echo "should_build_image=true" >> "$GITHUB_OUTPUT"
           elif [[ "$SKIP_IMAGE_BUILD" == "true" ]]; then
             echo "should_build_image=false" >> "$GITHUB_OUTPUT"
@@ -645,6 +647,7 @@ jobs:
             type=ref,event=tag
             type=sha,enable=true,priority=100,prefix=,suffix=,format=long
             type=raw,value=${{needs.setup_variables.outputs.imagetag}}
+            type=raw,value=sandbox-${{ needs.setup_variables.outputs.timestamp }}-${{ needs.setup_variables.outputs.github-sha }}
             type=raw,value=latest,enable={{is_default_branch}}
           labels: |
             org.opencontainers.image.source=https://github.com/easir/${{needs.setup_variables.outputs.app}}
