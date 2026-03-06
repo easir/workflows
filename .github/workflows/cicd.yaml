@@ -53,7 +53,7 @@ on:
         required: false
         type: boolean
         default: false
-        description: "skip building image job"
+        description: "skip building image job (ignored when PR has 'deploy-test' label)"
       UseMakeTargets:
         required: false
         type: string
@@ -208,6 +208,8 @@ jobs:
       app: ${{ steps.imagetag.outputs.app }}
       rebuildManifest: ${{ steps.did-manifest-change.outputs.any_changed }}
       github-sha: ${{ steps.imagetag.outputs.github-sha }}
+      timestamp: ${{ steps.imagetag.outputs.timestamp }}
+      should_build_image: ${{ steps.should_build_image.outputs.should_build_image }}
     runs-on: ubuntu-latest
     env:
       GITHUB_TOKEN: ${{ secrets.token }}
@@ -268,6 +270,7 @@ jobs:
           echo "imagetag=$tag" >> $GITHUB_OUTPUT
           echo "app=$app" >> $GITHUB_OUTPUT
           echo "github-sha=$GITHUB_SHA" >> $GITHUB_OUTPUT
+          echo "timestamp=$timestamp" >> $GITHUB_OUTPUT
 
       - name: Check file existence
         id: check_files
@@ -283,7 +286,23 @@ jobs:
           files: |
             ./manifest.yaml
 
+      - name: compute should_build_image
+        id: should_build_image
+        env:
+          SKIP_IMAGE_BUILD: ${{ inputs.SkipImageBuild }}
+          HAS_DEPLOY_TEST_LABEL: ${{ github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'deploy-test') }}
+        run: |
+          if [[ "$HAS_DEPLOY_TEST_LABEL" == "true" ]]; then
+            echo "should_build_image=true" >> "$GITHUB_OUTPUT"
+          elif [[ "$SKIP_IMAGE_BUILD" == "true" ]]; then
+            echo "should_build_image=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "should_build_image=true" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: print all outputs
+        env:
+          REBUILD_MANIFEST: ${{ steps.did-manifest-change.outputs.any_changed }}
         run: |
           echo runners: ${{ steps.runners.outputs.runners }} >> $GITHUB_STEP_SUMMARY
           echo environment: ${{ steps.environment.outputs.environment }} >> $GITHUB_STEP_SUMMARY
@@ -291,6 +310,9 @@ jobs:
           echo app: ${{ steps.imagetag.outputs.app }} >> $GITHUB_STEP_SUMMARY
           echo rebuildManifest: ${{ steps.did-manifest-change.outputs.any_changed }} >> $GITHUB_STEP_SUMMARY
           echo github-sha: ${{ steps.imagetag.outputs.github-sha }} >> $GITHUB_STEP_SUMMARY
+          if [[ "$REBUILD_MANIFEST" == "true" ]]; then
+            echo manifest-chart-version: 0.0.1-${{ github.sha }}-manifestv2 >> $GITHUB_STEP_SUMMARY
+          fi
 
   tests-php:
     if: ${{ inputs.SkipTests != true && inputs.ApplicationLanguage == 'php'}}
@@ -557,7 +579,7 @@ jobs:
       always() && 
       !contains(needs.*.result, 'failure') &&
       !cancelled() &&
-      !inputs.SkipImageBuild
+      needs.setup_variables.outputs.should_build_image == 'true'
     env:
       GITHUB_TOKEN: ${{ secrets.token }}
     runs-on: ${{needs.setup_variables.outputs.runners}}
@@ -625,6 +647,7 @@ jobs:
             type=ref,event=tag
             type=sha,enable=true,priority=100,prefix=,suffix=,format=long
             type=raw,value=${{needs.setup_variables.outputs.imagetag}}
+            type=raw,value=sandbox-${{ needs.setup_variables.outputs.timestamp }}-${{ needs.setup_variables.outputs.github-sha }}
             type=raw,value=latest,enable={{is_default_branch}}
           labels: |
             org.opencontainers.image.source=https://github.com/easir/${{needs.setup_variables.outputs.app}}
@@ -755,7 +778,7 @@ jobs:
       always() && 
       !contains(needs.*.result, 'failure') &&
       !cancelled() &&
-      !inputs.SkipImageBuild &&
+      needs.setup_variables.outputs.should_build_image == 'true' &&
       inputs.RunSBOM == true
     steps:
       - name: Generate SBOM on Docker image
