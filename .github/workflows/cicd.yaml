@@ -52,8 +52,8 @@ on:
       SkipImageBuild:
         required: false
         type: boolean
-        default: false
-        description: "skip building image job"
+        default: true
+        description: "skip building image job (ignored when PR has 'deploy-test' label)"
       UseMakeTargets:
         required: false
         type: string
@@ -283,6 +283,23 @@ jobs:
           files: |
             ./manifest.yaml
 
+      - name: compute should_build_image
+        id: should_build_image
+        env:
+          SKIP_IMAGE_BUILD: ${{ inputs.SkipImageBuild }}
+          HAS_DEPLOY_TEST_LABEL: ${{ github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'deploy-test') }}
+          REF: ${{ github.ref }}
+        run: |
+          # Always build on master branch, regardless of SkipImageBuild or labels
+          if [[ "$REF" == "refs/heads/master" ]]; then
+            echo "should_build_image=true" >> "$GITHUB_OUTPUT"
+          elif [[ "$HAS_DEPLOY_TEST_LABEL" == "true" ]]; then
+            echo "should_build_image=true" >> "$GITHUB_OUTPUT"
+          elif [[ "$SKIP_IMAGE_BUILD" == "true" ]]; then
+            echo "should_build_image=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "should_build_image=true" >> "$GITHUB_OUTPUT"
+          fi
       - name: print all outputs
         run: |
           echo runners: ${{ steps.runners.outputs.runners }} >> $GITHUB_STEP_SUMMARY
