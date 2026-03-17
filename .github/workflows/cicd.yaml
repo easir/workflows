@@ -207,6 +207,7 @@ jobs:
       imagetag: ${{ steps.imagetag.outputs.imagetag }}
       app: ${{ steps.imagetag.outputs.app }}
       rebuildManifest: ${{ steps.did-manifest-change.outputs.any_changed }}
+      dockerfile-changed: ${{ steps.did-dockerfile-change.outputs.any_changed }}
       github-sha: ${{ steps.imagetag.outputs.github-sha }}
     runs-on: ubuntu-latest
     env:
@@ -282,6 +283,13 @@ jobs:
         with:
           files: |
             ./manifest.yaml
+
+      - name: did Dockerfile change?
+        id: did-dockerfile-change
+        uses: tj-actions/changed-files@v44.4.0
+        with:
+          files: |
+            ./Dockerfile
 
       - name: compute should_build_image
         id: should_build_image
@@ -574,7 +582,10 @@ jobs:
       always() && 
       !contains(needs.*.result, 'failure') &&
       !cancelled() &&
-      !inputs.SkipImageBuild
+      (
+        !inputs.SkipImageBuild ||
+        needs.setup_variables.outputs.dockerfile-changed == 'true'
+      )
     env:
       GITHUB_TOKEN: ${{ secrets.token }}
     runs-on: ${{needs.setup_variables.outputs.runners}}
