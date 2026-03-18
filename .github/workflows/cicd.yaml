@@ -591,7 +591,7 @@ jobs:
       !contains(needs.*.result, 'failure') &&
       !cancelled() &&
       (
-        !inputs.SkipImageBuild ||
+        needs.setup_variables.outputs.should_build_image == 'true' ||
         needs.setup_variables.outputs.dockerfile-changed == 'true'
       )
     env:
