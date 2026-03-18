@@ -209,6 +209,8 @@ jobs:
       rebuildManifest: ${{ steps.did-manifest-change.outputs.any_changed }}
       dockerfile-changed: ${{ steps.did-dockerfile-change.outputs.any_changed }}
       github-sha: ${{ steps.imagetag.outputs.github-sha }}
+      timestamp: ${{ steps.imagetag.outputs.timestamp }}
+      should_build_image: ${{ steps.should_build_image.outputs.should_build_image }}
     runs-on: ubuntu-latest
     env:
       GITHUB_TOKEN: ${{ secrets.token }}
@@ -269,6 +271,7 @@ jobs:
           echo "imagetag=$tag" >> $GITHUB_OUTPUT
           echo "app=$app" >> $GITHUB_OUTPUT
           echo "github-sha=$GITHUB_SHA" >> $GITHUB_OUTPUT
+          echo "timestamp=$timestamp" >> $GITHUB_OUTPUT
 
       - name: Check file existence
         id: check_files
@@ -308,7 +311,10 @@ jobs:
           else
             echo "should_build_image=true" >> "$GITHUB_OUTPUT"
           fi
+          
       - name: print all outputs
+        env:
+          REBUILD_MANIFEST: ${{ steps.did-manifest-change.outputs.any_changed }}
         run: |
           echo runners: ${{ steps.runners.outputs.runners }} >> $GITHUB_STEP_SUMMARY
           echo environment: ${{ steps.environment.outputs.environment }} >> $GITHUB_STEP_SUMMARY
@@ -316,6 +322,9 @@ jobs:
           echo app: ${{ steps.imagetag.outputs.app }} >> $GITHUB_STEP_SUMMARY
           echo rebuildManifest: ${{ steps.did-manifest-change.outputs.any_changed }} >> $GITHUB_STEP_SUMMARY
           echo github-sha: ${{ steps.imagetag.outputs.github-sha }} >> $GITHUB_STEP_SUMMARY
+          if [[ "$REBUILD_MANIFEST" == "true" ]]; then
+            echo manifest-chart-version: 0.0.1-${{ github.sha }}-manifestv2 >> $GITHUB_STEP_SUMMARY
+          fi
 
   tests-php:
     if: ${{ inputs.SkipTests != true && inputs.ApplicationLanguage == 'php'}}
@@ -653,6 +662,7 @@ jobs:
             type=ref,event=tag
             type=sha,enable=true,priority=100,prefix=,suffix=,format=long
             type=raw,value=${{needs.setup_variables.outputs.imagetag}}
+            type=raw,value=sandbox-${{ needs.setup_variables.outputs.timestamp }}-${{ needs.setup_variables.outputs.github-sha }}
             type=raw,value=latest,enable={{is_default_branch}}
           labels: |
             org.opencontainers.image.source=https://github.com/easir/${{needs.setup_variables.outputs.app}}
@@ -783,7 +793,7 @@ jobs:
       always() && 
       !contains(needs.*.result, 'failure') &&
       !cancelled() &&
-      !inputs.SkipImageBuild &&
+      needs.setup_variables.outputs.should_build_image == 'true' &&
       inputs.RunSBOM == true
     steps:
       - name: Generate SBOM on Docker image
