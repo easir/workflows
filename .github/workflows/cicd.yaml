@@ -311,7 +311,6 @@ jobs:
           else
             echo "should_build_image=true" >> "$GITHUB_OUTPUT"
           fi
-          
       - name: print all outputs
         env:
           REBUILD_MANIFEST: ${{ steps.did-manifest-change.outputs.any_changed }}
