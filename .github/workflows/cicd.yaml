@@ -793,7 +793,7 @@ jobs:
           artifact-name: sbom.spdx.json
           format: spdx-json
       - name: Scan SBOM
-        uses: anchore/scan-action@v3
+        uses: anchore/scan-action@v7.3.2
         id: scan_sbom
         with:
             sbom: sbom.spdx.json
