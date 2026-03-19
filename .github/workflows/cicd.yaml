@@ -813,6 +813,10 @@ jobs:
             sbom: sbom.spdx.json
             fail-build: false
             output-format: json
+      - name: test the temp
+        run: |
+          ls -alR /tmp/
+          
       - name: Import scan results into defectdojo (master only)
         if: ${{ github.ref == 'refs/heads/master' }}
         id: import-scan-results-into-defectdojo
