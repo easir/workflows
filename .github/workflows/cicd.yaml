@@ -816,9 +816,9 @@ jobs:
       - name: test the temp
         run: |
           ls -alR /tmp/
-          
+
       - name: Import scan results into defectdojo (master only)
-        if: ${{ github.ref == 'refs/heads/master' }}
+        if: (success() || failure() ) && ${{ github.ref == 'refs/heads/master' }}
         id: import-scan-results-into-defectdojo
         uses: lupo-src/defectdojo-upload@main
         with:
