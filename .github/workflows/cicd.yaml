@@ -796,7 +796,7 @@ jobs:
       inputs.RunSBOM == true
     steps:
       - name: Generate SBOM on Docker image
-        uses: anchore/sbom-action@v0.18.0
+        uses: anchore/sbom-action@v0.23.1
         with:
           image: ${{secrets.docker-reg}}/${{ needs.setup_variables.outputs.app }}:${{ needs.setup_variables.outputs.imagetag }}
           registry-username: ${{ secrets.docker-login }}
@@ -813,17 +813,10 @@ jobs:
             sbom: sbom.spdx.json
             fail-build: false
             output-format: json
-      - name: Upload vulnerabilities artifact
-        uses: actions/upload-artifact@v4
-        if: success() || failure()
-        with:
-          name: vulnerabilities.json
-          path: ${{ steps.scan_sbom.outputs.json }}
       - name: Import scan results into defectdojo (master only)
         if: ${{ github.ref == 'refs/heads/master' }}
         id: import-scan-results-into-defectdojo
-        uses: alvacoder/defectdojo-upload@v1.0.1
-        #uses: lupo-src/defectdojo-upload@main
+        uses: lupo-src/defectdojo-upload@main
         with:
           defectdojo_url: https://defectdojo.sandbox.easir.com
           defectdojo_api_key: ${{ secrets.defectdojo-token }}
@@ -834,6 +827,12 @@ jobs:
           defectdojo_engagement_name: Github Actions Initiated SAST Scan
           scan_results_file_name: ${{ steps.scan_sbom.outputs.json }}
           upload_timeout: 500
+      - name: Upload vulnerabilities artifact
+        uses: actions/upload-artifact@v4
+        if: success() || failure()
+        with:
+          name: vulnerabilities.json
+          path: ${{ steps.scan_sbom.outputs.json }}          
       - name: Build vulnerability scan report
         id: vulnerability_scan_report
         uses: actions/github-script@v7
