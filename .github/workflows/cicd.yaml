@@ -820,7 +820,7 @@ jobs:
       - name: Import scan results into defectdojo (master only)
         if: ${{ (success() || failure() ) && github.ref == 'refs/heads/master' }}
         id: import-scan-results-into-defectdojo
-        uses: lupo-src/defectdojo-upload@main
+        uses: easir/defectdojo-upload@main
         with:
           defectdojo_url: https://defectdojo.sandbox.easir.com
           defectdojo_api_key: ${{ secrets.defectdojo-token }}
