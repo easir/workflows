@@ -813,9 +813,13 @@ jobs:
             sbom: sbom.spdx.json
             fail-build: false
             output-format: json
-      - name: test the temp
+      - name: Copy scan output into workspace
         run: |
-          ls -alR /tmp/
+          set -euo pipefail
+          mkdir -p defectdojo
+          # anchore/scan-action writes to runner /tmp; Docker actions can't access that path.
+          cp "${{ steps.scan_sbom.outputs.json }}" "defectdojo/grype-output"
+          ls -al defectdojo/grype-output
 
       - name: Import scan results into defectdojo (master only)
         if: ${{ (success() || failure() ) && github.ref == 'refs/heads/master' }}
@@ -829,14 +833,14 @@ jobs:
           defectdojo_environment_type: Production
           defectdojo_scan_type: Anchore Grype
           defectdojo_engagement_name: Github Actions Initiated SAST Scan
-          scan_results_file_name: ${{ steps.scan_sbom.outputs.json }}
+          scan_results_file_name: defectdojo/grype-output
           upload_timeout: 500
       - name: Upload vulnerabilities artifact
         uses: actions/upload-artifact@v4
         if: success() || failure()
         with:
           name: vulnerabilities.json
-          path: ${{ steps.scan_sbom.outputs.json }}          
+          path: defectdojo/grype-output
       - name: Build vulnerability scan report
         id: vulnerability_scan_report
         uses: actions/github-script@v7
@@ -844,7 +848,7 @@ jobs:
         with:
           script: |
             let fs = require('fs')
-            let file = '${{ steps.scan_sbom.outputs.json }}'
+            let file = 'defectdojo/grype-output'
             let data
   
             try {
