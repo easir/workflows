@@ -43,7 +43,7 @@ jobs:
       DO_E2E_TESTS: ${{ contains(github.event.head_commit.message, '/e2e') }}
     steps:
       - name: pull code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6.0.2
 
       - name: forced selfhosted runners
         id: forced
@@ -88,7 +88,7 @@ jobs:
       - name: did Dockerfile change?
         if: steps.check_files.outputs.files_exists == 'true'
         id: did-docker-change
-        uses: tj-actions/changed-files@v44.4.0
+        uses: tj-actions/changed-files@v47.0.5
         with:
           files: |
             ./Dockerfile
@@ -117,7 +117,7 @@ jobs:
     runs-on: ${{needs.setup_variables.outputs.runners}}
     steps:
       - name: pull code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6.0.2
         with:
           token: ${{ secrets.numa-numa-token }}
           submodules: recursive
@@ -131,10 +131,10 @@ jobs:
           docker context create builders
 
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
+        uses: docker/setup-qemu-action@v4.0.0
 
       - name: Docker Setup Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4.0.0
         with:
           version: latest
           endpoint: builders
@@ -142,7 +142,7 @@ jobs:
 
       - name: Docker meta
         id: meta
-        uses: docker/metadata-action@v5.5.1
+        uses: docker/metadata-action@v6.0.0
         with:
           images: |
             ${{ secrets.docker-reg }}/${{needs.setup_variables.outputs.app}}/${{ matrix.target }}
@@ -154,7 +154,7 @@ jobs:
             org.opencontainers.image.source=https://github.com/easir/${{needs.setup_variables.outputs.app}}/${{ matrix.target }}
 
       - name: Docker Login
-        uses: docker/login-action@v3.0.0
+        uses: docker/login-action@v4.1.0
         with:
           registry: ghcr.io
           username: easir
@@ -162,7 +162,7 @@ jobs:
           ecr: false
 
       - name: Docker Login
-        uses: docker/login-action@v3.0.0
+        uses: docker/login-action@v4.1.0
         with:
           registry: ${{ secrets.docker-reg }}
           username: ${{ secrets.docker-login }}
@@ -170,7 +170,7 @@ jobs:
           ecr: false
 
       - name: Build and push Docker images with target
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v7.1.0
         with:
           build-args: |
             IMAGE_VERSION=${{ needs.setup_variables.outputs.environment }}
