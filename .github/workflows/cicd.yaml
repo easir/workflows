@@ -282,14 +282,14 @@ jobs:
       - name: did manifest change?
         if: steps.check_files.outputs.files_exists == 'true'
         id: did-manifest-change
-        uses: tj-actions/changed-files@v44.4.0
+        uses: tj-actions/changed-files@v47.0.5
         with:
           files: |
             ./manifest.yaml
 
       - name: did Dockerfile change?
         id: did-dockerfile-change
-        uses: tj-actions/changed-files@v44.4.0
+        uses: tj-actions/changed-files@v47.0.5
         with:
           files: |
             ./Dockerfile
