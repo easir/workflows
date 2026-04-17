@@ -22,6 +22,7 @@ on:
         type: boolean
         required: false
         default: false
+        description: "skip test jobs (forced when PR has 'skip-tests' label)"
       PhpcsWorkdir:
         required: false
         type: string
@@ -211,6 +212,7 @@ jobs:
       github-sha: ${{ steps.imagetag.outputs.github-sha }}
       timestamp: ${{ steps.imagetag.outputs.timestamp }}
       should_build_image: ${{ steps.should_build_image.outputs.should_build_image }}
+      should_run_tests: ${{ steps.should_run_tests.outputs.should_run_tests }}
     runs-on: ubuntu-latest
     env:
       GITHUB_TOKEN: ${{ secrets.token }}
@@ -311,6 +313,19 @@ jobs:
           else
             echo "should_build_image=true" >> "$GITHUB_OUTPUT"
           fi
+      - name: compute should_run_tests
+        id: should_run_tests
+        env:
+          SKIP_TESTS: ${{ inputs.SkipTests }}
+          HAS_SKIP_TESTS_LABEL: ${{ github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'skip-tests') }}
+        run: |
+          if [[ "$HAS_SKIP_TESTS_LABEL" == "true" ]]; then
+            echo "should_run_tests=false" >> "$GITHUB_OUTPUT"
+          elif [[ "$SKIP_TESTS" == "true" ]]; then
+            echo "should_run_tests=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "should_run_tests=true" >> "$GITHUB_OUTPUT"
+          fi
       - name: print all outputs
         env:
           REBUILD_MANIFEST: ${{ steps.did-manifest-change.outputs.any_changed }}
@@ -320,13 +335,14 @@ jobs:
           echo imagetag: ${{ steps.imagetag.outputs.imagetag }} >> $GITHUB_STEP_SUMMARY
           echo app: ${{ steps.imagetag.outputs.app }} >> $GITHUB_STEP_SUMMARY
           echo rebuildManifest: ${{ steps.did-manifest-change.outputs.any_changed }} >> $GITHUB_STEP_SUMMARY
+          echo shouldRunTests: ${{ steps.should_run_tests.outputs.should_run_tests }} >> $GITHUB_STEP_SUMMARY
           echo github-sha: ${{ steps.imagetag.outputs.github-sha }} >> $GITHUB_STEP_SUMMARY
           if [[ "$REBUILD_MANIFEST" == "true" ]]; then
             echo manifest-chart-version: 0.0.1-${{ github.sha }}-manifestv2 >> $GITHUB_STEP_SUMMARY
           fi
 
   tests-php:
-    if: ${{ inputs.SkipTests != true && inputs.ApplicationLanguage == 'php'}}
+    if: ${{ needs.setup_variables.outputs.should_run_tests == 'true' && inputs.ApplicationLanguage == 'php'}}
     needs: setup_variables
     env:
       GITHUB_TOKEN: ${{ secrets.numa-numa-token }}
@@ -428,7 +444,7 @@ jobs:
           composer exec -- psalm --long-progress
 
   tests-nodejs:
-    if: ${{ inputs.SkipTests != true && inputs.ApplicationLanguage == 'nodejs'}}
+    if: ${{ needs.setup_variables.outputs.should_run_tests == 'true' && inputs.ApplicationLanguage == 'nodejs'}}
     needs: setup_variables
     env:
       APPCONFIG_API: "//api.domain"
@@ -493,7 +509,7 @@ jobs:
 
 
   behat:
-    if: inputs.RunBehatTests
+    if: ${{ needs.setup_variables.outputs.should_run_tests == 'true' && inputs.RunBehatTests }}
     needs: setup_variables
     env:
       GITHUB_TOKEN: ${{ secrets.token }}
