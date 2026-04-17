@@ -509,7 +509,7 @@ jobs:
 
 
   behat:
-    if: inputs.RunBehatTests
+    if: ${{ needs.setup_variables.outputs.should_run_tests == 'true' && inputs.RunBehatTests }}
     needs: setup_variables
     env:
       GITHUB_TOKEN: ${{ secrets.token }}
