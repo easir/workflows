@@ -300,7 +300,7 @@ jobs:
         id: should_build_image
         env:
           SKIP_IMAGE_BUILD: ${{ inputs.SkipImageBuild }}
-          HAS_DEPLOY_TEST_LABEL: ${{ github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'deploy-test') }}
+          HAS_DEPLOY_TEST_LABEL: ${{ contains(github.event.pull_request.labels.*.name, 'deploy-test') }}
           REF: ${{ github.ref }}
         run: |
           # Always build on master branch, regardless of SkipImageBuild or labels
@@ -317,7 +317,7 @@ jobs:
         id: should_run_tests
         env:
           SKIP_TESTS: ${{ inputs.SkipTests }}
-          HAS_SKIP_TESTS_LABEL: ${{ github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'skip-tests') }}
+          HAS_SKIP_TESTS_LABEL: ${{ contains(github.event.pull_request.labels.*.name, 'skip-tests') }}
         run: |
           if [[ "$HAS_SKIP_TESTS_LABEL" == "true" ]]; then
             echo "should_run_tests=false" >> "$GITHUB_OUTPUT"
