@@ -336,11 +336,11 @@ jobs:
           extensions: ${{inputs.PhpExtensions}}
           coverage: pcov
           tools: composer
-          update: ${{ inputs.PhpUpdate }}
           #behat, phpunit, composer, phpcs, php-cs-fixer, phpcbf, phpstan, psalm, phplint,
         env:
           runner: ubuntu-latest
           fail-fast: true
+          update: ${{ inputs.PhpUpdate }}
       - name: run Composer
         if: inputs.ApplicationLanguage == 'php'
         run: |
@@ -490,10 +490,10 @@ jobs:
           extensions: ${{inputs.PhpExtensions}}
           coverage: pcov
           tools: composer
-          update: ${{ inputs.PhpUpdate }}
         env:
           runner: ${{needs.setup_variables.outputs.runners}}
           fail-fast: true
+          update: ${{ inputs.PhpUpdate }}
 
       - name: run Composer
         if: inputs.ApplicationLanguage == 'php'
