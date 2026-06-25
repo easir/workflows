@@ -49,6 +49,11 @@ on:
         type: string
         default: "8.1"
         description: "php version to use, with minor version, no bugfix versions. default 8.1"
+      PhpUpdate:
+        required: false
+        type: boolean
+        default: false
+        description: "force setup-php to install the latest patch of the PHP minor version (update: true). default false"
       SkipImageBuild:
         required: false
         type: boolean
@@ -331,6 +336,7 @@ jobs:
           extensions: ${{inputs.PhpExtensions}}
           coverage: pcov
           tools: composer
+          update: ${{ inputs.PhpUpdate }}
           #behat, phpunit, composer, phpcs, php-cs-fixer, phpcbf, phpstan, psalm, phplint,
         env:
           runner: ubuntu-latest
@@ -484,6 +490,7 @@ jobs:
           extensions: ${{inputs.PhpExtensions}}
           coverage: pcov
           tools: composer
+          update: ${{ inputs.PhpUpdate }}
         env:
           runner: ${{needs.setup_variables.outputs.runners}}
           fail-fast: true
@@ -755,7 +762,7 @@ jobs:
           registry-password: ${{ secrets.docker-pass }}
           output-file: sbom.spdx.json
           # ⬇️ only update the dependency graph when merged! WS comment: not sure what that is about
-          # dependency-snapshot: true 
+          # dependency-snapshot: true
           artifact-name: sbom.spdx.json
           format: spdx-json
       - name: Scan SBOM
@@ -885,7 +892,7 @@ jobs:
               } catch (err) {
                 console.error(err);
               }
-            }  
+            }
       - name: Add vulnerability report to summary
         if: success() || failure()
         run: cat vulnerability_report.md >> $GITHUB_STEP_SUMMARY
