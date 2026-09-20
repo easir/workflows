@@ -132,6 +132,11 @@ on:
         type: boolean
         required: false
         default: false
+      ComposerAudit:
+        type: string
+        required: false
+        default: ""
+        description: "composer audit in CI: report (never fails) or the lowest severity to fail on (low|medium|high|critical). Empty disables the step."
       LintContainer:
         type: string
         required: false
@@ -437,6 +442,36 @@ jobs:
         if: (success() || failure()) && inputs.ApplicationLanguage == 'php' && inputs.SkipUnitTests != true && inputs.EnablePsalm
         run: |
           composer exec -- psalm --long-progress
+
+      - name: composer audit
+        if: (success() || failure()) && inputs.ApplicationLanguage == 'php' && inputs.ComposerAudit != ''
+        env:
+          COMPOSER_AUDIT: ${{ inputs.ComposerAudit }}
+        run: |
+          if [ ! -f composer.lock ]; then
+            echo "no composer.lock, nothing to audit"
+            exit 0
+          fi
+          composer audit --locked --format=json --abandoned=report --no-interaction > audit.json || true
+          {
+            echo "### composer audit"
+            echo
+            echo "| severity | advisories |"
+            echo "| --- | --- |"
+            jq -r '[.advisories[]?[]?] | group_by(.severity) | map("| \(.[0].severity) | \(length) |") | .[]' audit.json
+            echo
+            echo "abandoned: $(jq -r '(.abandoned // {}) | if length == 0 then "none" else (to_entries | map(.key) | join(", ")) end' audit.json)"
+          } >> "$GITHUB_STEP_SUMMARY"
+          case "$COMPOSER_AUDIT" in
+            report)   exit 0 ;;
+            low)      ignore="" ;;
+            medium)   ignore="--ignore-severity=low" ;;
+            high)     ignore="--ignore-severity=low --ignore-severity=medium" ;;
+            critical) ignore="--ignore-severity=low --ignore-severity=medium --ignore-severity=high" ;;
+            *) echo "::error::ComposerAudit must be report, low, medium, high or critical"; exit 1 ;;
+          esac
+          # shellcheck disable=SC2086
+          composer audit --locked $ignore --abandoned=ignore --no-interaction
 
       # Symfony only. Repos without bin/console (Laravel, node) skip this step.
       - name: lint:container
