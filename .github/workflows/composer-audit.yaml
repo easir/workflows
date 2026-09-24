@@ -1,0 +1,65 @@
+---
+# Scheduled composer audit (SAD-3919). Reads composer.lock only, nothing gets installed,
+# so no submodules, private repos or secrets are needed.
+on:
+  workflow_call:
+    inputs:
+      PhpVersion:
+        required: false
+        default: "8.4"
+        type: string
+      ComposerAudit:
+        required: false
+        default: "report"
+        type: string
+        description: "report (never fails) or the lowest severity to fail on (low|medium|high|critical)"
+
+jobs:
+  composer-audit:
+    name: composer audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ inputs.PhpVersion }}
+          tools: composer
+          coverage: none
+
+      - name: composer audit
+        env:
+          COMPOSER_AUDIT: ${{ inputs.ComposerAudit }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          if [ ! -f composer.lock ]; then
+            echo "no composer.lock, nothing to audit" >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          composer audit --locked --format=json --abandoned=report --no-interaction > audit.json || true
+          {
+            echo "### composer audit: $REPOSITORY"
+            echo
+            echo "| severity | advisories |"
+            echo "| --- | --- |"
+            jq -r '[.advisories[]?[]?] | group_by(.severity) | map("| \(.[0].severity) | \(length) |") | .[]' audit.json
+            echo
+            jq -r '[.advisories[]?[]?] | if length == 0 then "no advisories" else
+              (["| package | severity | cve | title |", "| --- | --- | --- | --- |"]
+              + map("| \(.packageName) | \(.severity) | \(.cve // "-") | \(.title | gsub("\\|"; "/")) |")) | join("\n") end' audit.json
+            echo
+            echo "abandoned: $(jq -r '(.abandoned // {}) | if length == 0 then "none" else (to_entries | map(.key) | join(", ")) end' audit.json)"
+          } >> "$GITHUB_STEP_SUMMARY"
+          case "$COMPOSER_AUDIT" in
+            report)   exit 0 ;;
+            low)      ignore="" ;;
+            medium)   ignore="--ignore-severity=low" ;;
+            high)     ignore="--ignore-severity=low --ignore-severity=medium" ;;
+            critical) ignore="--ignore-severity=low --ignore-severity=medium --ignore-severity=high" ;;
+            *) echo "::error::ComposerAudit must be report, low, medium, high or critical"; exit 1 ;;
+          esac
+          # shellcheck disable=SC2086
+          composer audit --locked $ignore --abandoned=ignore --no-interaction
