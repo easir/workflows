@@ -173,11 +173,16 @@ on:
         default: false
         required: false
         description: "start PostgreSQL for tests and export DATABASE_URL pointing at it"
-      PostgresImage:
+      PostgresVersion:
         type: string
-        default: "postgres:16-alpine"
+        default: "16"
         required: false
-        description: "image used when EnablePostgres is on"
+        description: "PostgreSQL major version used when EnablePostgres is on"
+      PostgresSchema:
+        type: string
+        default: "app"
+        required: false
+        description: "schema created in the test database and put in DATABASE_URL"
 #      Used in old node (Report)
       Python2AsPython:
         type: boolean
@@ -395,9 +400,10 @@ jobs:
       - name: start postgres
         if: inputs.EnablePostgres
         run: |
-          docker run -d --name postgres-db -p 5432:5432 -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=${{ needs.setup_variables.outputs.app }} --health-cmd "pg_isready -U postgres" --health-interval 5s --health-timeout 5s --health-retries 10 ${{ inputs.PostgresImage }}
-          echo "DATABASE_URL=postgresql://postgres:postgres@localhost:5432/${{ needs.setup_variables.outputs.app }}?driverOptions[schema]=public" >> "$GITHUB_ENV"
+          docker run -d --name postgres-db -p 5432:5432 -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=${{ needs.setup_variables.outputs.app }} --health-cmd "pg_isready -U postgres" --health-interval 5s --health-timeout 5s --health-retries 10 postgres:${{ inputs.PostgresVersion }}-alpine
           until docker exec postgres-db pg_isready -U postgres; do sleep 2; done
+          docker exec postgres-db psql -U postgres -d "${{ needs.setup_variables.outputs.app }}" -c 'CREATE SCHEMA IF NOT EXISTS "${{ inputs.PostgresSchema }}"'
+          echo "DATABASE_URL=postgresql://postgres:postgres@localhost:5432/${{ needs.setup_variables.outputs.app }}?serverVersion=${{ inputs.PostgresVersion }}&driverOptions[schema]=${{ inputs.PostgresSchema }}" >> "$GITHUB_ENV"
       - name: elasticsearch and init mysql
         if: ${{ needs.setup_variables.outputs.app == 'zebra' }}
         run: |
