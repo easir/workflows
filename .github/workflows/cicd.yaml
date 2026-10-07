@@ -401,7 +401,8 @@ jobs:
         if: inputs.EnablePostgres
         run: |
           docker run -d --name postgres-db -p 5432:5432 -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=${{ needs.setup_variables.outputs.app }} --health-cmd "pg_isready -U postgres" --health-interval 5s --health-timeout 5s --health-retries 10 postgres:${{ inputs.PostgresVersion }}-alpine
-          timeout 30 bash -c 'until docker exec postgres-db pg_isready -U postgres; do sleep 2; done'
+          timeout 60 bash -c 'until docker exec postgres-db pg_isready -U postgres; do sleep 2; done' \
+            || { echo "::error::postgres did not become ready"; docker logs postgres-db; exit 1; }
           docker exec postgres-db psql -U postgres -d "${{ needs.setup_variables.outputs.app }}" -c 'CREATE SCHEMA IF NOT EXISTS "${{ inputs.PostgresSchema }}"'
           echo "DATABASE_URL=postgresql://postgres:postgres@localhost:5432/${{ needs.setup_variables.outputs.app }}?serverVersion=${{ inputs.PostgresVersion }}&driverOptions[schema]=${{ inputs.PostgresSchema }}" >> "$GITHUB_ENV"
       - name: elasticsearch and init mysql
