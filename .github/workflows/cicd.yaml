@@ -158,6 +158,31 @@ on:
         type: boolean
         default: false
         required: false
+      DisableMariadb:
+        type: boolean
+        default: false
+        required: false
+        description: "do not start the MariaDB container for tests"
+      DisableRedis:
+        type: boolean
+        default: false
+        required: false
+        description: "do not start the Redis container for tests"
+      EnablePostgres:
+        type: boolean
+        default: false
+        required: false
+        description: "start PostgreSQL for tests and export DATABASE_URL pointing at it"
+      PostgresVersion:
+        type: string
+        default: "16"
+        required: false
+        description: "PostgreSQL major version used when EnablePostgres is on"
+      PostgresSchema:
+        type: string
+        default: "app"
+        required: false
+        description: "schema created in the test database and put in DATABASE_URL"
 #      Used in old node (Report)
       Python2AsPython:
         type: boolean
@@ -364,10 +389,22 @@ jobs:
         with:
           token: ${{ secrets.numa-numa-token }}
           submodules: recursive
-      - name: start mysql and redis
+      - name: start mariadb
+        if: ${{ !inputs.DisableMariadb }}
         run: |
           docker run -d --env MYSQL_DATABASE=zebra-tests --env MYSQL_ROOT_PASSWORD=root -p 3306:3306 --name mariadb mariadb:10.6.10
+      - name: start redis
+        if: ${{ !inputs.DisableRedis }}
+        run: |
           docker run -d --name redis -p 6379:6379 --health-cmd "redis-cli ping" --health-interval 10s --health-timeout 5s --health-retries 5 valkey/valkey:8.1.5-alpine
+      - name: start postgres
+        if: inputs.EnablePostgres
+        run: |
+          docker run -d --name postgres-db -p 5432:5432 -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=${{ needs.setup_variables.outputs.app }} --health-cmd "pg_isready -U postgres" --health-interval 5s --health-timeout 5s --health-retries 10 postgres:${{ inputs.PostgresVersion }}-alpine
+          timeout 60 bash -c 'until docker exec postgres-db pg_isready -U postgres; do sleep 2; done' \
+            || { echo "::error::postgres did not become ready"; docker logs postgres-db; exit 1; }
+          docker exec postgres-db psql -U postgres -d "${{ needs.setup_variables.outputs.app }}" -c 'CREATE SCHEMA IF NOT EXISTS "${{ inputs.PostgresSchema }}"'
+          echo "DATABASE_URL=postgresql://postgres:postgres@localhost:5432/${{ needs.setup_variables.outputs.app }}?serverVersion=${{ inputs.PostgresVersion }}&driverOptions[schema]=${{ inputs.PostgresSchema }}" >> "$GITHUB_ENV"
       - name: elasticsearch and init mysql
         if: ${{ needs.setup_variables.outputs.app == 'zebra' }}
         run: |
