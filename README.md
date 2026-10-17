@@ -84,15 +84,16 @@ MariaDB and Redis start by default. PostgreSQL is opt in.
 | `EnablePostgres` | `false` | exports `DATABASE_URL` for you |
 | `PostgresVersion` | `16` | |
 | `PostgresSchema` | `app` | created after the container is up, also put in `DATABASE_URL` |
-| `MariadbInitDir` | `""` | repository directory mounted into `/docker-entrypoint-initdb.d` |
-| `PostgresInitDir` | `""` | the same for PostgreSQL |
 
-The init directories run once, when the container initialises an empty data directory.
-In CI the container is always fresh, so they run exactly once per job. They are the place
-for `CREATE DATABASE` and `CREATE SCHEMA`, which keeps CI and a local docker compose on the
-same files instead of duplicating the setup in a test bootstrap. The step fails if the
-directory does not exist, because docker would otherwise mount an empty one and the typo
-would go unnoticed.
+Anything the test database needs beyond that - extra databases, extra schemas, fixtures -
+belongs in the application's own test bootstrap, not here. A bootstrap runs the same way
+locally and in CI, it can do things SQL cannot (migrations, seeding), and it needs no input
+on this workflow. `sad-dsm` does it that way.
+
+Do not reach for a docker `/docker-entrypoint-initdb.d` mount instead. Those scripts are
+written against the local compose topology, with its own roles and users, and in CI they
+fail on the first missing role - which kills the container, because postgres aborts
+initialisation when a script errors.
 
 ### Image, manifest, deploy
 

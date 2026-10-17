@@ -178,16 +178,6 @@ on:
         default: "16"
         required: false
         description: "PostgreSQL major version used when EnablePostgres is on"
-      MariadbInitDir:
-        type: string
-        required: false
-        default: ""
-        description: "repo dir mounted into mariadb docker-entrypoint-initdb.d, runs once on a fresh container"
-      PostgresInitDir:
-        type: string
-        required: false
-        default: ""
-        description: "repo dir mounted into postgres docker-entrypoint-initdb.d, runs once on a fresh container"
       PostgresSchema:
         type: string
         default: "app"
@@ -401,15 +391,8 @@ jobs:
           submodules: recursive
       - name: start mariadb
         if: ${{ !inputs.DisableMariadb }}
-        env:
-          INIT_DIR: ${{ inputs.MariadbInitDir }}
         run: |
-          MOUNT=""
-          if [ -n "$INIT_DIR" ]; then
-            [ -d "$GITHUB_WORKSPACE/$INIT_DIR" ] || { echo "::error::init dir $INIT_DIR not found"; exit 1; }
-            MOUNT="-v $GITHUB_WORKSPACE/$INIT_DIR:/docker-entrypoint-initdb.d:ro"
-          fi
-          docker run -d $MOUNT --env MYSQL_DATABASE=zebra-tests --env MYSQL_ROOT_PASSWORD=root -p 3306:3306 --name mariadb mariadb:10.6.10
+          docker run -d --env MYSQL_DATABASE=zebra-tests --env MYSQL_ROOT_PASSWORD=root -p 3306:3306 --name mariadb mariadb:10.6.10
           timeout 90 bash -c 'until docker exec mariadb mysqladmin ping -uroot -proot --silent; do sleep 2; done' \
             || { echo "::error::mariadb did not become ready"; docker logs mariadb; exit 1; }
       - name: start redis
@@ -418,15 +401,8 @@ jobs:
           docker run -d --name redis -p 6379:6379 --health-cmd "redis-cli ping" --health-interval 10s --health-timeout 5s --health-retries 5 valkey/valkey:8.1.5-alpine
       - name: start postgres
         if: inputs.EnablePostgres
-        env:
-          INIT_DIR: ${{ inputs.PostgresInitDir }}
         run: |
-          MOUNT=""
-          if [ -n "$INIT_DIR" ]; then
-            [ -d "$GITHUB_WORKSPACE/$INIT_DIR" ] || { echo "::error::init dir $INIT_DIR not found"; exit 1; }
-            MOUNT="-v $GITHUB_WORKSPACE/$INIT_DIR:/docker-entrypoint-initdb.d:ro"
-          fi
-          docker run -d $MOUNT --name postgres-db -p 5432:5432 -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=${{ needs.setup_variables.outputs.app }} --health-cmd "pg_isready -U postgres" --health-interval 5s --health-timeout 5s --health-retries 10 postgres:${{ inputs.PostgresVersion }}-alpine
+          docker run -d --name postgres-db -p 5432:5432 -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=${{ needs.setup_variables.outputs.app }} --health-cmd "pg_isready -U postgres" --health-interval 5s --health-timeout 5s --health-retries 10 postgres:${{ inputs.PostgresVersion }}-alpine
           timeout 60 bash -c 'until docker exec postgres-db pg_isready -U postgres; do sleep 2; done' \
             || { echo "::error::postgres did not become ready"; docker logs postgres-db; exit 1; }
           docker exec postgres-db psql -U postgres -d "${{ needs.setup_variables.outputs.app }}" -c 'CREATE SCHEMA IF NOT EXISTS "${{ inputs.PostgresSchema }}"'
