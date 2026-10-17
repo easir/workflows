@@ -393,6 +393,8 @@ jobs:
         if: ${{ !inputs.DisableMariadb }}
         run: |
           docker run -d --env MYSQL_DATABASE=zebra-tests --env MYSQL_ROOT_PASSWORD=root -p 3306:3306 --name mariadb mariadb:10.6.10
+          timeout 90 bash -c 'until docker exec mariadb mysqladmin ping -uroot -proot --silent; do sleep 2; done' \
+            || { echo "::error::mariadb did not become ready"; docker logs mariadb; exit 1; }
       - name: start redis
         if: ${{ !inputs.DisableRedis }}
         run: |
@@ -471,7 +473,7 @@ jobs:
           composer exec -- phpunit
 
       - name: phpstan
-        if: (success() || failure()) && inputs.ApplicationLanguage == 'php' && inputs.SkipUnitTests != true && inputs.EnablePhpstan
+        if: (success() || failure()) && inputs.ApplicationLanguage == 'php' && inputs.EnablePhpstan
         run: |
           composer exec -- phpstan analyse
 
