@@ -109,8 +109,8 @@ would go unnoticed.
 - **`EnableMysql` and `EnableRedis` do nothing.** They are declared but never read. At
   least one repository sets them anyway, so removing them would break that caller:
   an unknown input to `workflow_call` is a hard error, not a warning. Leave them.
-- **MariaDB starts without a readiness check.** Only the path that mounts `MariadbInitDir`
-  waits for it. Anything else that assumes the database is up right after the step is racing.
+- **Redis starts without a readiness check.** MariaDB and PostgreSQL wait for the server to
+  answer before the job moves on, Redis does not.
 - **Two steps are hardcoded to one application**, both `if: app == 'zebra'`: the `migrate`
   step and the elasticsearch one. New per application behaviour belongs in an input, or in
   the application's own test bootstrap, not in another `if`.

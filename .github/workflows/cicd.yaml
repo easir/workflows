@@ -410,10 +410,8 @@ jobs:
             MOUNT="-v $GITHUB_WORKSPACE/$INIT_DIR:/docker-entrypoint-initdb.d:ro"
           fi
           docker run -d $MOUNT --env MYSQL_DATABASE=zebra-tests --env MYSQL_ROOT_PASSWORD=root -p 3306:3306 --name mariadb mariadb:10.6.10
-          if [ -n "$INIT_DIR" ]; then
-            timeout 90 bash -c 'until docker exec mariadb mysqladmin ping -uroot -proot --silent; do sleep 2; done' \
-              || { echo "::error::mariadb did not become ready"; docker logs mariadb; exit 1; }
-          fi
+          timeout 90 bash -c 'until docker exec mariadb mysqladmin ping -uroot -proot --silent; do sleep 2; done' \
+            || { echo "::error::mariadb did not become ready"; docker logs mariadb; exit 1; }
       - name: start redis
         if: ${{ !inputs.DisableRedis }}
         run: |
