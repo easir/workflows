@@ -52,7 +52,7 @@ Keep new inputs on that convention.
 
 | input | default | notes |
 |---|---|---|
-| `PhpVersion` | `8.1` | minor only, no bugfix version |
+| `PhpVersion` | `8.1` | minor only, no bugfix version. Also passed to `docker build` as build arg `PHP_VERSION` (a Dockerfile can use it with `ARG PHP_VERSION`) |
 | `PhpExtensions` | `pdo_sqlite` | comma separated |
 | `PhpcsWorkdir` | `./src/` | where the code lives |
 | `SkipPhpcs` | `false` | |

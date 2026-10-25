@@ -803,6 +803,7 @@ jobs:
         with:
           build-args: |
             IMAGE_VERSION=${{ needs.setup_variables.outputs.github-sha }}
+            PHP_VERSION=${{ inputs.PhpVersion }}
             ENVIRONMENT=${{ needs.setup_variables.outputs.environment }}
             SENTRY_ORG=${{inputs.SentryOrganisation}}
             SENTRY_AUTH_TOKEN=${{secrets.sentry-auth-token}}
@@ -827,6 +828,7 @@ jobs:
         with:
           build-args: |
             IMAGE_VERSION=${{ needs.setup_variables.outputs.github-sha }}
+            PHP_VERSION=${{ inputs.PhpVersion }}
             ENVIRONMENT=${{ needs.setup_variables.outputs.environment }}
             SENTRY_ORG=${{inputs.SentryOrganisation}}
             SENTRY_AUTH_TOKEN=${{secrets.sentry-auth-token}}
