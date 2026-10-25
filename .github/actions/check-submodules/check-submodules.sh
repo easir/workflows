@@ -98,13 +98,20 @@ while read -r path; do
     [ -d "$path/.git" ] || [ -f "$path/.git" ] || continue
 
     head=$(git -C "$path" rev-parse HEAD 2>/dev/null) || continue
+    branch=$(git -C "$path" rev-parse --abbrev-ref HEAD 2>/dev/null)
+    declared=$(git config -f .gitmodules --get "submodule.$path.branch" || true)
+
     if [ "$head" != "$pointer" ]; then
-        fail "$path: checked out at ${head:0:12}, the parent records ${pointer:0:12}. Run: git submodule update --init $path"
+        if git -C "$path" merge-base --is-ancestor "$head" "$pointer" 2>/dev/null; then
+            fail "$path: checked out at ${head:0:12}, behind the recorded ${pointer:0:12}. composer reads the local branch, so it resolves the stale commit. Run: git -C $path merge --ff-only ${pointer:0:12}"
+        elif git -C "$path" merge-base --is-ancestor "$pointer" "$head" 2>/dev/null; then
+            fail "$path: checked out at ${head:0:12}, ahead of the recorded ${pointer:0:12}. Either commit the bump (git add $path plus composer update) or go back: git -C $path reset --hard ${pointer:0:12}"
+        else
+            fail "$path: checked out at ${head:0:12}, diverged from the recorded ${pointer:0:12}${declared:+ on $declared}"
+        fi
         status=1
     fi
 
-    branch=$(git -C "$path" rev-parse --abbrev-ref HEAD 2>/dev/null)
-    declared=$(git config -f .gitmodules --get "submodule.$path.branch" || true)
     if [ "$branch" = "HEAD" ]; then
         fail "$path: detached HEAD, composer reads local branches only and will resolve the wrong metadata"
         status=1
