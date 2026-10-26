@@ -59,6 +59,11 @@ on:
         type: boolean
         default: true
         description: "skip building image job (ignored when PR has 'deploy-test' label)"
+      SkipSubmoduleCheck:
+        required: false
+        type: boolean
+        default: false
+        description: "skip the submodule drift check. default false"
       UseMakeTargets:
         required: false
         type: string
@@ -364,6 +369,18 @@ jobs:
           if [[ "$REBUILD_MANIFEST" == "true" ]]; then
             echo manifest-chart-version: 0.0.1-${{ github.sha }}-manifestv2 >> $GITHUB_STEP_SUMMARY
           fi
+
+  submodules:
+    if: ${{ inputs.SkipSubmoduleCheck != true }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: pull code
+        uses: actions/checkout@v6.0.2
+        with:
+          token: ${{ secrets.numa-numa-token }}
+      - name: check submodules against composer.lock
+        uses: easir/workflows/.github/actions/check-submodules@master
 
   tests-php:
     if: ${{ inputs.SkipTests != true && inputs.ApplicationLanguage == 'php'}}

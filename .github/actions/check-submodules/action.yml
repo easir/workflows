@@ -1,0 +1,19 @@
+---
+name: Check submodules
+description: Fail when a submodule points somewhere composer.lock or .gitmodules does not agree with
+inputs:
+  local:
+    description: also check the working copy for a detached HEAD or the wrong branch
+    required: false
+    default: "false"
+runs:
+  using: composite
+  steps:
+    - name: check submodules
+      shell: bash
+      run: |
+        if [ "${{ inputs.local }}" = "true" ]; then
+          "$GITHUB_ACTION_PATH/check-submodules.sh" --local
+        else
+          "$GITHUB_ACTION_PATH/check-submodules.sh"
+        fi
