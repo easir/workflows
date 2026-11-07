@@ -483,6 +483,26 @@ jobs:
         run: |
           find . -name '*.php' -not -path './vendor/*' -print0 | xargs -0 php -l
 
+      - name: phpunit testsuites exist
+        if: (success() || failure()) && inputs.ApplicationLanguage == 'php'
+        run: |
+          for config in phpunit.xml phpunit.dist.xml phpunit.xml.dist; do
+            [ -f "$config" ] && break
+          done
+          [ -f "$config" ] || { echo "no phpunit config"; exit 0; }
+          # shellcheck disable=SC2016
+          php -r '
+            $missing = 0;
+            foreach (simplexml_load_file($argv[1])->xpath("//testsuite/directory | //testsuite/file") as $path) {
+              $path = trim($path);
+              if ($path !== "" && !glob($path)) {
+                echo "::error file=$argv[1]::testsuite path $path does not exist\n";
+                $missing = 1;
+              }
+            }
+            exit($missing);
+          ' "$config"
+
       - name: phpunit
         if: (success() || failure()) && inputs.ApplicationLanguage == 'php' && inputs.SkipUnitTests != true
         run: |
