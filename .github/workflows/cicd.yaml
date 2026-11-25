@@ -34,8 +34,25 @@ on:
         type: boolean
         required: false
         default: false
+      # How the behat job (non-Postgres path, php-actions/behat) picks Behat:
+      # - BehatPath set   -> runs that binary from the repo, i.e. the Behat
+      #                      version locked in the repo's composer.lock. Updating
+      #                      behat/behat via composer is then all that's needed.
+      #                      Use "vendor/behat/behat/bin/behat", NOT
+      #                      "vendor/bin/behat": the action mounts the file at
+      #                      /usr/local/bin/behat, and composer's vendor/bin proxy
+      #                      resolves the real binary relative to its own dir.
+      # - BehatPath empty -> fallback: downloads behat.phar of BehatVersion from
+      #                      getrelease.download, independent of composer.lock.
+      #                      Older versions can stop resolving there (3.13.0 did
+      #                      after the 2026-11-20 Behat releases).
+      BehatPath:
+        description: "path (relative to repo root) of a vendored Behat binary, e.g. vendor/behat/behat/bin/behat; empty = download phar of BehatVersion"
+        type: string
+        required: false
+        default: ""
       BehatVersion:
-        description: "behat version to use"
+        description: "behat phar version to download when BehatPath is empty"
         type: string
         required: false
         default: "3.13.0"
@@ -704,6 +721,9 @@ jobs:
         if: ${{ !inputs.BehatUsePostgresql }}
         uses: php-actions/behat@v1
         with:
+          # vendored_behat_path non-empty -> the action skips the phar download
+          # and ignores `version` (see BehatPath input above)
+          vendored_behat_path: ${{ inputs.BehatPath }}
           version: ${{ inputs.BehatVersion }}
           php_version: ${{ inputs.PhpVersion }}
           php_extensions: ${{inputs.PhpExtensions}}
